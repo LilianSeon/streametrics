@@ -1,0 +1,23 @@
+{
+    "manifest_version": 3,
+    "version": "1.0.0",
+    "name": "My test extension",
+    "action": {
+        "default_popup": "index.html"
+    },
+    "permission": ["tabs", "activeTab", "scripting"],
+    "host_permissions": [
+        "http://*/*",
+        "https://*/*"
+    ],
+    "background": {
+        "service_worker": "js/background.js"
+    },
+    "content_scripts": [
+        {
+            "matches": ["https://www.twitch.tv/*", "https://www.twitch.tv/*"],
+            "js": ["js/content_scripts.js"],
+            "run_at": "document_start"
+        }
+    ]
+}
