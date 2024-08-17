@@ -28,13 +28,15 @@ export class ChartExtension {
     chart: Chart<"line", ChartExtensionData> | null;
     chartTitle: string;
     chartData: ChartExtensionData;
+    defaultColor: string = '#fff'; // Label color
 
-    constructor(container: Element, title?: string){
+    constructor(container: Element, title?: string, defaultColor?:  string){
         this.container = container;
         this.canvas = null;
         this.chart = null;
         this.chartTitle = title ?? 'Viewers';
         this.chartData = [];
+        this.defaultColor = defaultColor ?? this.defaultColor;
 
         const html: string = `<div id="extensionChartContainer" height="200" style="margin-left: 20px;margin-right: 20px;margin-bottom: 10px;"><canvas id="extensionChart" height="200" style="width: 100%"></canvas></div>`;
 
@@ -50,8 +52,11 @@ export class ChartExtension {
     _initChart(container: HTMLCanvasElement | null) {
         if (container) {
 
+            this.setDefaultColor(this.defaultColor);
+
             this.chart = new Chart(container, {
                 type: 'line',
+                
                 data: {
                   labels: [],
                   datasets: [{
@@ -86,6 +91,9 @@ export class ChartExtension {
                         intersect: false
                     },
                     plugins: {
+                        colors: {
+                            forceOverride: true
+                        },
                         datalabels: customDatalabels,
                         tooltip: {
                             enabled: true,
@@ -143,6 +151,15 @@ export class ChartExtension {
             this.chart.destroy();
             document.getElementById('extensionChartContainer')?.remove();
         } 
+    };
+
+    setDefaultColor(newValue: string) {
+        if (newValue){
+            this.defaultColor = newValue;
+            Chart.defaults.color = newValue;
+            Chart.defaults.borderColor = 'transparent';
+            Chart.defaults.font.size = 13;
+        }
     };
 
 };

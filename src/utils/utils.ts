@@ -5,6 +5,8 @@ export type DataLabelComputed = {
     dataLabelColor: string;
 };
 
+export type ThemeBackgroundColor = 'dark' | 'light';
+
 /**
  * value.startsWith("https://www.twitch.tv/") ?
  * @param { string } value 
@@ -34,7 +36,13 @@ const getPercentageOf = (percentage: number, number: number): number => {
  * @returns { boolean }
  */
 const isBetweenPercentage = (percentage1: number, percentage2: number, value: number, difference: number): boolean => {
-    return difference >= getPercentageOf(percentage1, value) && difference <= getPercentageOf(percentage2, value);
+
+    if (difference < 0) {
+        return difference <= getPercentageOf(percentage1, value) && difference >= getPercentageOf(percentage2, value);
+    } else {
+        return difference >= getPercentageOf(percentage1, value) && difference <= getPercentageOf(percentage2, value);
+    }
+    
 };
 
 /**
@@ -53,27 +61,16 @@ const computedDataLabel = (data: ChartExtensionData, nbViewer: number): DataLabe
 
     let dataLabelColor: string = '';
 
-    if (isBetweenPercentage(1, 10, nbViewer, diff)) { // Apply color regarding how high is the raise
+    // Apply color regarding how high is the raise or decreasement
+    if (isBetweenPercentage(1, 10, nbViewer, diff) || isBetweenPercentage(-1, -10, nbViewer, diff)) {
         dataLabelColor = '#fff600';
-    } else if (isBetweenPercentage(11, 25, nbViewer, diff)) {
+    } else if (isBetweenPercentage(11, 25, nbViewer, diff) || isBetweenPercentage(-11, -25, nbViewer, diff)) {
         dataLabelColor = '#ffc302';
-    } else if (isBetweenPercentage(26, 50, nbViewer, diff)) {
+    } else if (isBetweenPercentage(26, 50, nbViewer, diff) || isBetweenPercentage(-26, -50, nbViewer, diff)) {
         dataLabelColor = '#ff8f00';
-    } else if (isBetweenPercentage(51, 75, nbViewer, diff)) {
+    } else if (isBetweenPercentage(51, 75, nbViewer, diff) || isBetweenPercentage(-51, -75, nbViewer, diff)) {
         dataLabelColor = '#ff5b00';
-    } else if (isBetweenPercentage(76, 100, nbViewer, diff)) {
-        dataLabelColor = '#ff0505';
-    }
-
-    if (isBetweenPercentage(-1, -10, nbViewer, diff)) { // Apply color regarding how high is the raise
-        dataLabelColor = '#fff600';
-    } else if (isBetweenPercentage(-11, -25, nbViewer, diff)) {
-        dataLabelColor = '#ffc302';
-    } else if (isBetweenPercentage(-26, -50, nbViewer, diff)) {
-        dataLabelColor = '#ff8f00';
-    } else if (isBetweenPercentage(-51, -75, nbViewer, diff)) {
-        dataLabelColor = '#ff5b00';
-    } else if (isBetweenPercentage(-76, -100, nbViewer, diff)) {
+    } else if (isBetweenPercentage(76, 100, nbViewer, diff) || isBetweenPercentage(-76, -100, nbViewer, diff)) {
         dataLabelColor = '#ff0505';
     }
 
@@ -156,7 +153,25 @@ const waitForElm = (selector: string): Promise<Element | null> => {
             subtree: true
         });
     });
-}
+};
+
+const backGroundThemeObserver = (element: Document, callback: (newTheme: ThemeBackgroundColor) => void) => {
+    const elmObserver = new MutationObserver((mutations) => {
+        mutations.forEach(mutation => {
+          if (mutation.type !== "attributes" && mutation.attributeName !== "class") return;
+          //@ts-ignore
+          if (mutation.target.className.includes('dark')) {
+            callback('dark');
+            //@ts-ignore
+          } else if (mutation.target.className.includes('light')) {
+            callback('light');
+          }
+          console.log("class was modified!", mutation);
+        });
+    });
+
+    elmObserver.observe(element.documentElement, { attributes: true });
+};
 
 /**
  * Apply chart title format to a string
@@ -165,6 +180,6 @@ const waitForElm = (selector: string): Promise<Element | null> => {
  */
 const formatChartTitle = (string: string) => {
     return string.replace('/', '') + "'s viewers";
-}
+};
 
-export { isURLTwitch, getNbViewer, sleep, waitForElm, getDuration, removeSpaceInString, formatChartTitle, getGameName, computedDataLabel };
+export { isURLTwitch, getNbViewer, sleep, waitForElm, getDuration, removeSpaceInString, formatChartTitle, getGameName, computedDataLabel, backGroundThemeObserver };

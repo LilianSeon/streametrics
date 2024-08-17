@@ -1,4 +1,4 @@
-import { isURLTwitch, getNbViewer, waitForElm, getDuration, formatChartTitle, getGameName, computedDataLabel } from './utils/utils.js';
+import { isURLTwitch, getNbViewer, waitForElm, getDuration, formatChartTitle, getGameName, computedDataLabel, backGroundThemeObserver, ThemeBackgroundColor } from './utils/utils.js';
 import { ChartData, ChartExtension } from './js/chartExtension.js';
 
 let interval: NodeJS.Timeout;
@@ -44,7 +44,9 @@ const initChartInDOM = () => {
         startLoopGetData();
         if (element) {
             const chartTitle: string = formatChartTitle(window.location.pathname);
-            chartExtension = new ChartExtension(element, chartTitle);
+            const textColor: string = document.documentElement.className.includes('dark') ? '#ffffff' : '#000000';
+            chartExtension = new ChartExtension(element, chartTitle, textColor);
+            backGroundThemeObserver(document, updateDefaultColor);
         }
         
     });
@@ -66,9 +68,14 @@ chrome.runtime.onMessage.addListener((request, _sender) => { // When user goes f
     }
 });
 
+const updateDefaultColor = (theme: ThemeBackgroundColor): void => {
+    if (chartExtension instanceof ChartExtension) {
+        const newColor = (theme === 'dark') ? '#ffffff' : '#000000';
+        chartExtension.setDefaultColor(newColor);
+    }
+};
+
 
 window.addEventListener('DOMContentLoaded', () => {
-    
     initChartInDOM();
-
 });

@@ -14,10 +14,11 @@ const customDatalabels: Options = {
         //@ts-ignore
         return (context.dataset.data[i]?.dataLabel) ? true : false;
     },
-    color: function(context: Context) {
-        const i = context.dataIndex;
+    color: function(_context: Context) {
+        //const i = context.dataIndex;
         //@ts-ignore
-        return context.dataset.data[i]?.dataLabelColor;
+        //return context.dataset.data[i]?.dataLabelColor;
+        return '#000'
     },
     font: {
         size: 11,
