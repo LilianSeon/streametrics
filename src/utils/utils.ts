@@ -1,5 +1,12 @@
 import { ChartExtensionData } from "../js/chartExtension";
 
+export type Peak = {
+    endIndex: number,
+    endValue: number,
+    startIndex: number,
+    startValue: number
+};
+
 export type DataLabelComputed = {
     dataLabel: string;
     dataLabelColor: string;
@@ -45,18 +52,94 @@ const isBetweenPercentage = (percentage1: number, percentage2: number, value: nu
     
 };
 
+const findPeaks = (data: ChartExtensionData, threshold: number) => {
+    const peaks: Peak[] = [];
+
+    if (typeof data == 'undefined') return;
+
+    // Add a new peak if diff >= threshold
+    const addPeak = (newPeak: Peak): void => {
+        if (peaks && newPeak) {
+            const diff = newPeak.endValue - newPeak.startValue;
+            if (diff >= threshold) {
+                peaks.push(newPeak);
+            }
+        }
+    };
+
+    // Check first element
+    if (data.length > 1 && data.at(0)! > data.at(1)!) {
+        let temp5 = 0;
+        while (data.at(temp5 + 1)!.nbViewer <= data.at(temp5 + 2)!.nbViewer) temp5++;
+        addPeak({ endIndex: 0, endValue: data.at(0)!.nbViewer, startIndex: temp5, startValue: data.at(temp5)!.nbViewer });
+    }
+
+    // Check middle elements
+    for (let i = 0 ; i < data.length; i++) { // For each data elements
+        //@ts-ignore
+        if (data.at(i + 1)?.nbViewer && data.at(i)!.nbViewer  > data.at(i - 1)!.nbViewer && data.at(i)!.nbViewer  > data.at(i + 1)?.nbViewer ) { // Check if data[i] is supp to data[i-1] AND if data[i] supp to data[i+1]
+            let temp1 = i;
+
+            while (data.at(temp1 - 1)!.nbViewer >= data.at(temp1 - 2)!.nbViewer) temp1--;
+
+            addPeak({ endIndex: i, endValue: data.at(i)!.nbViewer, startIndex: temp1, startValue: data.at(temp1)!.nbViewer });
+
+        } else if (data.at(i + 1)?.nbViewer && data.at(i + 2)?.nbViewer && data.at(i)!.nbViewer === data.at(i + 1)!.nbViewer && data.at(i + 1)!.nbViewer > data.at(i + 2)!.nbViewer) {
+            let temp2 = i;
+            let temp3 = i;
+
+            while (data.at(temp2)!.nbViewer == data.at(temp2 + 1)!.nbViewer) temp2++;
+            while (data.at(temp3 - 1)!.nbViewer >= data.at(temp3 - 2)!.nbViewer) temp3--;
+
+            if (data.at(i)?.nbViewer && data.at(temp2)!.nbViewer > data.at(temp2 + 1)!.nbViewer) {
+                addPeak({ endIndex: temp2, endValue: data.at(temp2)!.nbViewer, startIndex: temp3, startValue: data.at(temp3)!.nbViewer });
+            }
+        }
+    }
+
+    // Check last element
+    if (data.length > 1 && data.at(-1)!.nbViewer  > data.at(-2)!.nbViewer ) {
+        let temp4 = data.length;
+        while (data[temp4 - 1]!.nbViewer >= data.at(temp4 - 2)!.nbViewer) temp4--;
+        addPeak({ endIndex: data.length - 1, endValue: data.at(-1)!.nbViewer, startIndex: --temp4, startValue: data[temp4-- - 2]!.nbViewer });
+    }
+
+    return peaks;
+}
+
+const detectPeaks = (arr: ChartExtensionData) => {
+    let positions = []
+    let maximas = []
+    for (let i = 1; i < arr.length - 1; i++) {
+        if (arr.at(i)!.nbViewer > arr.at(i - 1)!.nbViewer) {
+            if (arr.at(i)!.nbViewer > arr.at(i + 1)!.nbViewer) {
+                positions.push(i)
+                maximas.push(arr.at(i)!.nbViewer)
+            } else if (arr.at(i)!.nbViewer === arr.at(i + 1)!.nbViewer) {
+                let temp = i
+                while (arr.at(i)?.nbViewer === arr.at(temp)?.nbViewer) i++
+                if (arr.at(i)?.nbViewer && arr.at(temp)!.nbViewer > arr.at(i)!.nbViewer) {
+                    positions.push(temp)
+                    maximas.push(arr.at(temp)?.nbViewer)
+                }
+            }
+        }
+    }
+    return { maximas, positions };
+}
+
 /**
  * Apply a label and color to data if the difference in the number of viewers is to high
  * @param { ChartExtensionData } data 
  * @param { number } nbViewer 
  * @returns { DataLabelComputed | undefined }
  */
-const computedDataLabel = (data: ChartExtensionData, nbViewer: number): DataLabelComputed | undefined => {
+const computedDataLabel = (data: ChartExtensionData, nbViewer: number): Peak[] | undefined => {
 
     if (data && data.length === 0) return;
 
     const diff = nbViewer - data.at(-1)!.nbViewer;
-
+    
     if (diff === 0) return;
 
     let dataLabelColor: string = '';
@@ -78,7 +161,9 @@ const computedDataLabel = (data: ChartExtensionData, nbViewer: number): DataLabe
 
     if (isColorEmpty) return;
 
-    return { dataLabel: diff.toString(), dataLabelColor };
+    if (data.length > 3) console.log(detectPeaks(data), findPeaks(data, getPercentageOf(2, nbViewer)));
+
+    return findPeaks(data, getPercentageOf(2, nbViewer));
 };
 
 /**
@@ -182,4 +267,4 @@ const formatChartTitle = (string: string) => {
     return string.replace('/', '') + "'s viewers";
 };
 
-export { isURLTwitch, getNbViewer, sleep, waitForElm, getDuration, removeSpaceInString, formatChartTitle, getGameName, computedDataLabel, backGroundThemeObserver };
+export { isURLTwitch, getNbViewer, sleep, waitForElm, getDuration, removeSpaceInString, formatChartTitle, getGameName, computedDataLabel, backGroundThemeObserver, detectPeaks, findPeaks, getPercentageOf };

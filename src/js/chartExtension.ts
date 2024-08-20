@@ -5,9 +5,12 @@ import ChartDataLabels from 'chartjs-plugin-datalabels';
 Chart.register(ChartDataLabels);
 
 // Chart Custom Plugin
-import verticalHoverLine from './plugins/verticalHoverLine.js';
-import { customTooltipTitle, customTooltipLabel, customTooltipAfterFooter } from './plugins/customTooltip.js';
-import customDatalabels from './plugins/customDatalabels.js';
+import verticalHoverLine from './plugins/verticalHoverLine';
+import { customTooltipTitle, customTooltipLabel, customTooltipAfterFooter } from './plugins/customTooltip';
+import customDatalabels from './plugins/customDatalabels';
+
+// Types
+import { Peak } from '../utils/utils';
 
 
 export type ChartExtensionData = ChartData[] | [];
@@ -17,8 +20,9 @@ export type ChartExtensionData = ChartData[] | [];
     dataLabelColor?: string;
     duration: string;
     game: string;
+    id: string;
     nbViewer: number;
-    time: Date;
+    time: Date | string;
 }
 
 
@@ -67,7 +71,7 @@ export class ChartExtension {
                         yAxisKey: 'nbViewer'
                     },
                     borderWidth: 1,
-                    tension: 0.4,
+                    tension: 0.3,
                     //@ts-ignore
                     pointRadius: (ctx) => {
                         const pointsLength: number = ctx.chart.data.labels?.length! -1;
@@ -143,6 +147,28 @@ export class ChartExtension {
                 dataset.data.push({ duration, nbViewer, game, time, dataLabel, dataLabelColor });
             });
             this.chart.update();
+        }
+    };
+
+    addPeaks(peaks: Peak[]) {
+        if (peaks && peaks.length > 0 && this.chart && this.chart?.data?.labels) {
+
+            this.chart.data.datasets.forEach((dataset) => {
+                peaks.forEach((peak: Peak) => {
+                    let diff: string;
+                    if (peak.startValue > peak.endValue) {
+                        diff = (peak.startValue - peak.endValue).toString();
+                    } else {
+                        diff = (peak.endValue - peak.startValue).toString();
+                    }
+                    
+                    dataset.data[peak.endIndex] = {
+                        ...dataset.data[peak.endIndex],
+                        dataLabel: diff
+                    }
+                })
+            });
+            this.chart.update('none');
         }
     };
 

@@ -7,9 +7,9 @@ import { ChartData } from "../chartExtension.js";
  * @returns { string } 15/08/2024 17:44:11
  */
 const customTooltipAfterFooter = (context: any): string => {
-    const { time } = context[0].raw as ChartData;
+    const { time }: { time: Date } = context[0].raw;
 
-    return time.toLocaleDateString() + ' ' + time.toLocaleTimeString();
+    return time.toLocaleDateString() + ' ' + time.toLocaleDateString();
 }
 
 /**
