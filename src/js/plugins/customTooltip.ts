@@ -13,7 +13,7 @@ const customTooltipAfterFooter = (context: any): string => {
 }
 
 /**
- * 
+ * Display tooltip's core text 
  * @param context 
  * @returns { string | string[] } Viewers : 49 562
  */
@@ -24,16 +24,17 @@ const customTooltipLabel = (context: any): string | string[] => {
     const previousValue: number | undefined = (dataIndex > 0) ? data.at(dataIndex - 1)!.nbViewer : undefined;
 
     const formatNbViewer = new Intl.NumberFormat(undefined, { minimumFractionDigits: 0 });
-    const label = (nbViewer >= 1) ? ' Viewers : ' : ' Viewer : ';
+    const label: string = (nbViewer >= 1) ? ' Viewers : ' : ' Viewer : ';
+    const formatedString: string = label + formatNbViewer.format(nbViewer);
 
-    if (typeof previousValue == 'undefined') return label + formatNbViewer.format(nbViewer);
+    if (typeof previousValue == 'undefined') return formatedString;
 
     const diff: number = nbViewer - previousValue;
 
-    if (diff === 0) return label + formatNbViewer.format(nbViewer); // IF there is no differences don't display it
+    if (diff === 0) return formatedString; // If there is no differences don't display it
     
 
-    return [label + formatNbViewer.format(nbViewer), diff < 0 ? '▼ '+ diff : '▲ ' + diff];
+    return [formatedString, diff < 0 ? '▼ '+ diff : '▲ ' + diff];
 }
 
 /**

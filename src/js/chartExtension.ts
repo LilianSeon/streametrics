@@ -21,7 +21,7 @@ export type ChartExtensionData = ChartData[] | [];
     dataLabelColor?: string;
     duration: string;
     game: string;
-    id: string;
+    id: number;
     nbViewer: number;
     time: Date | string;
 }
@@ -78,7 +78,7 @@ export class ChartExtension {
                         yAxisKey: 'nbViewer'
                     },
                     borderWidth: 1,
-                    tension: 0.2,
+                    tension: 0.3,
                     //@ts-ignore
                     pointRadius: (ctx) => {
                         const pointsLength: number = ctx.chart.data.labels?.length! -1;

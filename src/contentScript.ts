@@ -1,6 +1,9 @@
 import { isURLTwitch, getNbViewer, waitForElm, getDuration, formatChartTitle, getGameName, backGroundThemeObserver, ThemeBackgroundColor } from './utils/utils.js';
 import { ChartData, ChartExtension } from './js/chartExtension.js';
 
+// Template
+import accordion from './templates/accordion';
+
 let interval: NodeJS.Timeout;
 let chartExtension: ChartExtension;
 let data: ChartData[] = [];
@@ -20,7 +23,7 @@ const startLoopGetData = () => {
                 //const peaks: Peak[] = computedDataLabel(data, nbViewer) || []; // return dataLabel if needed;
 
                 const newData = {
-                    id: duration,
+                    id: data.length,
                     duration,
                     nbViewer,
                     game,
@@ -32,8 +35,16 @@ const startLoopGetData = () => {
                 data.push(newData);
 
             }
-        }, 5000);
+        }, 2000);
     }
+};
+
+const initAccordion = (element: Element | null): HTMLElement | null => {
+    if (element && document.getElementById('accordionTemplate') === null) {
+        element.insertAdjacentHTML('afterend', accordion('TwitchChart'));
+    }
+
+    return document.getElementById('accordionTemplate');
 };
 
 /**
@@ -42,10 +53,11 @@ const startLoopGetData = () => {
 const initChartInDOM = () => {
     waitForElm('#live-channel-stream-information').then((element: Element | null) => {
         startLoopGetData();
-        if (element) {
+        const accordionContainter = initAccordion(element);
+        if (accordionContainter && typeof chartExtension == 'undefined') {
             const chartTitle: string = formatChartTitle(window.location.pathname);
             const textColor: string = document.documentElement.className.includes('dark') ? '#ffffff' : '#000000';
-            chartExtension = new ChartExtension(element, chartTitle, textColor);
+            chartExtension = new ChartExtension(accordionContainter, chartTitle, textColor);
             backGroundThemeObserver(document, updateDefaultColor);
         }
         

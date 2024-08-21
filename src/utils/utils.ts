@@ -171,8 +171,9 @@ const computedDataLabel = (data: ChartExtensionData, nbViewer: number): Peak[] |
  * @returns { string } Game name
  */
 const getGameName = (document: Document): string => {
+    const selector = document.querySelectorAll<HTMLElement>('[data-a-target="stream-game-link"]');
 
-    const getHTMLElementByData = document.querySelectorAll<HTMLElement>('[data-a-target="stream-game-link"]')[0]?.innerText;
+    const getHTMLElementByData = (selector.length > 1) ? selector[1]?.innerText : selector[0]?.innerText; // If is streaming together
     const getHTMLElementByClass = document.getElementsByClassName("CoreText-sc-1txzju1-0 dLeJdh")[0]?.innerHTML
 
     return getHTMLElementByData ?? getHTMLElementByClass;
@@ -204,16 +205,9 @@ const getDuration = (document: Document): string | undefined => {
 /**
  * 
  * @param { string | undefined } value 
- * @returns { string }
+ * @returns { string } String without any spaces
  */
 const removeSpaceInString = (value?: string): string => value ? value.replace(/\s+/g, '') : '';
-
-/**
- * 
- * @param { number } ms 
- * @returns { Promise<unknown> }
- */
-const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 /**
  * Wait for an HTMLElement to appears in DOM.
@@ -240,7 +234,7 @@ const waitForElm = (selector: string): Promise<Element | null> => {
     });
 };
 
-const backGroundThemeObserver = (element: Document, callback: (newTheme: ThemeBackgroundColor) => void) => {
+const backGroundThemeObserver = (element: Document, callback: (newTheme: ThemeBackgroundColor) => void): void => {
     const elmObserver = new MutationObserver((mutations) => {
         mutations.forEach(mutation => {
           if (mutation.type !== "attributes" && mutation.attributeName !== "class") return;
@@ -251,7 +245,6 @@ const backGroundThemeObserver = (element: Document, callback: (newTheme: ThemeBa
           } else if (mutation.target.className.includes('light')) {
             callback('light');
           }
-          console.log("class was modified!", mutation);
         });
     });
 
@@ -263,8 +256,8 @@ const backGroundThemeObserver = (element: Document, callback: (newTheme: ThemeBa
  * @param { string } string 
  * @returns { string }
  */
-const formatChartTitle = (string: string) => {
+const formatChartTitle = (string: string): string => {
     return string.replace('/', '') + "'s viewers";
 };
 
-export { isURLTwitch, getNbViewer, sleep, waitForElm, getDuration, removeSpaceInString, formatChartTitle, getGameName, computedDataLabel, backGroundThemeObserver, detectPeaks, findPeaks, getPercentageOf };
+export { isURLTwitch, getNbViewer, waitForElm, getDuration, removeSpaceInString, formatChartTitle, getGameName, computedDataLabel, backGroundThemeObserver, detectPeaks, findPeaks, getPercentageOf };

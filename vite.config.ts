@@ -19,7 +19,8 @@ export default defineConfig({
         index: './index.html',
         'js/background': './src/background.ts',
         'js/content_scripts': './src/contentScript.ts',
-        'css/app': './src/App.css'
+        'css/app': './src/App.css',
+        'css/accordion.css': './src/assets/css/accordion.css'
       },
       output:{
         entryFileNames: "[name].js"
