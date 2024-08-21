@@ -9,20 +9,31 @@ import { ChartData } from "../chartExtension.js";
 const customTooltipAfterFooter = (context: any): string => {
     const { time }: { time: Date } = context[0].raw;
 
-    return time.toLocaleDateString() + ' ' + time.toLocaleDateString();
+    return time.toLocaleDateString() + ' ' + time.toLocaleTimeString();
 }
 
 /**
  * 
  * @param context 
- * @returns { string } Viewers : 49 562
+ * @returns { string | string[] } Viewers : 49 562
  */
-const customTooltipLabel = (context: any): string => {
+const customTooltipLabel = (context: any): string | string[] => {
     const { nbViewer } = context.raw as ChartData;
+    const { data }: { data: ChartData[] } = context.dataset;
+    const { dataIndex } = context;
+    const previousValue: number | undefined = (dataIndex > 0) ? data.at(dataIndex - 1)!.nbViewer : undefined;
+
     const formatNbViewer = new Intl.NumberFormat(undefined, { minimumFractionDigits: 0 });
     const label = (nbViewer >= 1) ? ' Viewers : ' : ' Viewer : ';
 
-    return label + formatNbViewer.format(nbViewer);
+    if (typeof previousValue == 'undefined') return label + formatNbViewer.format(nbViewer);
+
+    const diff: number = nbViewer - previousValue;
+
+    if (diff === 0) return label + formatNbViewer.format(nbViewer); // IF there is no differences don't display it
+    
+
+    return [label + formatNbViewer.format(nbViewer), diff < 0 ? '▼ '+ diff : '▲ ' + diff];
 }
 
 /**

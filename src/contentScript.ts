@@ -1,4 +1,4 @@
-import { isURLTwitch, getNbViewer, waitForElm, getDuration, formatChartTitle, getGameName, computedDataLabel, backGroundThemeObserver, ThemeBackgroundColor, Peak } from './utils/utils.js';
+import { isURLTwitch, getNbViewer, waitForElm, getDuration, formatChartTitle, getGameName, backGroundThemeObserver, ThemeBackgroundColor } from './utils/utils.js';
 import { ChartData, ChartExtension } from './js/chartExtension.js';
 
 let interval: NodeJS.Timeout;
@@ -17,7 +17,7 @@ const startLoopGetData = () => {
 
             if (chartExtension && duration && nbViewer) {
 
-                const peaks: Peak[] = computedDataLabel(data, nbViewer) || []; // return dataLabel if needed;
+                //const peaks: Peak[] = computedDataLabel(data, nbViewer) || []; // return dataLabel if needed;
 
                 const newData = {
                     id: duration,
@@ -28,11 +28,11 @@ const startLoopGetData = () => {
                 } as ChartData;
 
                 chartExtension.addData({ ...newData });
-                chartExtension.addPeaks(peaks);
+                //chartExtension.addPeaks(peaks);
                 data.push(newData);
 
             }
-        }, 1000);
+        }, 5000);
     }
 };
 

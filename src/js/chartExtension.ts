@@ -1,13 +1,14 @@
-import { Chart } from 'chart.js/auto';
-import ChartDataLabels from 'chartjs-plugin-datalabels';
+import { Chart, ScriptableLineSegmentContext } from 'chart.js/auto';
+/*import ChartDataLabels from 'chartjs-plugin-datalabels';
 
 // Register the plugin to all charts:
-Chart.register(ChartDataLabels);
+Chart.register(ChartDataLabels);*/
 
 // Chart Custom Plugin
 import verticalHoverLine from './plugins/verticalHoverLine';
 import { customTooltipTitle, customTooltipLabel, customTooltipAfterFooter } from './plugins/customTooltip';
-import customDatalabels from './plugins/customDatalabels';
+import { customSegmentTooltip } from './plugins/customSegmentTooltip';
+//import customDatalabels from './plugins/customDatalabels';
 
 // Types
 import { Peak } from '../utils/utils';
@@ -58,6 +59,9 @@ export class ChartExtension {
 
             this.setDefaultColor(this.defaultColor);
 
+            const down = (ctx: ScriptableLineSegmentContext, value: string) => ctx.p0.parsed.y > ctx.p1.parsed.y ? value : undefined;
+            const up = (ctx: ScriptableLineSegmentContext, value: string) => ctx.p0.parsed.y < ctx.p1.parsed.y ? value : undefined;
+
             this.chart = new Chart(container, {
                 type: 'line',
                 
@@ -66,12 +70,15 @@ export class ChartExtension {
                   datasets: [{
                     label: this.chartTitle,
                     data: this.chartData,
+                    segment: {
+                        borderColor: ctx => down(ctx, 'rgb(192,75,75)') || up(ctx, 'rgb(24,204,84)') 
+                    },
                     parsing: {
                         xAxisKey: 'duration',
                         yAxisKey: 'nbViewer'
                     },
                     borderWidth: 1,
-                    tension: 0.3,
+                    tension: 0.2,
                     //@ts-ignore
                     pointRadius: (ctx) => {
                         const pointsLength: number = ctx.chart.data.labels?.length! -1;
@@ -89,21 +96,27 @@ export class ChartExtension {
                     }
                   }]
                 },
-                options: {      
-                    interaction: {
+                options: {     
+                    hover: {
+                        mode: 'nearest',
+                        intersect: false
+                    }, 
+                    /*interaction: {
                         mode: 'index',
                         intersect: false
-                    },
+                    },*/
                     plugins: {
                         colors: {
                             forceOverride: true
                         },
-                        datalabels: customDatalabels,
+                        //datalabels: customDatalabels,
                         tooltip: {
                             enabled: true,
+                            mode: 'nearest',
                             caretPadding: 5,
+                            intersect: false,
                             footerFont: {
-                                size: 10,
+                                size: 11,
                             },
                             callbacks: {
                                 title: customTooltipTitle,
@@ -133,7 +146,7 @@ export class ChartExtension {
                     },
                     responsive: false,
                 },
-                plugins: [verticalHoverLine]
+                plugins: [verticalHoverLine, customSegmentTooltip]
             });
         }
     };
