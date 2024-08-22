@@ -35,7 +35,7 @@ export class ChartExtension {
     chartData: ChartExtensionData;
     defaultColor: string = '#fff'; // Label color
 
-    constructor(container: Element, title?: string, defaultColor?:  string){
+    constructor(container: HTMLElement, title?: string, defaultColor?:  string){
         this.container = container;
         this.canvas = null;
         this.chart = null;

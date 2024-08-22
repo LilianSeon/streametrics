@@ -8,10 +8,6 @@
   --themeExtension: var(--primaryExtension);
 }
 
-*::after {
-  box-sizing: border-box;
-}
-
 /* Core styles/functionality */
 .tabExtension input {
   position: absolute;
@@ -23,12 +19,14 @@
   overflow: hidden;
   transition: all 0.35s;
 }
-.tabExtension input:checked ~ .tab__content {
+
+.tab__content {
   max-height: 255px;
 }
 
 /* Visual styles */
 .accordionExtension {
+  box-sizing: border-box;
   color: var(--themeExtension);
   border: 2px solid;
   border-radius: 0.5rem;
@@ -38,32 +36,47 @@
   margin-bottom: 10px;
 }
 
-.tab__label,
-.tab__close {
+.last-item {
+  margin-left: auto;
+}
+
+.flex-container {
   display: flex;
-  color: white;
-  background: var(--themeExtension);
-  cursor: pointer;
+  justify-content: space-between; 
+}
+
+.bg-primary {
+  background-color: var(--primaryExtension);
 }
 
 .tab__label {
-  justify-content: space-between;
   padding: 1rem;
   height: 39.5px;
+  text-align: center;
+  color: #fff;
 }
 
-.tab__label::after {
+.arrowExtension {
+  float: right;
+  position: relative;
+}
+
+.arrowExtension::after {
   content: "\276F";
+  color: white;
+  cursor: pointer;
+  position: absolute;
   width: 1em;
   height: 1em;
   text-align: center;
-  transform: rotate(90deg);
-  transition: transform 0.35s;
-  margin-right: 0.5rem;
+  transform: var(--arrowTransform);
+  transition: transform 0.35s ease;
+  right: 15px;
+  top: 10px;
   font-size: 16px;
 }
 
-.tabExtension input:checked + .tab__label::after {
+.rotate::after { /* checked */
   transform: rotate(270deg);
 }
 
@@ -81,20 +94,20 @@
   --themeExtension: var(--secondaryExtension);
 }
 
-.tabExtension input:not(:checked) + .tab__label::after {
+.tabExtension + .flex-container > .arrowExtension::after  { /* not */
   margin-bottom: 10px;
   margin-right: 0px;
 }
 
 /* Arrow animation */
-.tabExtension input:not(:checked) + .tab__label:hover::after {
+.arrowExtension:hover::after { /* not */
   animation: bounce .5s infinite;
 }
 @keyframes bounce {
   25% {
-    transform: rotate(90deg) translate(.25rem);
+    transform: var(--arrowTransform) translate(.25rem);
   }
   75% {
-    transform: rotate(90deg) translate(-.25rem);
+    transform: var(--arrowTransform) translate(-.25rem);
   }
 }

@@ -5,7 +5,7 @@
     "action": {
         "default_popup": "index.html"
     },
-    "permission": ["tabs", "activeTab", "scripting"],
+    "permissions": ["tabs", "activeTab", "scripting", "storage"],
     "host_permissions": [
         "http://*/*",
         "https://*/*"
@@ -18,7 +18,7 @@
             "matches": ["https://www.twitch.tv/*", "https://www.twitch.tv/*"],
             "js": ["js/content_scripts.js"],
             "run_at": "document_start",
-            "css": [ "./assets/css/accordion.css" ]
+            "css": [ "./assets/css/accordion-BbXHYRD9.css" ]
         }
     ]
 }

@@ -3,6 +3,11 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "manifest": {
+    "permissions": [
+        "storage"
+    ]
+  },
   "scripts": {
     "dev": "vite",
     "test": "vitest",
