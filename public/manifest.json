@@ -18,7 +18,7 @@
             "matches": ["https://www.twitch.tv/*", "https://www.twitch.tv/*"],
             "js": ["js/content_scripts.js"],
             "run_at": "document_start",
-            "css": [ "./assets/css/accordion-BbXHYRD9.css" ]
+            "css": [ "./assets/css/accordion-B8xsulg5.css" ]
         }
     ]
 }

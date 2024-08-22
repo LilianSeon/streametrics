@@ -7,8 +7,9 @@ interface IAccordion<E extends Element> {
     arrowAccordion: E | null;
     accordion: E;
     isExpanded: boolean;
-    expandChartContainer(): void;
     collapseChartContainer(): void;
+    destroy(): void;
+    expandChartContainer(): void;
     getAccordionElement(): Element;
     getChartContainer(): Element | null;
 }
@@ -20,15 +21,17 @@ export default class Accordion implements IAccordion<Element> {
     chartContainer: HTMLElement | null;
     tabContent: HTMLElement | null;
     isExpanded: boolean;
+    private onClickArrowAccordionHandler: OnClickArrowAccordionHandler;
 
     constructor(element: Element, onClickArrowAccordionHandler: OnClickArrowAccordionHandler, isExpanded: boolean) {
+
         const htmlString = `
-            <style>
-                :root {
-                    --arrowTransform: rotate(${isExpanded ? 270 : 90}deg);
-                }
-            </style>
             <section id="accordionExtension" class="accordionExtension">
+                <style>
+                    :root {
+                        --arrowTransform: rotate(${isExpanded ? 270 : 90}deg);
+                    }
+                </style>
                 <div class="tabExtension">
                     <div class="flex-container bg-primary">
                         <div id="headerLabel" class="tab__label">TwitchChart</div>
@@ -49,6 +52,7 @@ export default class Accordion implements IAccordion<Element> {
         this.chartContainer = document.getElementById('chartContainer');
         this.tabContent = document.getElementById('tab__content');
         this.isExpanded = isExpanded;
+        this.onClickArrowAccordionHandler = onClickArrowAccordionHandler;
 
         isExpanded ? this.expandChartContainer() : this.collapseChartContainer();
     }
@@ -64,7 +68,6 @@ export default class Accordion implements IAccordion<Element> {
     expandChartContainer(): void {
         if (this.tabContent && this.arrowAccordion) {
             this.tabContent.style.maxHeight = '250px';
-            //this.arrowAccordion.classList.toggle('rotate');
             this.arrowAccordion.style.setProperty('--arrowTransform', 'rotate(270deg)');
             this.isExpanded = true;
         }
@@ -73,10 +76,14 @@ export default class Accordion implements IAccordion<Element> {
     collapseChartContainer(): void {
         if (this.tabContent && this.arrowAccordion) {
             this.tabContent.style.maxHeight = '0px';
-            //this.arrowAccordion.classList.toggle('rotate');
             this.arrowAccordion.style.setProperty('--arrowTransform', 'rotate(90deg)');
             this.isExpanded = false;
         }
+    }
+
+    destroy(): void {
+        this.accordion.remove();
+        this.arrowAccordion?.removeEventListener('click', this.onClickArrowAccordionHandler);
     }
 
 };

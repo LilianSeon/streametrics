@@ -6,10 +6,10 @@ import { ChartData, ChartExtension } from './js/chartExtension';
 import Accordion from './templates/accordion';
 
 let interval: NodeJS.Timeout;
-let chartExtension: ChartExtension;
+let chartExtension: ChartExtension | undefined;
 let data: ChartData[] = [];
-let accordionComponent: Accordion;
-let accordionElement: HTMLElement;
+let accordionComponent: Accordion | undefined;
+let accordionElement: HTMLElement | undefined;
 
 /**
  * Get needed data then add it to the Chart
@@ -45,14 +45,14 @@ const startLoopGetData = () => {
 const onClickArrowAccordionHandler = async () =>{
     const { isAccordionExpanded } = await getStorage(['isAccordionExpanded']);
 
-    if (typeof isAccordionExpanded !== 'undefined') {
+    if (typeof isAccordionExpanded !== 'undefined' && accordionComponent) {
         await setStorage( {'isAccordionExpanded': !isAccordionExpanded} );
         isAccordionExpanded ? accordionComponent.collapseChartContainer() : accordionComponent.expandChartContainer();
     }
 };
 
-const initAccordion = async (element: Element | null): Promise<HTMLElement> => {
-    if (element && typeof accordionComponent == 'undefined') {
+/*const initAccordion = async (element: Element | null): Promise<HTMLElement> => {
+    if (element && typeof accordionComponent == 'undefined' && typeof accordionElement == 'undefined') {
         const { isAccordionExpanded } = await getStorage(['isAccordionExpanded']);
 
         accordionComponent = new Accordion(element, onClickArrowAccordionHandler, isAccordionExpanded);
@@ -60,7 +60,7 @@ const initAccordion = async (element: Element | null): Promise<HTMLElement> => {
     }
 
     return accordionElement;
-};
+};*/
 
 const initStorage = async (): Promise<void> => {
     try {
@@ -80,14 +80,20 @@ const initStorage = async (): Promise<void> => {
  * Check if `#live-channel-stream-information` is in DOM or wait for it, then start getting datas and init chart
  */
 const initChartInDOM = () => {
+    console.log('initChartInDOM');
     waitForElm('#live-channel-stream-information').then(async (element: Element | null) => {
         startLoopGetData();
         initStorage();
-        const accordionContainter = await initAccordion(element);
-        if (accordionContainter && typeof chartExtension == 'undefined') {
+        if (element && typeof accordionComponent == 'undefined' && typeof accordionElement == 'undefined' && document.getElementById("accordionExtension") === null) {
+            const { isAccordionExpanded } = await getStorage(['isAccordionExpanded']);
+    
+            accordionComponent = new Accordion(element, onClickArrowAccordionHandler, isAccordionExpanded);
+            accordionElement = accordionComponent.getChartContainer() as HTMLElement;
+        }
+        if (accordionElement && typeof chartExtension == 'undefined') {
             const chartTitle: string = formatChartTitle(window.location.pathname);
             const textColor: string = document.documentElement.className.includes('dark') ? '#ffffff' : '#000000';
-            chartExtension = new ChartExtension(accordionContainter, chartTitle, textColor);
+            chartExtension = new ChartExtension(accordionElement, chartTitle, textColor);
             backGroundThemeObserver(document, updateDefaultColor);
         }
         
@@ -101,9 +107,12 @@ chrome.runtime.onMessage.addListener((request, _sender) => { // When user goes f
 
         if (chartExtension && formatChartTitle(window.location.pathname).includes(chartExtension.chartTitle.replace("'s viewers", ""))) return; // if page reloaded but still on same page, do not init another Chart
 
-        if (chartExtension instanceof ChartExtension) { // If Chart already exists in DOM
+        if (chartExtension instanceof ChartExtension && accordionComponent instanceof Accordion && typeof accordionElement !== 'undefined') { // If Chart already exists in DOM
             chartExtension.destroy();
-            initChartInDOM();
+            accordionComponent.destroy();
+            chartExtension = undefined;
+            accordionComponent = undefined;
+            accordionElement = undefined;
         } else {
             initChartInDOM();
         }

@@ -168,6 +168,19 @@ const computedDataLabel = (data: ChartExtensionData, nbViewer: number): Peak[] |
 };
 
 /**
+ * 
+ * @param { Document } document 
+ * @returns Return streamer's name, above title
+ */
+const getStreamerName = (document: Document): string => {
+
+    const getHTMLElementByClass = document.getElementsByClassName("CoreText-sc-1txzju1-0 ScTitleText-sc-d9mj2s-0 AAWwv bzDGwQ InjectLayout-sc-1i43xsx-0 dhkijX tw-title")[0]?.innerHTML;
+    const getHTMLElementByClassContaining = Array.from(document.getElementsByClassName("tw-title")).filter((element: Element) => element.localName === "h1")[0]?.innerHTML;
+
+    return getHTMLElementByClass ?? getHTMLElementByClassContaining;
+};
+
+/**
  * @param { Document } document
  * @returns { string } Game name
  */
@@ -261,4 +274,4 @@ const formatChartTitle = (string: string): string => {
     return string.replace('/', '') + "'s viewers";
 };
 
-export { isURLTwitch, getNbViewer, waitForElm, getDuration, removeSpaceInString, formatChartTitle, getGameName, computedDataLabel, backGroundThemeObserver, detectPeaks, findPeaks, getPercentageOf };
+export { isURLTwitch, getNbViewer, waitForElm, getDuration, removeSpaceInString, formatChartTitle, getGameName, computedDataLabel, backGroundThemeObserver, detectPeaks, findPeaks, getPercentageOf, getStreamerName };

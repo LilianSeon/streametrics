@@ -6,8 +6,8 @@ chrome.runtime.onMessage.addListener((request, _sender) => {
 
 });
 
-chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-    if (changeInfo.url && tab.url!.startsWith("https://www.twitch.tv")) {
+chrome.tabs.onUpdated.addListener((tabId, _changeInfo, tab) => {
+    if (tab.url!.startsWith("https://www.twitch.tv/") && tab.status === 'complete') {
         console.log("onUpdated", tabId)
         chrome.tabs.sendMessage(tabId, { url: tab.url, event: "onUpdate" }, (response) => {
             console.log("Response from content script:", response);
@@ -18,7 +18,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 
 chrome.tabs.onCreated.addListener((tab) => {
     console.log("onCreated", tab)
-    if (tab.pendingUrl && tab.pendingUrl.startsWith("https://www.twitch.tv")) {
+    if (tab.pendingUrl && tab.pendingUrl.startsWith("https://www.twitch.tv/")) {
         chrome.tabs.sendMessage(tab.id!, { url: tab.pendingUrl, event: "onCreated" }, (response) => {
             console.log("Response from content script:", response);
         });
@@ -29,7 +29,7 @@ chrome.tabs.onCreated.addListener((tab) => {
 
 
 chrome.tabs.onRemoved.addListener((tabId: number) => {
-    if (tabToUrl[tabId]!.startsWith("https://www.twitch.tv")) {
+    if (tabToUrl[tabId]!.startsWith("https://www.twitch.tv/")) {
         chrome.tabs.sendMessage(tabId, { closed: true}, (response) => { // Delete setInterval when closed
             console.log("Response from content script:", response);
         });
