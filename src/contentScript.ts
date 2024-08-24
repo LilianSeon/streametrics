@@ -10,6 +10,7 @@ let chartExtension: ChartExtension | undefined;
 let data: ChartData[] = [];
 let accordionComponent: Accordion | undefined;
 let accordionElement: HTMLElement | undefined;
+let isExtensionInitialized: boolean = false;
 
 /**
  * Get needed data then add it to the Chart
@@ -81,6 +82,7 @@ const initStorage = async (): Promise<void> => {
  */
 const initChartInDOM = () => {
     console.log('initChartInDOM');
+    isExtensionInitialized = true;
     waitForElm('#live-channel-stream-information').then(async (element: Element | null) => {
         startLoopGetData();
         initStorage();
@@ -113,8 +115,11 @@ chrome.runtime.onMessage.addListener((request, _sender) => { // When user goes f
             chartExtension = undefined;
             accordionComponent = undefined;
             accordionElement = undefined;
+            isExtensionInitialized = false;
         } else {
-            initChartInDOM();
+            if (document.getElementById('accordionExtension') === null && document.getElementById('extensionChartContainer') === null && !isExtensionInitialized) {
+                initChartInDOM();
+            }
         }
     }
 });
@@ -128,5 +133,8 @@ const updateDefaultColor = (theme: ThemeBackgroundColor): void => {
 
 
 window.addEventListener('DOMContentLoaded', () => {
-    initChartInDOM();
+    if (document.getElementById('accordionExtension') === null && document.getElementById('extensionChartContainer') === null && !isExtensionInitialized) {
+        initChartInDOM();
+    }
+    
 });
