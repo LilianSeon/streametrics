@@ -143,7 +143,7 @@ describe('Utils functions', () => {
         console.log(data1)
         if (chartExtension) {
             data1.forEach((data: ChartDataViewer) => {
-                chartExtension.addData(data);
+                chartExtension.addData(data, 15);
                 console.log(data)
             });
             

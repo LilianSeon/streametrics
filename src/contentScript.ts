@@ -1,4 +1,4 @@
-import { isURLTwitch, getNbViewer, waitForElm, getDuration, formatChartTitle, getGameName, backGroundThemeObserver, ThemeBackgroundColor, getMessageAmount } from './utils/utils';
+import { isURLTwitch, getNbViewer, waitForElm, getDuration, formatChartTitle, getGameName, backGroundThemeObserver, ThemeBackgroundColor, getChatContainer } from './utils/utils';
 import { getStorage, setStorage } from './utils/utilsStorage'
 import { ChartDataViewer, ChartExtension } from './js/chartExtension';
 
@@ -25,11 +25,8 @@ const startLoopGetData = () => {
             const game = getGameName(document);
             let messageAmount = 0;
             if (typeof messageCounter !== 'undefined') {
-                messageAmount = messageCounter.getAmountOfNewMessages(getMessageAmount(document));
+                messageAmount = messageCounter.getAmountOfNewMessages(messageCounter.previousMessagesCount);
             }
-
-            // TODO: Add messageAmount to chartExtension
-            console.log("messageAmount: ", messageAmount)
 
             if (chartExtension && duration && nbViewer) {
 
@@ -43,7 +40,7 @@ const startLoopGetData = () => {
                     time: new Date(),
                 } as ChartDataViewer;
 
-                chartExtension.addData({ ...newData });
+                chartExtension.addData({ ...newData }, messageAmount);
                 //chartExtension.addPeaks(peaks);
                 data.push(newData);
 
@@ -82,9 +79,10 @@ const initChartInDOM = () => {
     console.log('initChartInDOM');
     isExtensionInitialized = true;
     waitForElm('#live-channel-stream-information').then(async (element: Element | null) => {
+        const chartContainer = await waitForElm('.chat-line__message');
 
-        if (typeof messageCounter === 'undefined') {
-            messageCounter = new MessageCounter(getMessageAmount(document));
+        if (typeof messageCounter === 'undefined' && chartContainer) {
+            messageCounter = new MessageCounter(getChatContainer(document));
         }
 
         startLoopGetData();
@@ -112,9 +110,10 @@ chrome.runtime.onMessage.addListener((request, _sender) => { // When user goes f
 
         if (chartExtension && formatChartTitle(window.location.pathname).includes(chartExtension.chartTitle.replace("'s viewers", ""))) return; // if page reloaded but still on same page, do not init another Chart
 
-        if (chartExtension instanceof ChartExtension && accordionComponent instanceof Accordion && typeof accordionElement !== 'undefined') { // If Chart already exists in DOM
+        if (chartExtension instanceof ChartExtension && accordionComponent instanceof Accordion && typeof accordionElement !== 'undefined' && messageCounter) { // If Chart already exists in DOM
             chartExtension.destroy();
             accordionComponent.destroy();
+            messageCounter.destroy();
             chartExtension = undefined;
             accordionComponent = undefined;
             accordionElement = undefined;

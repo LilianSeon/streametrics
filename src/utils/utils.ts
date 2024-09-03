@@ -1,5 +1,5 @@
 import { ChartExtensionData } from "../js/chartExtension";
-import { MessageTwitch } from "../js/messageCounter";
+import { ChatContainer } from "../js/messageCounter";
 
 export type Peak = {
     endIndex: number,
@@ -185,12 +185,12 @@ const computedDataLabel = (data: ChartExtensionData, nbViewer: number): Peak[] |
 /**
  * 
  * @param { Document } document 
- * @returns Return array of messages in twitch chat
+ * @returns Return chat node container
  */
-const getMessageAmount = (document: Document): MessageTwitch => {
+const getChatContainer = (document: Document): ChatContainer => {
 
-    const selector = document.querySelectorAll<HTMLElement>('[data-a-target="chat-line-message"]');
-    const getHTMLElementByClass = document.getElementsByClassName("chat-line__message");
+    const selector = document.querySelectorAll<HTMLElement>('[data-test-selector="chat-scrollable-area__message-container"]');
+    const getHTMLElementByClass = document.getElementsByClassName("Layout-sc-1xcs6mc-0 capulb chat-scrollable-area__message-container");
 
     return selector ?? getHTMLElementByClass;
 };
@@ -252,7 +252,7 @@ const getDuration = (document: Document): string | undefined => {
 const removeSpaceInString = (value?: string): string => value ? value.replace(/\s+/g, '') : '';
 
 /**
- * Wait for an HTMLElement to appears in DOM.
+ * Wait for an HTMLElement to appears in DOM by giving a string selector.
  * @param { string } selector 
  * @returns { Promise<Element | null> }
  */
@@ -302,4 +302,4 @@ const formatChartTitle = (string: string): string => {
     return string.replace('/', '') + "'s viewers";
 };
 
-export { isURLTwitch, getNbViewer, waitForElm, getDuration, removeSpaceInString, formatChartTitle, getGameName, computedDataLabel, backGroundThemeObserver, detectPeaks, findPeaks, getPercentageOf, getStreamerName, getMessageAmount };
+export { isURLTwitch, getNbViewer, waitForElm, getDuration, removeSpaceInString, formatChartTitle, getGameName, computedDataLabel, backGroundThemeObserver, detectPeaks, findPeaks, getPercentageOf, getStreamerName, getChatContainer };

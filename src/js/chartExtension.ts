@@ -83,6 +83,7 @@ export class ChartExtension {
                 data: {
                   labels: [],
                   datasets: [{
+                    stack: 'viewersCount',
                     label: this.chartTitle,
                     data: this.chartData,
                     segment: {
@@ -110,8 +111,9 @@ export class ChartExtension {
                         return pointsArray;
                     }
                   },{
+                    stack: 'messagesCount',
                     type: 'bar',
-                    data: [50, 40 ,30]
+                    data: [],
                   }]
                 },
                 options: {     
@@ -169,15 +171,28 @@ export class ChartExtension {
         }
     };
 
-    addData({ duration, nbViewer, game, time, dataLabel, dataLabelColor}: ChartDataViewer): void {
+    public addData({ duration, nbViewer, game, time, dataLabel, dataLabelColor, id}: ChartDataViewer, messagesCount: number): void {
+        this.addDataViewers({ duration, nbViewer, game, time, dataLabel, dataLabelColor, id }, false);
+        this.addDataMessagesCount(messagesCount, true);
+
+        this.chart?.update();
+    };
+
+    private addDataMessagesCount(count: number, update: boolean): void {
+        //@ts-ignore
+        this.chart?.data.datasets[1].data.push(count);
+
+        if (update)  this.chart?.update();
+    };
+
+    private addDataViewers({ duration, nbViewer, game, time, dataLabel, dataLabelColor, id }: ChartDataViewer, update: boolean): void {
         if (this.chart?.data?.labels && duration && nbViewer && !isNaN(nbViewer)) {
 
             this.chart.data.labels.push(duration);
-            this.chart.data.datasets.forEach((dataset) => {
-                //@ts-ignore
-                dataset.data.push({ duration, nbViewer, game, time, dataLabel, dataLabelColor });
-            });
-            this.chart.update();
+            //@ts-ignore
+            this.chart.data.datasets[0].data.push({ duration, nbViewer, game, time, dataLabel, dataLabelColor, id });
+
+            if (update)  this.chart.update();
         }
     };
 
