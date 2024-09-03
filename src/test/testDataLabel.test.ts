@@ -8,7 +8,7 @@ import { detectPeaks, findPeaks } from '../utils/utils';
 
 // Data mockup
 import { data1 } from './mockup/data1';
-import { ChartData, ChartExtension } from "../js/chartExtension";
+import { ChartDataViewer, ChartExtension } from "../js/chartExtension";
 
 /*const data2: ChartExtensionData = [{
     id: "01:00:00",
@@ -142,7 +142,7 @@ describe('Utils functions', () => {
     test('detectPeaks', () => {
         console.log(data1)
         if (chartExtension) {
-            data1.forEach((data: ChartData) => {
+            data1.forEach((data: ChartDataViewer) => {
                 chartExtension.addData(data);
                 console.log(data)
             });

@@ -71,7 +71,9 @@ const findPeaks = (data: ChartExtensionData, threshold: number) => {
     // Check first element
     if (data.length > 1 && data.at(0)! > data.at(1)!) {
         let temp5 = 0;
+        //@ts-ignore
         while (data.at(temp5 + 1)!.nbViewer <= data.at(temp5 + 2)!.nbViewer) temp5++;
+        //@ts-ignore
         addPeak({ endIndex: 0, endValue: data.at(0)!.nbViewer, startIndex: temp5, startValue: data.at(temp5)!.nbViewer });
     }
 
@@ -80,28 +82,33 @@ const findPeaks = (data: ChartExtensionData, threshold: number) => {
         //@ts-ignore
         if (data.at(i + 1)?.nbViewer && data.at(i)!.nbViewer  > data.at(i - 1)!.nbViewer && data.at(i)!.nbViewer  > data.at(i + 1)?.nbViewer ) { // Check if data[i] is supp to data[i-1] AND if data[i] supp to data[i+1]
             let temp1 = i;
-
+//@ts-ignore
             while (data.at(temp1 - 1)!.nbViewer >= data.at(temp1 - 2)!.nbViewer) temp1--;
-
+//@ts-ignore
             addPeak({ endIndex: i, endValue: data.at(i)!.nbViewer, startIndex: temp1, startValue: data.at(temp1)!.nbViewer });
-
+//@ts-ignore
         } else if (data.at(i + 1)?.nbViewer && data.at(i + 2)?.nbViewer && data.at(i)!.nbViewer === data.at(i + 1)!.nbViewer && data.at(i + 1)!.nbViewer > data.at(i + 2)!.nbViewer) {
             let temp2 = i;
             let temp3 = i;
-
+//@ts-ignore
             while (data.at(temp2)!.nbViewer == data.at(temp2 + 1)!.nbViewer) temp2++;
+            //@ts-ignore
             while (data.at(temp3 - 1)!.nbViewer >= data.at(temp3 - 2)!.nbViewer) temp3--;
-
+//@ts-ignore
             if (data.at(i)?.nbViewer && data.at(temp2)!.nbViewer > data.at(temp2 + 1)!.nbViewer) {
+                //@ts-ignore
                 addPeak({ endIndex: temp2, endValue: data.at(temp2)!.nbViewer, startIndex: temp3, startValue: data.at(temp3)!.nbViewer });
             }
         }
     }
 
     // Check last element
+    //@ts-ignore
     if (data.length > 1 && data.at(-1)!.nbViewer  > data.at(-2)!.nbViewer ) {
         let temp4 = data.length;
+        //@ts-ignore
         while (data[temp4 - 1]!.nbViewer >= data.at(temp4 - 2)!.nbViewer) temp4--;
+        //@ts-ignore
         addPeak({ endIndex: data.length - 1, endValue: data.at(-1)!.nbViewer, startIndex: --temp4, startValue: data[temp4-- - 2]!.nbViewer });
     }
 
@@ -112,15 +119,22 @@ const detectPeaks = (arr: ChartExtensionData) => {
     let positions = []
     let maximas = []
     for (let i = 1; i < arr.length - 1; i++) {
+        //@ts-ignore
         if (arr.at(i)!.nbViewer > arr.at(i - 1)!.nbViewer) {
+            //@ts-ignore
             if (arr.at(i)!.nbViewer > arr.at(i + 1)!.nbViewer) {
-                positions.push(i)
-                maximas.push(arr.at(i)!.nbViewer)
+                positions.push(i);
+                //@ts-ignore
+                maximas.push(arr.at(i)!.nbViewer);
+                //@ts-ignore
             } else if (arr.at(i)!.nbViewer === arr.at(i + 1)!.nbViewer) {
                 let temp = i
+                //@ts-ignore
                 while (arr.at(i)?.nbViewer === arr.at(temp)?.nbViewer) i++
+                //@ts-ignore
                 if (arr.at(i)?.nbViewer && arr.at(temp)!.nbViewer > arr.at(i)!.nbViewer) {
                     positions.push(temp)
+                    //@ts-ignore
                     maximas.push(arr.at(temp)?.nbViewer)
                 }
             }
@@ -138,7 +152,7 @@ const detectPeaks = (arr: ChartExtensionData) => {
 const computedDataLabel = (data: ChartExtensionData, nbViewer: number): Peak[] | undefined => {
 
     if (data && data.length === 0) return;
-
+//@ts-ignore
     const diff = nbViewer - data.at(-1)!.nbViewer;
     
     if (diff === 0) return;

@@ -1,13 +1,13 @@
 import { isURLTwitch, getNbViewer, waitForElm, getDuration, formatChartTitle, getGameName, backGroundThemeObserver, ThemeBackgroundColor } from './utils/utils';
 import { getStorage, setStorage } from './utils/utilsStorage'
-import { ChartData, ChartExtension } from './js/chartExtension';
+import { ChartDataViewer, ChartExtension } from './js/chartExtension';
 
 // Template
 import Accordion from './templates/accordion';
 
 let interval: NodeJS.Timeout;
 let chartExtension: ChartExtension | undefined;
-let data: ChartData[] = [];
+let data: ChartDataViewer[] = [];
 let accordionComponent: Accordion | undefined;
 let accordionElement: HTMLElement | undefined;
 let isExtensionInitialized: boolean = false;
@@ -32,7 +32,7 @@ const startLoopGetData = () => {
                     nbViewer,
                     game,
                     time: new Date(),
-                } as ChartData;
+                } as ChartDataViewer;
 
                 chartExtension.addData({ ...newData });
                 //chartExtension.addPeaks(peaks);
@@ -51,17 +51,6 @@ const onClickArrowAccordionHandler = async () =>{
         isAccordionExpanded ? accordionComponent.collapseChartContainer() : accordionComponent.expandChartContainer();
     }
 };
-
-/*const initAccordion = async (element: Element | null): Promise<HTMLElement> => {
-    if (element && typeof accordionComponent == 'undefined' && typeof accordionElement == 'undefined') {
-        const { isAccordionExpanded } = await getStorage(['isAccordionExpanded']);
-
-        accordionComponent = new Accordion(element, onClickArrowAccordionHandler, isAccordionExpanded);
-        accordionElement = accordionComponent.getChartContainer() as HTMLElement;
-    }
-
-    return accordionElement;
-};*/
 
 const initStorage = async (): Promise<void> => {
     try {

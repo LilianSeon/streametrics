@@ -1,6 +1,6 @@
-import { ChartData } from "../../js/chartExtension";
+import { ChartDataViewer } from "../../js/chartExtension";
 
-export const data1: ChartData[] = [
+export const data1: ChartDataViewer[] = [
     {
         "id": 0,
         "duration": "02:53:28",

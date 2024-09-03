@@ -1,4 +1,4 @@
-import { ChartData } from "../chartExtension.js";
+import { ChartDataViewer } from "../chartExtension.js";
 
 
 /**
@@ -18,8 +18,8 @@ const customTooltipAfterFooter = (context: any): string => {
  * @returns { string | string[] } Viewers : 49 562
  */
 const customTooltipLabel = (context: any): string | string[] => {
-    const { nbViewer } = context.raw as ChartData;
-    const { data }: { data: ChartData[] } = context.dataset;
+    const { nbViewer } = context.raw as ChartDataViewer;
+    const { data }: { data: ChartDataViewer[] } = context.dataset;
     const { dataIndex } = context;
     const previousValue: number | undefined = (dataIndex > 0) ? data.at(dataIndex - 1)!.nbViewer : undefined;
 

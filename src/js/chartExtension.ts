@@ -14,9 +14,9 @@ import { customSegmentTooltip } from './plugins/customSegmentTooltip';
 import { Peak } from '../utils/utils';
 
 
-export type ChartExtensionData = ChartData[] | [];
+export type ChartExtensionData = ChartDataViewer[] | [] | ChartDataMessage[];
 
- export type ChartData = {
+ export type ChartDataViewer = {
     dataLabel?: string;
     dataLabelColor?: string;
     duration: string;
@@ -26,11 +26,13 @@ export type ChartExtensionData = ChartData[] | [];
     time: Date | string;
 }
 
+export type ChartDataMessage = number
+
 
 export class ChartExtension {
     container: Element;
     canvas: HTMLCanvasElement | null;
-    chart: Chart<"line", ChartExtensionData> | null;
+    chart: Chart<"line" | "bar", ChartExtensionData> | null;
     chartTitle: string;
     chartData: ChartExtensionData;
     defaultColor: string = '#fff'; // Label color
@@ -59,7 +61,20 @@ export class ChartExtension {
 
             this.setDefaultColor(this.defaultColor);
 
+            /**
+             * Return value if data is going down
+             * @param { ScriptableLineSegmentContext } ctx 
+             * @param { string } value 
+             * @returns { string | undefined }
+             */
             const down = (ctx: ScriptableLineSegmentContext, value: string) => ctx.p0.parsed.y > ctx.p1.parsed.y ? value : undefined;
+
+            /**
+             * Return value if data is going up
+             * @param { ScriptableLineSegmentContext } ctx 
+             * @param { string } value 
+             * @returns { string | undefined }
+             */
             const up = (ctx: ScriptableLineSegmentContext, value: string) => ctx.p0.parsed.y < ctx.p1.parsed.y ? value : undefined;
 
             this.chart = new Chart(container, {
@@ -94,6 +109,9 @@ export class ChartExtension {
 
                         return pointsArray;
                     }
+                  },{
+                    type: 'bar',
+                    data: [50, 40 ,30]
                   }]
                 },
                 options: {     
@@ -151,7 +169,7 @@ export class ChartExtension {
         }
     };
 
-    addData({ duration, nbViewer, game, time, dataLabel, dataLabelColor}: ChartData): void {
+    addData({ duration, nbViewer, game, time, dataLabel, dataLabelColor}: ChartDataViewer): void {
         if (this.chart?.data?.labels && duration && nbViewer && !isNaN(nbViewer)) {
 
             this.chart.data.labels.push(duration);
@@ -176,6 +194,7 @@ export class ChartExtension {
                     }
                     
                     dataset.data[peak.endIndex] = {
+                        //@ts-ignore
                         ...dataset.data[peak.endIndex],
                         dataLabel: diff
                     }
@@ -185,6 +204,9 @@ export class ChartExtension {
         }
     };
 
+    /**
+     * Remove chart from DOM
+     */
     destroy(): void {
         if (this.chart){
             this.chart.destroy();

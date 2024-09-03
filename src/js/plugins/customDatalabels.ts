@@ -1,5 +1,5 @@
 import { Context } from "chartjs-plugin-datalabels";
-import { ChartData } from "../chartExtension";
+import { ChartDataViewer } from "../chartExtension";
 import { Options } from "chartjs-plugin-datalabels/types/options";
 
 const customDatalabels: Options = {
@@ -25,7 +25,7 @@ const customDatalabels: Options = {
         weight: 'bold',
     },
     offset: 8,
-    formatter: function(value: ChartData, _context: Context) {
+    formatter: function(value: ChartDataViewer, _context: Context) {
         const glyph = value.dataLabel?.includes('-') ? '▼' : '▲';
 
         return glyph + ' ' + value.dataLabel + ' 👤';

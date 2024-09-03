@@ -1,6 +1,6 @@
 :root {
   /*--primaryExtension: #227093;*/
-  --primaryExtension: #9147ff;
+  --primaryExtension: rgba(83, 83, 95, 0.38); /*#9147ff;*/
   --secondaryExtension: #ff5252;
   --backgroundExtension: #eee;
   --highlightExtension: #ffda79;
