@@ -1,9 +1,10 @@
-import { isURLTwitch, getNbViewer, waitForElm, getDuration, formatChartTitle, getGameName, backGroundThemeObserver, ThemeBackgroundColor } from './utils/utils';
+import { isURLTwitch, getNbViewer, waitForElm, getDuration, formatChartTitle, getGameName, backGroundThemeObserver, ThemeBackgroundColor, getMessageAmount } from './utils/utils';
 import { getStorage, setStorage } from './utils/utilsStorage'
 import { ChartDataViewer, ChartExtension } from './js/chartExtension';
 
 // Template
 import Accordion from './templates/accordion';
+import { MessageCounter } from './js/messageCounter';
 
 let interval: NodeJS.Timeout;
 let chartExtension: ChartExtension | undefined;
@@ -11,6 +12,7 @@ let data: ChartDataViewer[] = [];
 let accordionComponent: Accordion | undefined;
 let accordionElement: HTMLElement | undefined;
 let isExtensionInitialized: boolean = false;
+let messageCounter: MessageCounter;
 
 /**
  * Get needed data then add it to the Chart
@@ -21,6 +23,13 @@ const startLoopGetData = () => {
             const duration = getDuration(document);
             const nbViewer = getNbViewer(document);
             const game = getGameName(document);
+            let messageAmount = 0;
+            if (typeof messageCounter !== 'undefined') {
+                messageAmount = messageCounter.getAmountOfNewMessages(getMessageAmount(document));
+            }
+
+            // TODO: Add messageAmount to chartExtension
+            console.log("messageAmount: ", messageAmount)
 
             if (chartExtension && duration && nbViewer) {
 
@@ -73,6 +82,11 @@ const initChartInDOM = () => {
     console.log('initChartInDOM');
     isExtensionInitialized = true;
     waitForElm('#live-channel-stream-information').then(async (element: Element | null) => {
+
+        if (typeof messageCounter === 'undefined') {
+            messageCounter = new MessageCounter(getMessageAmount(document));
+        }
+
         startLoopGetData();
         initStorage();
         if (element && typeof accordionComponent == 'undefined' && typeof accordionElement == 'undefined' && document.getElementById("accordionExtension") === null) {

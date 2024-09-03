@@ -1,4 +1,5 @@
 import { ChartExtensionData } from "../js/chartExtension";
+import { MessageTwitch } from "../js/messageCounter";
 
 export type Peak = {
     endIndex: number,
@@ -184,6 +185,19 @@ const computedDataLabel = (data: ChartExtensionData, nbViewer: number): Peak[] |
 /**
  * 
  * @param { Document } document 
+ * @returns Return array of messages in twitch chat
+ */
+const getMessageAmount = (document: Document): MessageTwitch => {
+
+    const selector = document.querySelectorAll<HTMLElement>('[data-a-target="chat-line-message"]');
+    const getHTMLElementByClass = document.getElementsByClassName("chat-line__message");
+
+    return selector ?? getHTMLElementByClass;
+};
+
+/**
+ * 
+ * @param { Document } document 
  * @returns Return streamer's name, above title
  */
 const getStreamerName = (document: Document): string => {
@@ -288,4 +302,4 @@ const formatChartTitle = (string: string): string => {
     return string.replace('/', '') + "'s viewers";
 };
 
-export { isURLTwitch, getNbViewer, waitForElm, getDuration, removeSpaceInString, formatChartTitle, getGameName, computedDataLabel, backGroundThemeObserver, detectPeaks, findPeaks, getPercentageOf, getStreamerName };
+export { isURLTwitch, getNbViewer, waitForElm, getDuration, removeSpaceInString, formatChartTitle, getGameName, computedDataLabel, backGroundThemeObserver, detectPeaks, findPeaks, getPercentageOf, getStreamerName, getMessageAmount };
