@@ -145,10 +145,16 @@ export class ChartExtension {
                             offset: true,
                             //stackWeight: 1,
                             beginAtZero: true,
+                            ticks: {
+                                callback: this.#tickFormatCallback
+                            }
                         },
                         y: { // nbViewer
                             position: 'left',
                             stack: 'chartExtension',
+                            ticks: {
+                                callback: this.#tickFormatCallback
+                            }
                             //stackWeight: 2,
                         },
                         
@@ -164,6 +170,17 @@ export class ChartExtension {
             });
         }
     };
+
+    /**
+     * Get ride of decimal for ticks (Y labels)
+     * @param { string | number } value 
+     * @returns 
+     */
+    #tickFormatCallback(value: string | number) {
+        const tickValue = (typeof value === 'number') ? value : parseInt(value);
+
+        return ~~tickValue;
+    }
 
     public addData(chartDataViewer: ChartDataViewer, messagesCount: number): void {
 
