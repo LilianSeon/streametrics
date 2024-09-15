@@ -67,7 +67,7 @@ export default class Accordion implements IAccordion<Element> {
 
     expandChartContainer(): void {
         if (this.tabContent && this.arrowAccordion) {
-            this.tabContent.style.maxHeight = '250px';
+            this.tabContent.style.maxHeight = '300px';
             this.arrowAccordion.style.setProperty('--arrowTransform', 'rotate(270deg)');
             this.isExpanded = true;
         }

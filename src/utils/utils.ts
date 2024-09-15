@@ -1,4 +1,4 @@
-import { ChartExtensionData } from "../js/chartExtension";
+import { ChartDataViewer, ChartExtensionData } from "../js/chartExtension";
 import { ChatContainer } from "../js/messageCounter";
 
 export type Peak = {
@@ -14,6 +14,44 @@ export type DataLabelComputed = {
 };
 
 export type ThemeBackgroundColor = 'dark' | 'light';
+
+
+/**
+ * Delete continuous value in array
+ * @param { ChartDataViewer } arr 
+ * @returns { ChartDataViewer }
+ */
+const deleteSequenceSameNumber = (arr: ChartDataViewer[]): ChartDataViewer[] =>  {
+    const n: number = arr.length;
+
+    if (arr.length < 3) {
+      return arr; // If the array has less than 3 elements, there is no real sequence to reduce
+    }
+  
+    const resultat: ChartDataViewer[] = [];
+    let i: number = 0;
+  
+    while (i < n) {
+      let debut = i;
+  
+      // Find the end of the sequence of same numbers
+      while (i < n - 1 && arr[i].nbViewer === arr[i + 1].nbViewer) {
+        i++;
+      }
+  
+      if (debut === i) {
+        // If no duplicates, simply add the unique element
+        resultat.push(arr[i]);
+      } else {
+        // If sequence detected, add the first and last element of the sequence
+        resultat.push(arr[debut], arr[i]);
+      }
+  
+      i++;
+    }
+  
+    return resultat;
+}
 
 
 /**
@@ -302,4 +340,4 @@ const formatChartTitle = (string: string): string => {
     return string.replace('/', '') + "'s viewers";
 };
 
-export { isURLTwitch, getNbViewer, waitForElm, getDuration, removeSpaceInString, formatChartTitle, getGameName, computedDataLabel, backGroundThemeObserver, detectPeaks, findPeaks, getPercentageOf, getStreamerName, getChatContainer };
+export { isURLTwitch, getNbViewer, waitForElm, getDuration, removeSpaceInString, formatChartTitle, getGameName, computedDataLabel, backGroundThemeObserver, detectPeaks, findPeaks, getPercentageOf, getStreamerName, getChatContainer, deleteSequenceSameNumber };

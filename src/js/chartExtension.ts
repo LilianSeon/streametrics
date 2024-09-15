@@ -17,13 +17,13 @@ import { Peak } from '../utils/utils';
 export type ChartExtensionData = ChartDataViewer[] | [] | ChartDataMessage[];
 
  export type ChartDataViewer = {
-    dataLabel?: string;
-    dataLabelColor?: string;
     duration: string;
     game: string;
     id: number;
     nbViewer: number;
     time: Date | string;
+    dataLabel?: string;
+    dataLabelColor?: string;
 }
 
 export type ChartDataMessage = number
@@ -34,7 +34,7 @@ export class ChartExtension {
     canvas: HTMLCanvasElement | null;
     chart: Chart<"line" | "bar", ChartExtensionData> | null;
     chartTitle: string;
-    chartData: ChartExtensionData;
+    chartDataViewer = [];
     defaultColor: string = '#fff'; // Label color
 
     constructor(container: HTMLElement, title?: string, defaultColor?:  string){
@@ -42,10 +42,12 @@ export class ChartExtension {
         this.canvas = null;
         this.chart = null;
         this.chartTitle = title ?? 'Viewers';
-        this.chartData = [];
+        this.chartDataViewer = [];
         this.defaultColor = defaultColor ?? this.defaultColor;
 
-        const html: string = `<div id="extensionChartContainer" height="200" style="margin-left: 20px;margin-right: 20px;margin-bottom: 10px;"><canvas id="extensionChart" height="200" style="width: 100%"></canvas></div>`;
+        const height: number = 250;
+
+        const html: string = `<div id="extensionChartContainer" height="${ height }" style="margin-left: 20px;margin-right: 20px;margin-bottom: 10px;"><canvas id="extensionChart" height="${ height }" style="width: 100%"></canvas></div>`;
 
         if (this.container) {
             this.container.insertAdjacentHTML('afterend', html);
@@ -79,13 +81,12 @@ export class ChartExtension {
 
             this.chart = new Chart(container, {
                 type: 'line',
-                
                 data: {
                   labels: [],
                   datasets: [{
                     stack: 'viewersCount',
-                    label: this.chartTitle,
-                    data: this.chartData,
+                    yAxisID: 'y',
+                    data: this.chartDataViewer,
                     segment: {
                         borderColor: ctx => down(ctx, 'rgb(192,75,75)') || up(ctx, 'rgb(24,204,84)') 
                     },
@@ -93,27 +94,16 @@ export class ChartExtension {
                         xAxisKey: 'duration',
                         yAxisKey: 'nbViewer'
                     },
-                    borderWidth: 1,
+                    borderWidth: 2,
                     tension: 0.3,
-                    //@ts-ignore
-                    pointRadius: (ctx) => {
-                        const pointsLength: number = ctx.chart.data.labels?.length! -1;
-                        const pointsArray: number[] = [];
-
-                        for(let i = 0; i <= pointsLength; i++) {
-                            if (i === pointsLength) {
-                                pointsArray.push(5);
-                            } else {
-                                pointsArray.push(0);
-                            }
-                        }
-
-                        return pointsArray;
-                    }
+                    pointRadius: 0,
+                    order: 0
                   },{
                     stack: 'messagesCount',
                     type: 'bar',
                     data: [],
+                    yAxisID: 'y2',
+                    order: 1
                   }]
                 },
                 options: {     
@@ -121,10 +111,6 @@ export class ChartExtension {
                         mode: 'nearest',
                         intersect: false
                     }, 
-                    /*interaction: {
-                        mode: 'index',
-                        intersect: false
-                    },*/
                     plugins: {
                         colors: {
                             forceOverride: true
@@ -145,19 +131,27 @@ export class ChartExtension {
                             },
                         },
                         legend: {
-                            labels: {
-                                boxWidth: 0, // Hide color box label
-                                font: {
-                                    size: 15,
-                                    weight: 700
-                                }
-                            }
+                            display: false
+                        },
+                        title: {
+                            display: true,
+                            text: this.chartTitle
                         }
                     },
                     scales: {
-                        y: {
-                            beginAtZero: true
+                        y2: { // nbMessage
+                            position: 'left',
+                            stack: 'chartExtension',
+                            offset: true,
+                            //stackWeight: 1,
+                            beginAtZero: true,
                         },
+                        y: { // nbViewer
+                            position: 'left',
+                            stack: 'chartExtension',
+                            //stackWeight: 2,
+                        },
+                        
                         x: {
                             ticks: {
                                 maxTicksLimit: 10
@@ -171,11 +165,14 @@ export class ChartExtension {
         }
     };
 
-    public addData({ duration, nbViewer, game, time, dataLabel, dataLabelColor, id}: ChartDataViewer, messagesCount: number): void {
-        this.addDataViewers({ duration, nbViewer, game, time, dataLabel, dataLabelColor, id }, false);
+    public addData(chartDataViewer: ChartDataViewer, messagesCount: number): void {
+
+        //@ts-ignore
+        this.chartDataViewer.push(chartDataViewer);
+
+        this.addDataViewers(chartDataViewer, false);
         this.addDataMessagesCount(messagesCount, true);
 
-        this.chart?.update();
     };
 
     private addDataMessagesCount(count: number, update: boolean): void {

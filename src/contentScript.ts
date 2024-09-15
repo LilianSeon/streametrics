@@ -12,7 +12,7 @@ let data: ChartDataViewer[] = [];
 let accordionComponent: Accordion | undefined;
 let accordionElement: HTMLElement | undefined;
 let isExtensionInitialized: boolean = false;
-let messageCounter: MessageCounter;
+let messageCounter: MessageCounter | undefined;
 
 /**
  * Get needed data then add it to the Chart
@@ -20,15 +20,16 @@ let messageCounter: MessageCounter;
 const startLoopGetData = () => {
     if (typeof interval === 'undefined') {
         interval = setInterval(() => {
-            const duration = getDuration(document);
-            const nbViewer = getNbViewer(document);
-            const game = getGameName(document);
-            let messageAmount = 0;
-            if (typeof messageCounter !== 'undefined') {
-                messageAmount = messageCounter.getAmountOfNewMessages(messageCounter.previousMessagesCount);
-            }
+            const duration: string | undefined = getDuration(document);
+            const nbViewer: number = getNbViewer(document);
+            const game: string = getGameName(document);
+            let messageAmount: number = 0;
 
             if (chartExtension && duration && nbViewer) {
+
+                if (typeof messageCounter !== 'undefined') {
+                    messageAmount = messageCounter.getAmountOfNewMessages(messageCounter.previousMessagesCount);
+                }
 
                 //const peaks: Peak[] = computedDataLabel(data, nbViewer) || []; // return dataLabel if needed;
 
@@ -114,6 +115,7 @@ chrome.runtime.onMessage.addListener((request, _sender) => { // When user goes f
             chartExtension.destroy();
             accordionComponent.destroy();
             messageCounter.destroy();
+            messageCounter = undefined;
             chartExtension = undefined;
             accordionComponent = undefined;
             accordionElement = undefined;
