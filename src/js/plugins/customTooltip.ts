@@ -32,7 +32,7 @@ const customTooltipLabel = (context: any): string | string[] => {
         const previousValue: number | undefined = (dataIndex > 0) ? data.at(dataIndex - 1)!.nbViewer : undefined;
 
         const formatNbViewer = new Intl.NumberFormat(undefined, { minimumFractionDigits: 0 });
-        const label: string = (nbViewer >= 1) ? ' Viewers : ' : ' Viewer : ';
+        const label: string = (nbViewer > 1) ? ' Viewers : ' : ' Viewer : ';
         const formatedString: string = label + formatNbViewer.format(nbViewer);
 
         if (typeof previousValue == 'undefined') return formatedString;
@@ -46,7 +46,7 @@ const customTooltipLabel = (context: any): string | string[] => {
     } else if (context.dataset.stack === 'messagesCount') {
         const formattedValue = context.formattedValue;
 
-        return (formattedValue >= 1) ? 'New messages : ' + formattedValue : 'New message : ' + formattedValue;
+        return (formattedValue > 1) ? 'New messages : ' + formattedValue : 'New message : ' + formattedValue;
     } else {
         return '';
     }

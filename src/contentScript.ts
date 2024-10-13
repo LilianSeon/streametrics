@@ -1,6 +1,6 @@
 import { isURLTwitch, getNbViewer, waitForElm, getDuration, formatChartTitle, getGameName, backGroundThemeObserver, ThemeBackgroundColor, getChatContainer } from './utils/utils';
 import { getStorage, setStorage } from './utils/utilsStorage'
-import { ChartDataViewer, ChartExtension } from './js/chartExtension';
+import ChartExtension, { ChartDataViewer } from './js/chartExtension';
 
 // Template
 import Accordion from './templates/accordion';
@@ -41,7 +41,7 @@ const startLoopGetData = () => {
                     time: new Date(),
                 } as ChartDataViewer;
 
-                chartExtension.addData({ ...newData }, messageAmount);
+                chartExtension.addData(newData, messageAmount);
                 //chartExtension.addPeaks(peaks);
                 data.push(newData);
 

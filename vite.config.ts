@@ -13,6 +13,7 @@ export default defineConfig({
   },
   build: {
     target: "ES2020",
+    outDir: 'dist',
     minify: false,
     rollupOptions: {
       input:{
@@ -23,8 +24,11 @@ export default defineConfig({
         'css/accordion.css': './src/assets/css/accordion.css'
       },
       output:{
-        entryFileNames: "[name].js"
+        entryFileNames: "[name].js",
       }
     }
+  },
+  resolve: {
+    extensions: [".js", ".json", ".ts", ".tsx", ".css"]
   }
 })

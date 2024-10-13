@@ -29,13 +29,15 @@ export type ChartExtensionData = ChartDataViewer[] | [] | ChartDataMessage[];
 export type ChartDataMessage = number
 
 
-export class ChartExtension {
+export default class ChartExtension {
     container: Element;
     canvas: HTMLCanvasElement | null;
     chart: Chart<"line" | "bar", ChartExtensionData> | null;
     chartTitle: string;
-    chartDataViewer = [];
+    chartDataViewer: ChartDataViewer[] = [];
     defaultColor: string = '#fff'; // Label color
+    chartDataMessageCount: ChartDataMessage[];
+    _isDocumentHidden: boolean;
 
     constructor(container: HTMLElement, title?: string, defaultColor?:  string){
         this.container = container;
@@ -44,6 +46,8 @@ export class ChartExtension {
         this.chartTitle = title ?? 'Viewers';
         this.chartDataViewer = [];
         this.defaultColor = defaultColor ?? this.defaultColor;
+        this.chartDataMessageCount = [];
+        this._isDocumentHidden = false;
 
         const height: number = 250;
 
@@ -56,6 +60,8 @@ export class ChartExtension {
         } else {
             console.error("Can't find container");
         }
+
+        document.addEventListener( 'visibilitychange' , this.#onVisibilityChanged.bind(this));
     };
 
     _initChart(container: HTMLCanvasElement | null) {
@@ -86,7 +92,7 @@ export class ChartExtension {
                   datasets: [{
                     stack: 'viewersCount',
                     yAxisID: 'y',
-                    data: this.chartDataViewer,
+                    data: [],
                     segment: {
                         borderColor: ctx => down(ctx, 'rgb(192,75,75)') || up(ctx, 'rgb(24,204,84)') 
                     },
@@ -172,39 +178,86 @@ export class ChartExtension {
     };
 
     /**
-     * Get ride of decimal for ticks (Y labels)
+     * Get ride of decimal for ticks (Y labels).
      * @param { string | number } value 
-     * @returns 
+     * @returns { number }
      */
-    #tickFormatCallback(value: string | number) {
+    #tickFormatCallback(value: string | number): number {
         const tickValue = (typeof value === 'number') ? value : parseInt(value);
 
         return ~~tickValue;
-    }
-
-    public addData(chartDataViewer: ChartDataViewer, messagesCount: number): void {
-
-        //@ts-ignore
-        this.chartDataViewer.push(chartDataViewer);
-
-        this.addDataViewers(chartDataViewer, false);
-        this.addDataMessagesCount(messagesCount, true);
-
     };
 
+    get isDocumentHidden() {
+        return this._isDocumentHidden;
+    };
+
+    set isDocumentHidden(newValue: boolean) {
+        this._isDocumentHidden = newValue;
+    }
+
+    #onVisibilityChanged() {
+        this._isDocumentHidden = document.hidden;
+    };
+
+    public addData(chartDataViewer: ChartDataViewer, messagesCount: ChartDataMessage): void {
+        
+        if (this._isDocumentHidden) { // If _isDocumentHidden is true, the user is not focusing the document anymore, therefore we keep data in memory in order to update chart later.
+            this.chartDataViewer.push(chartDataViewer);
+            this.chartDataMessageCount.push(messagesCount);
+        } else {
+            if (this.chartDataMessageCount.length > 0 && this.chartDataViewer.length > 0) {
+
+                this.#addManyDatas(this.chartDataMessageCount, this.chartDataViewer);
+
+            } else {
+                this.addDataViewers(chartDataViewer, false);
+                this.addDataMessagesCount(messagesCount, true);
+            }
+        }
+
+        //localStorage.setItem(this.chartTitle, `{ dataViewer: ${this.chartDataViewer.map((data: any) => JSON.stringify(data))}, messagesCount: ${this.chartDataMessageCount}}`);
+    };
+
+    /**
+     * Add chartDataMessageCount and chartDataViewer to the chart when user is focusing the document
+     * @param { ChartDataMessage[] } chartDataMessageCount 
+     * @param { ChartDataViewer[] } chartDataViewer 
+     */
+    #addManyDatas(chartDataMessageCount: ChartDataMessage[], chartDataViewer: ChartDataViewer[]): void {
+        chartDataMessageCount.forEach((messagesCount: ChartDataMessage) => {
+            this.addDataMessagesCount(messagesCount, false);
+        });
+
+        chartDataViewer.forEach((dataViewer) => {
+            this.addDataViewers(dataViewer, false);
+        });
+
+        this.chartDataMessageCount = [];
+        this.chartDataViewer = [];
+
+        this.chart?.update();
+    }
+
     private addDataMessagesCount(count: number, update: boolean): void {
-        //@ts-ignore
-        this.chart?.data.datasets[1].data.push(count);
+
+        if (count < 0) { // Message count can't be under 0
+            //@ts-ignore
+            this.chart?.data.datasets[1].data.push(0);
+        } else {
+            //@ts-ignore
+            this.chart?.data.datasets[1].data.push(count);
+        } 
 
         if (update)  this.chart?.update();
     };
 
-    private addDataViewers({ duration, nbViewer, game, time, dataLabel, dataLabelColor, id }: ChartDataViewer, update: boolean): void {
+    private addDataViewers({ duration, nbViewer, game, time, id }: ChartDataViewer, update: boolean): void {
         if (this.chart?.data?.labels && duration && nbViewer && !isNaN(nbViewer)) {
 
             this.chart.data.labels.push(duration);
             //@ts-ignore
-            this.chart.data.datasets[0].data.push({ duration, nbViewer, game, time, dataLabel, dataLabelColor, id });
+            this.chart.data.datasets[0].data.push({ duration, nbViewer, game, time, id });
 
             if (update)  this.chart.update();
         }
@@ -240,6 +293,7 @@ export class ChartExtension {
         if (this.chart){
             this.chart.destroy();
             document.getElementById('extensionChartContainer')?.remove();
+            document.removeEventListener('visibilitychange', this.#onVisibilityChanged);
         } 
     };
 
