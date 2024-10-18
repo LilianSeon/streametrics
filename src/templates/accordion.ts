@@ -51,7 +51,7 @@ export default class Accordion implements IAccordion<Element> {
         this.accordion = document.getElementById('accordionExtension') as Element;
         this.chartContainer = document.getElementById('chartContainer');
         this.tabContent = document.getElementById('tab__content');
-        this.isExpanded = isExpanded;
+        this.isExpanded = isExpanded || true;
         this.onClickArrowAccordionHandler = onClickArrowAccordionHandler;
 
         isExpanded ? this.expandChartContainer() : this.collapseChartContainer();

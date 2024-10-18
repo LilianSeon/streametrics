@@ -16,7 +16,11 @@ const getStorage = async (keys: string | string[]): Promise<{[key: string]: any}
  * @param { { [key: string]: any } } items
  */
 const setStorage = async (items: { [key: string]: any}): Promise<void> => {
-    await chrome.storage.sync.set(items);
+    try {
+        await chrome.storage.sync.set(items);
+    } catch (error) {
+        console.error(error);
+    }
 };
 
 export { getStorage, setStorage }

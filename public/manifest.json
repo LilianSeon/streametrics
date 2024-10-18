@@ -18,7 +18,11 @@
             "matches": ["https://www.twitch.tv/*", "https://www.twitch.tv/*"],
             "js": ["js/content_scripts.js"],
             "run_at": "document_start",
-            "css": [ "./assets/css/accordion-DMzLswJQ.css" ]
+            "css": [ "./css/accordion.css", "./css/index.css" ]
         }
-    ]
+    ],
+    "web_accessible_resources": [{
+        "resources": ["fonts/pacifico.woff2"],
+        "matches": ["https://www.twitch.tv/*", "https://www.twitch.tv/*"]
+    }]
 }

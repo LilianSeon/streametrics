@@ -24,6 +24,8 @@
   max-height: 255px;
 }
 
+
+
 /* Visual styles */
 .accordionExtension {
   box-sizing: border-box;
@@ -54,7 +56,8 @@
   height: 39.5px;
   text-align: center;
   color: #fff;
-  font-size: 14px;
+  font-family: 'Pacifico';
+  font-size: 16px;
 }
 
 .arrowExtension {
@@ -102,7 +105,7 @@
 
 /* Arrow animation */
 .arrowExtension:hover::after { /* not */
-  animation: bounce .5s infinite;
+  animation: bounce .7s infinite;
 }
 @keyframes bounce {
   25% {

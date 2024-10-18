@@ -6,13 +6,19 @@ import ChartExtension, { ChartDataViewer } from './js/chartExtension';
 import Accordion from './templates/accordion';
 import { MessageCounter } from './js/messageCounter';
 
+// CSS
+import './assets/css/index.css'; // Font
+
+const DELAY_MS: number = 2000;
+
 let interval: NodeJS.Timeout;
 let chartExtension: ChartExtension | undefined;
-let data: ChartDataViewer[] = [];
+//let data: ChartDataViewer[] = [];
 let accordionComponent: Accordion | undefined;
 let accordionElement: HTMLElement | undefined;
 let isExtensionInitialized: boolean = false;
 let messageCounter: MessageCounter | undefined;
+let loopCounter: number = 0;
 
 /**
  * Get needed data then add it to the Chart
@@ -34,7 +40,7 @@ const startLoopGetData = () => {
                 //const peaks: Peak[] = computedDataLabel(data, nbViewer) || []; // return dataLabel if needed;
 
                 const newData = {
-                    id: data.length,
+                    id: loopCounter,
                     duration,
                     nbViewer,
                     game,
@@ -43,18 +49,20 @@ const startLoopGetData = () => {
 
                 chartExtension.addData(newData, messageAmount);
                 //chartExtension.addPeaks(peaks);
-                data.push(newData);
+                loopCounter++;
 
             }
-        }, 2000);
+        }, DELAY_MS);
     }
 };
 
-const onClickArrowAccordionHandler = async () =>{
+const onClickArrowAccordionHandler = async (): Promise<void> => {
     const { isAccordionExpanded } = await getStorage(['isAccordionExpanded']);
 
+    if (typeof isAccordionExpanded === 'undefined') await setStorage({ 'isAccordionExpanded': true });
+
     if (typeof isAccordionExpanded !== 'undefined' && accordionComponent) {
-        await setStorage( {'isAccordionExpanded': !isAccordionExpanded} );
+        await setStorage({ 'isAccordionExpanded': !isAccordionExpanded });
         isAccordionExpanded ? accordionComponent.collapseChartContainer() : accordionComponent.expandChartContainer();
     }
 };
@@ -76,32 +84,31 @@ const initStorage = async (): Promise<void> => {
 /**
  * Check if `#live-channel-stream-information` is in DOM or wait for it, then start getting datas and init chart
  */
-const initChartInDOM = () => {
+const initChartInDOM = async () => {
     console.log('initChartInDOM');
     isExtensionInitialized = true;
-    waitForElm('#live-channel-stream-information').then(async (element: Element | null) => {
-        const chartContainer = await waitForElm('.chat-line__message');
+    const informationContainer = await waitForElm('#live-channel-stream-information');
+    const chartContainer = await waitForElm('.chat-line__message');
 
-        if (typeof messageCounter === 'undefined' && chartContainer) {
-            messageCounter = new MessageCounter(getChatContainer(document));
-        }
+    if (typeof messageCounter === 'undefined' && chartContainer) {
+        messageCounter = new MessageCounter(getChatContainer(document));
+    }
 
-        startLoopGetData();
-        initStorage();
-        if (element && typeof accordionComponent == 'undefined' && typeof accordionElement == 'undefined' && document.getElementById("accordionExtension") === null) {
-            const { isAccordionExpanded } = await getStorage(['isAccordionExpanded']);
-    
-            accordionComponent = new Accordion(element, onClickArrowAccordionHandler, isAccordionExpanded);
-            accordionElement = accordionComponent.getChartContainer() as HTMLElement;
-        }
-        if (accordionElement && typeof chartExtension == 'undefined') {
-            const chartTitle: string = formatChartTitle(window.location.pathname);
-            const textColor: string = document.documentElement.className.includes('dark') ? '#ffffff' : '#000000';
-            chartExtension = new ChartExtension(accordionElement, chartTitle, textColor);
-            backGroundThemeObserver(document, updateDefaultColor);
-        }
-        
-    });
+    startLoopGetData();
+    initStorage();
+
+    if (informationContainer && typeof accordionComponent == 'undefined' && typeof accordionElement == 'undefined' && document.getElementById("accordionExtension") === null) {
+        const { isAccordionExpanded } = await getStorage(['isAccordionExpanded']);
+
+        accordionComponent = new Accordion(informationContainer, onClickArrowAccordionHandler, isAccordionExpanded);
+        accordionElement = accordionComponent.getChartContainer() as HTMLElement;
+    }
+    if (accordionElement && typeof chartExtension == 'undefined') {
+        const chartTitle: string = formatChartTitle(window.location.pathname);
+        const textColor: string = document.documentElement.className.includes('dark') ? '#ffffff' : '#000000';
+        chartExtension = new ChartExtension(accordionElement, chartTitle, textColor);
+        backGroundThemeObserver(document, updateDefaultColor);
+    }
 };
 
 chrome.runtime.onMessage.addListener((request, _sender) => { // When user goes from a Twitch URL to another Twitch URL

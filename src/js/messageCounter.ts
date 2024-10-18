@@ -30,7 +30,7 @@ export class MessageCounter {
 
     /**
      * Watch chat HTML container when child get updated
-     * set messagesCount to number of added noodes.
+     * set messagesCount to number of added nodes.
      */
      #observeAmountOfNewMessages(): void {
         this.observer = new MutationObserver((mutations: MutationRecord[]) => {
