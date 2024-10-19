@@ -28,6 +28,11 @@ export type ChartExtensionData = ChartDataViewer[] | [] | ChartDataMessage[];
 
 export type ChartDataMessage = number
 
+export type ExportedDatas = {
+    data: [{ viewersCount: ChartDataViewer[] }, { messagesCount: ChartDataMessage[] }];
+    labels: string[];
+}
+
 
 export default class ChartExtension {
     container: Element;
@@ -101,7 +106,7 @@ export default class ChartExtension {
                         yAxisKey: 'nbViewer'
                     },
                     borderWidth: 2,
-                    tension: 0.3,
+                    tension: 0.4,
                     pointRadius: 0,
                     order: 0
                   },{
@@ -148,7 +153,7 @@ export default class ChartExtension {
                         y2: { // nbMessage
                             position: 'left',
                             stack: 'chartExtension',
-                            offset: true,
+                            offset: false,
                             //stackWeight: 1,
                             beginAtZero: true,
                             ticks: {
@@ -198,6 +203,21 @@ export default class ChartExtension {
 
     #onVisibilityChanged() {
         this._isDocumentHidden = document.hidden;
+    };
+
+    /**
+     * Get datas from the chart
+     * @returns { ExportedDatas }
+     */
+    public getDatas(): ExportedDatas {
+        const data = this.chart?.data.datasets.map((dataset) => {
+            return {
+                [dataset.stack as string]: dataset.data
+            }
+        });
+        const labels = this.chart?.data.labels;
+
+        return { data, labels } as ExportedDatas;
     };
 
     public addData(chartDataViewer: ChartDataViewer, messagesCount: ChartDataMessage): void {

@@ -1,9 +1,9 @@
-import { isURLTwitch, getNbViewer, waitForElm, getDuration, formatChartTitle, getGameName, backGroundThemeObserver, ThemeBackgroundColor, getChatContainer } from './utils/utils';
+import { isURLTwitch, getNbViewer, waitForElm, getDuration, formatChartTitle, getGameName, backGroundThemeObserver, ThemeBackgroundColor, getChatContainer, downloadJSON, getStreamerName } from './utils/utils';
 import { getStorage, setStorage } from './utils/utilsStorage'
 import ChartExtension, { ChartDataViewer } from './js/chartExtension';
 
 // Template
-import Accordion from './templates/accordion';
+import Accordion, { OnClickExportButtonHandler } from './templates/accordion';
 import { MessageCounter } from './js/messageCounter';
 
 // CSS
@@ -67,6 +67,10 @@ const onClickArrowAccordionHandler = async (): Promise<void> => {
     }
 };
 
+const onClickExportButtonHandler: OnClickExportButtonHandler = (): void => {
+    if (chartExtension) downloadJSON(getStreamerName(document)+'_datas.json', chartExtension.getDatas());
+};
+
 const initStorage = async (): Promise<void> => {
     try {
         const result = await getStorage(['isAccordionExpanded']);
@@ -100,7 +104,7 @@ const initChartInDOM = async () => {
     if (informationContainer && typeof accordionComponent == 'undefined' && typeof accordionElement == 'undefined' && document.getElementById("accordionExtension") === null) {
         const { isAccordionExpanded } = await getStorage(['isAccordionExpanded']);
 
-        accordionComponent = new Accordion(informationContainer, onClickArrowAccordionHandler, isAccordionExpanded);
+        accordionComponent = new Accordion(informationContainer, onClickArrowAccordionHandler, onClickExportButtonHandler, isAccordionExpanded);
         accordionElement = accordionComponent.getChartContainer() as HTMLElement;
     }
     if (accordionElement && typeof chartExtension == 'undefined') {
@@ -147,5 +151,4 @@ window.addEventListener('DOMContentLoaded', () => {
     if (document.getElementById('accordionExtension') === null && document.getElementById('extensionChartContainer') === null && !isExtensionInitialized) {
         initChartInDOM();
     }
-    
 });

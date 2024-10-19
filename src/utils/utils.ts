@@ -334,10 +334,34 @@ const backGroundThemeObserver = (element: Document, callback: (newTheme: ThemeBa
 /**
  * Apply chart title format to a string
  * @param { string } string 
- * @returns { string }
+ * @returns { string } *StreamerName*'s viewers
  */
 const formatChartTitle = (string: string): string => {
     return string.replace('/', '') + "'s viewers";
 };
 
-export { isURLTwitch, getNbViewer, waitForElm, getDuration, removeSpaceInString, formatChartTitle, getGameName, computedDataLabel, backGroundThemeObserver, detectPeaks, findPeaks, getPercentageOf, getStreamerName, getChatContainer, deleteSequenceSameNumber };
+/**
+ * Export datas from the chart by downloading a json file
+ * @param { string } fileName 
+ * @param { object } jsonData 
+ */
+const downloadJSON = (fileName: string, jsonData: object): void => {
+    // Convert the JSON data to a string
+    const jsonString = JSON.stringify(jsonData, null, 2); // pretty display with indentation
+
+    // Create a Blob with the JSON content
+    const blob = new Blob([jsonString], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileName;
+    document.body.appendChild(a);
+
+    a.click();
+
+    // Remove the anchor element and revoke the object URL
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+};
+
+export { isURLTwitch, getNbViewer, waitForElm, getDuration, removeSpaceInString, formatChartTitle, getGameName, computedDataLabel, backGroundThemeObserver, detectPeaks, findPeaks, getPercentageOf, getStreamerName, getChatContainer, deleteSequenceSameNumber, downloadJSON };
