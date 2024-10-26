@@ -38,6 +38,14 @@
   margin-bottom: 10px;
 }
 
+.hide {
+  display: none;
+}
+
+.show {
+  display: auto;
+}
+
 .tab__exportButton {
   width: 20px;
   color:#efeff1;
