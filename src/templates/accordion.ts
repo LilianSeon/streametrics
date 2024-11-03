@@ -27,7 +27,6 @@ export default class Accordion implements IAccordion<Element> {
     tabContent: HTMLElement | null;
     isExpanded: boolean;
     #isPlaying: boolean = true;
-    //isPlayingValue: boolean = true;
     private onClickArrowAccordionHandler: OnClickArrowAccordionHandler;
     private onClickExportButtonHandler: OnClickExportButtonHandler;
     private onClickPlayPauseButtonHandler: OnClickPlayPauseButtonHandler;
@@ -96,6 +95,10 @@ export default class Accordion implements IAccordion<Element> {
         this.onClickPlayPauseButtonHandler(this.isPlaying);
     };
 
+    /**
+     * Change svg icon play / pause and update title
+     * @param { boolean } newValue
+     */
     set isPlaying(newValue: boolean) {
         this.#isPlaying = newValue;
         const pauseIcon = document.getElementById('pauseIcon');

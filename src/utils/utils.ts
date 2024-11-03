@@ -268,7 +268,7 @@ const getNbViewer = (document: Document): number => {
     const getHTMLElementByData = document.querySelectorAll<HTMLElement>('[data-a-target="animated-channel-viewers-count"]')[0]?.innerText;
     const getHTMLElementByClass = document.getElementsByClassName("ScAnimatedNumber-sc-1iib0w9-0 hERoTc")[0]?.innerHTML
 
-    return parseInt(removeSpaceInString(getHTMLElementByData ?? getHTMLElementByClass));
+    return parseInt(removeSpaceInString(getHTMLElementByData ?? getHTMLElementByClass).replace(',', ''));
 };
 
 /**

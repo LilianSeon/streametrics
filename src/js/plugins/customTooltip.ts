@@ -21,8 +21,8 @@ const customTooltipAfterFooter = (context: any): string => {
 
 /**
  * Display tooltip's core text 
- * @param context 
- * @returns { string | string[] } Viewers : 49 562 | [" Viewers : 1 520", "▼ -1"]
+ * @param context
+ * @returns { string } Viewers : 49 562 | Viewers : 49 562 (-86)
  */
 const customTooltipLabel = (context: any): string | string[] => {
     if (context.dataset.stack === 'viewersCount') {
@@ -38,11 +38,12 @@ const customTooltipLabel = (context: any): string | string[] => {
         if (typeof previousValue == 'undefined') return formatedString;
 
         const diff: number = nbViewer - previousValue;
+        const diffString: string = (diff < 0) ? '('+ diff +')' : '(+' + diff+')';
 
         if (diff === 0) return formatedString; // If there is no differences don't display it
         
 
-        return [formatedString, diff < 0 ? '▼ '+ diff : '▲ ' + diff];
+        return formatedString +' '+ diffString;
     } else if (context.dataset.stack === 'messagesCount') {
         const formattedValue = context.formattedValue;
 

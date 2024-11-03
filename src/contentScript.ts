@@ -12,7 +12,6 @@ import './assets/css/index.css'; // Font
 
 const DELAY_MS: number = 2000;
 
-//let interval: NodeJS.Timeout;
 let chartExtension: ChartExtension | undefined;
 //let data: ChartDataViewer[] = [];
 let accordionComponent: Accordion | undefined;
@@ -117,7 +116,7 @@ const initChartInDOM = async () => {
     if (accordionElement && typeof chartExtension == 'undefined') {
         const chartTitle: string = formatChartTitle(window.location.pathname);
         const textColor: string = document.documentElement.className.includes('dark') ? '#ffffff' : '#000000';
-        chartExtension = new ChartExtension(accordionElement, chartTitle, textColor);
+        chartExtension = new ChartExtension(accordionElement, chartTitle, textColor, navigator.language);
         backGroundThemeObserver(document, updateDefaultColor);
     }
 };

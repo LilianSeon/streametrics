@@ -43,8 +43,9 @@ export default class ChartExtension {
     defaultColor: string = '#fff'; // Label color
     chartDataMessageCount: ChartDataMessage[];
     _isDocumentHidden: boolean;
+    language: NavigatorLanguage["language"];
 
-    constructor(container: HTMLElement, title?: string, defaultColor?:  string){
+    constructor(container: HTMLElement, title?: string, defaultColor?:  string, language?: NavigatorLanguage["language"]){
         this.container = container;
         this.canvas = null;
         this.chart = null;
@@ -53,6 +54,7 @@ export default class ChartExtension {
         this.defaultColor = defaultColor ?? this.defaultColor;
         this.chartDataMessageCount = [];
         this._isDocumentHidden = false;
+        this.language = language ?? 'en-US';
 
         const height: number = 250;
 
@@ -153,7 +155,7 @@ export default class ChartExtension {
                         y2: { // nbMessage
                             position: 'left',
                             stack: 'chartExtension',
-                            offset: false,
+                            offset: true,
                             //stackWeight: 1,
                             beginAtZero: true,
                             ticks: {
@@ -187,10 +189,9 @@ export default class ChartExtension {
      * @param { string | number } value 
      * @returns { number }
      */
-    #tickFormatCallback(value: string | number): number {
+    #tickFormatCallback(value: string | number): string {
         const tickValue = (typeof value === 'number') ? value : parseInt(value);
-
-        return ~~tickValue;
+        return new Intl.NumberFormat(this.language).format(~~tickValue);
     };
 
     get isDocumentHidden() {
