@@ -49,12 +49,12 @@ export default class ChartExtension {
         this.container = container;
         this.canvas = null;
         this.chart = null;
-        this.chartTitle = title ?? 'Viewers';
+        this.chartTitle = title || 'Viewers';
         this.chartDataViewer = [];
         this.defaultColor = defaultColor ?? this.defaultColor;
         this.chartDataMessageCount = [];
         this._isDocumentHidden = false;
-        this.language = language ?? 'en-US';
+        this.language = language || 'en-US';
 
         const height: number = 250;
 
@@ -139,7 +139,7 @@ export default class ChartExtension {
                             },
                             callbacks: {
                                 title: customTooltipTitle,
-                                label: customTooltipLabel,
+                                label: (context) => customTooltipLabel(context, this.language),
                                 afterFooter: customTooltipAfterFooter
                             },
                         },
@@ -159,14 +159,14 @@ export default class ChartExtension {
                             //stackWeight: 1,
                             beginAtZero: true,
                             ticks: {
-                                callback: this.#tickFormatCallback
+                                callback: this.#tickFormatCallback.bind(this)
                             }
                         },
                         y: { // nbViewer
                             position: 'left',
                             stack: 'chartExtension',
                             ticks: {
-                                callback: this.#tickFormatCallback
+                                callback: this.#tickFormatCallback.bind(this)
                             }
                             //stackWeight: 2,
                         },
