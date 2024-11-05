@@ -4,13 +4,13 @@ import ChartExtension, { ChartDataViewer } from './js/chartExtension';
 import IntervalManager from './js/intervalManager';
 
 // Template
-import Accordion, { OnClickExportButtonHandler, OnClickPlayPauseButtonHandler, OnChangeImportHandler } from './templates/accordion';
+import Accordion, { OnClickExportButtonHandler, OnClickPlayPauseButtonHandler, OnChangeImportHandler, OnClickClearButtonHandler } from './templates/accordion';
 import { MessageCounter } from './js/messageCounter';
 
 // CSS
 import './assets/css/index.css'; // Font
 
-const DELAY_MS: number = 5000;
+const DELAY_MS: number = 1000;
 
 let chartExtension: ChartExtension | undefined;
 //let data: ChartDataViewer[] = [];
@@ -20,6 +20,7 @@ let isExtensionInitialized: boolean = false;
 let messageCounter: MessageCounter | undefined;
 let loopCounter: number = 0;
 let intervalManager: IntervalManager| undefined;
+let hasImportedData: boolean = false;
 
 /**
  * Get needed data then add it to the Chart
@@ -46,6 +47,9 @@ const startLoopGetData = () => {
             time: new Date(),
         } as ChartDataViewer;
 
+        // Update title if empty
+        if (chartExtension.chartTitle === '') chartExtension.setTitle(formatChartTitle(window.location.pathname), false);
+
         chartExtension.addData(newData, messageAmount);
         //chartExtension.addPeaks(peaks);
         loopCounter++;
@@ -64,11 +68,26 @@ const onClickArrowAccordionHandler = async (): Promise<void> => {
     }
 };
 
+const onClickClearHandler: OnClickClearButtonHandler = () => {
+    chartExtension?.clearData();
+    chartExtension?.clearTitle();
+    hasImportedData = false;
+};
+
 const onChangeImportHandler: OnChangeImportHandler = async (event: Event): Promise<void> => {
-    console.log('onChangeImportHandler', await extractDataFromJSON(event));
-    if (chartExtension && intervalManager) {
-        intervalManager.clear();
-        chartExtension.importData(await extractDataFromJSON(event));
+    if (chartExtension && intervalManager && accordionComponent) {
+        try {
+            const data = await extractDataFromJSON(event)
+            const isDataImported = await chartExtension.importData(data);
+
+            if (isDataImported) {
+                intervalManager.clear();
+                accordionComponent.isPlaying = false;
+                hasImportedData = true;
+            }
+        } catch (_error) {
+            // TODO: handle error, if import data fail.
+        }
     }
 };
 
@@ -77,7 +96,17 @@ const onClickExportButtonHandler: OnClickExportButtonHandler = (): void => {
 };
 
 const onClickPlayPauseButtonHandler: OnClickPlayPauseButtonHandler = (isPlaying: boolean): void => {
-    (isPlaying) ? intervalManager?.pause() : intervalManager?.play();
+    if (isPlaying) {
+        intervalManager?.pause();
+    } else {
+        if (hasImportedData) {
+            chartExtension?.clearData();
+            chartExtension?.clearTitle();
+        }
+        intervalManager?.play();
+        hasImportedData = false;
+    }
+
     if (accordionComponent) accordionComponent.isPlaying = !isPlaying;
 };
 
@@ -92,7 +121,6 @@ const initStorage = async (): Promise<void> => {
     } catch (error) {
         console.log(error);
     }
-    
 };
 
 /**
@@ -112,13 +140,12 @@ const initChartInDOM = async () => {
         intervalManager = new IntervalManager(startLoopGetData, DELAY_MS);
     }
 
-    //startLoopGetData();
     await initStorage();
 
     if (informationContainer && typeof accordionComponent == 'undefined' && typeof accordionElement == 'undefined' && document.getElementById("accordionExtension") === null) {
         const { isAccordionExpanded } = await getStorage(['isAccordionExpanded']);
 
-        accordionComponent = new Accordion(informationContainer, onClickArrowAccordionHandler, onClickExportButtonHandler, onChangeImportHandler, onClickPlayPauseButtonHandler, isAccordionExpanded);
+        accordionComponent = new Accordion(informationContainer, onClickArrowAccordionHandler, onClickExportButtonHandler, onChangeImportHandler, onClickPlayPauseButtonHandler, onClickClearHandler, isAccordionExpanded);
         accordionElement = accordionComponent.getChartContainer() as HTMLElement;
     }
     if (accordionElement && typeof chartExtension == 'undefined') {
