@@ -11,7 +11,7 @@ import { customSegmentTooltip } from './plugins/customSegmentTooltip';
 //import customDatalabels from './plugins/customDatalabels';
 
 // Types
-import { Peak } from '../utils/utils';
+import { Peak, isArrayOfStrings, isArray, isString } from '../utils/utils';
 
 
 export type ChartExtensionData = ChartDataViewer[] | [] | ChartDataMessage[];
@@ -186,21 +186,80 @@ export default class ChartExtension {
     };
 
     /**
-     * Import a brand new dataset to the chart
-     * @param { ExportedDatas } data 
+     * Set chart's title value 
+     * @param { string } newValue title value
+     * @param { boolean } shouldUpdate true if chart should update render
      */
-    importData(data: ExportedDatas): void {
+    setTitle(newValue: string, shouldUpdate: boolean): void {
+        if (this.chart?.options.plugins?.title && typeof newValue == 'string') {
+            this.chartTitle = newValue;
+            this.chart.options.plugins.title.text = this.chartTitle;
+
+            if (shouldUpdate) this.chart?.update();
+        }
+    };
+
+    /**
+     * Clear chart's title value
+     */
+    clearTitle(): void {
+        this.setTitle('', true);
+    };
+
+    /**
+     * Clear data sets & labels
+     */
+    clearData(): void {
         if (this.chart) {
-            this.chart.data.labels = data.labels;
-            this.chart.data.datasets.find(dataset => dataset.stack === "viewersCount")!.data = data.data[0].viewersCount;
-            this.chart.data.datasets.find(dataset => dataset.stack === "messagesCount")!.data = data.data[1].messagesCount;
-        }
+            this.chart.data.labels = [];
+            this.chart.data.datasets.find(dataset => dataset.stack === "viewersCount")!.data = [];
+            this.chart.data.datasets.find(dataset => dataset.stack === "messagesCount")!.data = [];
 
-        if (this.chart?.options.plugins?.title) {
-            this.chart.options.plugins.title.text = data.title;
+            this.chart?.update();
         }
+    };
 
-        this.chart?.update();
+    /**
+     * Check if ExportedDatas data has valid properties
+     * @param { ExportedDatas } data 
+     * @returns { boolean }
+     */
+    #exportedDatasPropertiesCheck(data: ExportedDatas): boolean {
+        const sample = {
+            data: isArray,
+            labels: isArrayOfStrings,
+            title: isString
+        };
+
+        return Object.entries(sample).every(([prop, check]) => check((data as any)[prop]));
+    };
+
+    /**
+     * Import a brand new dataset to the chart
+     * @param { ExportedDatas } data
+     * @return { Promise<boolean> } return true if correctly imported
+     */
+    importData(data: ExportedDatas): Promise<boolean | string> {
+
+        return new Promise((resolve: (value: boolean) => void, reject: (value: string) =>  void) => {
+            // Check if data has the right properties
+            if (this.#exportedDatasPropertiesCheck(data)) {
+
+                if (this.chart) {
+                    this.chart.data.labels = data.labels;
+                    this.chart.data.datasets.find(dataset => dataset.stack === "viewersCount")!.data = data.data[0].viewersCount;
+                    this.chart.data.datasets.find(dataset => dataset.stack === "messagesCount")!.data = data.data[1].messagesCount;
+                }
+
+                this.setTitle(data.title, true);
+
+                this.chart?.update();
+
+                resolve(true);
+            } else {
+                reject("Incorrect JSON format");
+            }
+        });
     };
 
     /**

@@ -2,6 +2,7 @@
 import '../assets/css/accordion.css';
 
 export type OnClickArrowAccordionHandler = () => void;
+export type OnClickClearButtonHandler = () => void;
 export type OnClickExportButtonHandler = (event: MouseEvent) => void;
 export type OnClickPlayPauseButtonHandler = (isPlaying: boolean) => void;
 export type OnChangeImportHandler = (event: Event) => Promise<void>;
@@ -23,6 +24,7 @@ export default class Accordion implements IAccordion<Element> {
     arrowAccordion: HTMLElement | null;
     accordion: Element;
     chartContainer: HTMLElement | null;
+    clearButtonContainer: HTMLElement | null;
     exportButtonContainer: HTMLElement | null;
     importButtonContainer: HTMLElement | null;
     importInput: HTMLInputElement | null;
@@ -32,10 +34,11 @@ export default class Accordion implements IAccordion<Element> {
     #isPlaying: boolean = true;
     private onChangeImportHandler: OnChangeImportHandler;
     private onClickArrowAccordionHandler: OnClickArrowAccordionHandler;
+    private onClickClearButtonHandler: OnClickClearButtonHandler;
     private onClickExportButtonHandler: OnClickExportButtonHandler;
     private onClickPlayPauseButtonHandler: OnClickPlayPauseButtonHandler;
 
-    constructor(element: Element, onClickArrowAccordionHandler: OnClickArrowAccordionHandler, onClickExportButtonHandler: OnClickExportButtonHandler, onChangeImportHandler: OnChangeImportHandler, onClickPlayPauseButtonHandler: OnClickPlayPauseButtonHandler, isExpanded: boolean) {
+    constructor(element: Element, onClickArrowAccordionHandler: OnClickArrowAccordionHandler, onClickExportButtonHandler: OnClickExportButtonHandler, onChangeImportHandler: OnChangeImportHandler, onClickPlayPauseButtonHandler: OnClickPlayPauseButtonHandler, onClickClearButtonHandler: OnClickClearButtonHandler, isExpanded: boolean) {
 
         const htmlString = `
             <section id="accordionExtension" class="accordionExtension">
@@ -47,6 +50,12 @@ export default class Accordion implements IAccordion<Element> {
                 <div class="tabExtension">
                     <div class="flex-container bg-primary">
 
+                        <button id="clearButton" class="tab__clearButton" title="Clear data">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M8.75 1A2.75 2.75 0 0 0 6 3.75v.443c-.795.077-1.584.176-2.365.298a.75.75 0 1 0 .23 1.482l.149-.022.841 10.518A2.75 2.75 0 0 0 7.596 19h4.807a2.75 2.75 0 0 0 2.742-2.53l.841-10.52.149.023a.75.75 0 0 0 .23-1.482A41.03 41.03 0 0 0 14 4.193V3.75A2.75 2.75 0 0 0 11.25 1h-2.5ZM10 4c.84 0 1.673.025 2.5.075V3.75c0-.69-.56-1.25-1.25-1.25h-2.5c-.69 0-1.25.56-1.25 1.25v.325C8.327 4.025 9.16 4 10 4ZM8.58 7.72a.75.75 0 0 0-1.5.06l.3 7.5a.75.75 0 1 0 1.5-.06l-.3-7.5Zm4.34.06a.75.75 0 1 0-1.5-.06l-.3 7.5a.75.75 0 1 0 1.5.06l.3-7.5Z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+
                         <button id="playPauseButton" class="tab__exportButton" title="${ this.#isPlaying ? 'Pause' : 'Play' }">
                             <svg id="pauseIcon" class="${ this.#isPlaying ? 'show' : 'hide' }" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                                 <path d="M5.75 3a.75.75 0 0 0-.75.75v12.5c0 .414.336.75.75.75h1.5a.75.75 0 0 0 .75-.75V3.75A.75.75 0 0 0 7.25 3h-1.5ZM12.75 3a.75.75 0 0 0-.75.75v12.5c0 .414.336.75.75.75h1.5a.75.75 0 0 0 .75-.75V3.75a.75.75 0 0 0-.75-.75h-1.5Z" />
@@ -56,7 +65,7 @@ export default class Accordion implements IAccordion<Element> {
                             </svg>
                         </button>
 
-                        <input type="file" id="importInput" hidden />
+                        <input type="file" id="importInput" accept="application/json" hidden />
                         <button id="importButton" class="tab__importButton" title="Import data">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                                 <path d="M9.25 13.25a.75.75 0 0 0 1.5 0V4.636l2.955 3.129a.75.75 0 0 0 1.09-1.03l-4.25-4.5a.75.75 0 0 0-1.09 0l-4.25 4.5a.75.75 0 1 0 1.09 1.03L9.25 4.636v8.614Z" />
@@ -100,6 +109,11 @@ export default class Accordion implements IAccordion<Element> {
         this.onChangeImportHandler = onChangeImportHandler;
         this.importInput = document.getElementById('importInput') as HTMLInputElement;
         this.importInput?.addEventListener('change', this.onChangeImportHandler);
+
+        // Set clearData callback
+        this.clearButtonContainer = document.getElementById('clearButton');
+        this.onClickClearButtonHandler = onClickClearButtonHandler;
+        this.clearButtonContainer?.addEventListener('click', this.onClickClearButtonHandler);
 
 
         this.arrowAccordion = document.getElementById('arrowAccordion');
@@ -185,6 +199,7 @@ export default class Accordion implements IAccordion<Element> {
         this.importButtonContainer?.removeEventListener('click', this.#onClickImportButtonHandler);
         this.importInput?.removeEventListener('change', this.onChangeImportHandler); 
         this.playPauseButtonContainer?.removeEventListener('click', this.onClickPlayPauseButtonHandlerFunction);
+        this.clearButtonContainer?.removeEventListener('click', this.onClickClearButtonHandler);
     };
 
 };
