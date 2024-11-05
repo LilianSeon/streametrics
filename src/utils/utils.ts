@@ -1,4 +1,4 @@
-import { ChartDataViewer, ChartExtensionData } from "../js/chartExtension";
+import { ChartDataViewer, ChartExtensionData, ExportedDatas } from "../js/chartExtension";
 import { ChatContainer } from "../js/messageCounter";
 
 export type Peak = {
@@ -364,4 +364,28 @@ const downloadJSON = (fileName: string, jsonData: object): void => {
     URL.revokeObjectURL(url);
 };
 
-export { isURLTwitch, getNbViewer, waitForElm, getDuration, removeSpaceInString, formatChartTitle, getGameName, computedDataLabel, backGroundThemeObserver, detectPeaks, findPeaks, getPercentageOf, getStreamerName, getChatContainer, deleteSequenceSameNumber, downloadJSON };
+const extractDataFromJSON = (event: Event): Promise<ExportedDatas> => {
+    return new Promise((resolve: (value: ExportedDatas) => void, reject) => {
+        if (event.target instanceof HTMLInputElement) {
+            const reader = new FileReader();
+            //@ts-ignore
+            const file = event.target.files[0];
+            reader.readAsText(file, 'UTF-8');
+    
+            reader.onloadend = readerEvent => {
+                const content = readerEvent?.target?.result as string;
+                resolve(JSON.parse(content) as ExportedDatas);
+            };
+            
+            reader.onerror = (event: Event) => {
+                reject(event);
+            };
+
+            reader.onabort = (event: Event) => {
+                reject(event);
+            };
+        }
+    });
+};
+
+export { isURLTwitch, getNbViewer, waitForElm, getDuration, removeSpaceInString, formatChartTitle, getGameName, computedDataLabel, backGroundThemeObserver, detectPeaks, findPeaks, getPercentageOf, getStreamerName, getChatContainer, deleteSequenceSameNumber, downloadJSON, extractDataFromJSON };

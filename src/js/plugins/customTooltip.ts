@@ -9,9 +9,9 @@ import { ChartDataViewer } from "../chartExtension.js";
 const customTooltipAfterFooter = (context: any): string => {
 
     if (context[0].dataset.stack === 'viewersCount') {
-        const { time }: { time: Date } = context[0].raw;
+        const { time }: { time: Date | string } = context[0].raw;
 
-        return time.toLocaleDateString() + ' ' + time.toLocaleTimeString();
+        return new Date(time).toLocaleDateString() + ' ' + new Date(time).toLocaleTimeString();
     } else if (context[0].dataset.stack === 'messagesCount') {
         return '';
     } else {

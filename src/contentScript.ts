@@ -1,16 +1,16 @@
-import { isURLTwitch, getNbViewer, waitForElm, getDuration, formatChartTitle, getGameName, backGroundThemeObserver, ThemeBackgroundColor, getChatContainer, downloadJSON, getStreamerName } from './utils/utils';
+import { isURLTwitch, getNbViewer, waitForElm, getDuration, formatChartTitle, getGameName, backGroundThemeObserver, ThemeBackgroundColor, extractDataFromJSON, getChatContainer, downloadJSON, getStreamerName } from './utils/utils';
 import { getStorage, setStorage } from './utils/utilsStorage'
 import ChartExtension, { ChartDataViewer } from './js/chartExtension';
 import IntervalManager from './js/intervalManager';
 
 // Template
-import Accordion, { OnClickExportButtonHandler, OnClickPlayPauseButtonHandler } from './templates/accordion';
+import Accordion, { OnClickExportButtonHandler, OnClickPlayPauseButtonHandler, OnChangeImportHandler } from './templates/accordion';
 import { MessageCounter } from './js/messageCounter';
 
 // CSS
 import './assets/css/index.css'; // Font
 
-const DELAY_MS: number = 2000;
+const DELAY_MS: number = 5000;
 
 let chartExtension: ChartExtension | undefined;
 //let data: ChartDataViewer[] = [];
@@ -64,6 +64,14 @@ const onClickArrowAccordionHandler = async (): Promise<void> => {
     }
 };
 
+const onChangeImportHandler: OnChangeImportHandler = async (event: Event): Promise<void> => {
+    console.log('onChangeImportHandler', await extractDataFromJSON(event));
+    if (chartExtension && intervalManager) {
+        intervalManager.clear();
+        chartExtension.importData(await extractDataFromJSON(event));
+    }
+};
+
 const onClickExportButtonHandler: OnClickExportButtonHandler = (): void => {
     if (chartExtension) downloadJSON(getStreamerName(document)+'_datas.json', chartExtension.getDatas());
 };
@@ -110,7 +118,7 @@ const initChartInDOM = async () => {
     if (informationContainer && typeof accordionComponent == 'undefined' && typeof accordionElement == 'undefined' && document.getElementById("accordionExtension") === null) {
         const { isAccordionExpanded } = await getStorage(['isAccordionExpanded']);
 
-        accordionComponent = new Accordion(informationContainer, onClickArrowAccordionHandler, onClickExportButtonHandler, onClickPlayPauseButtonHandler, isAccordionExpanded);
+        accordionComponent = new Accordion(informationContainer, onClickArrowAccordionHandler, onClickExportButtonHandler, onChangeImportHandler, onClickPlayPauseButtonHandler, isAccordionExpanded);
         accordionElement = accordionComponent.getChartContainer() as HTMLElement;
     }
     if (accordionElement && typeof chartExtension == 'undefined') {
