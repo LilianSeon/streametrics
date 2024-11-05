@@ -31,6 +31,7 @@ export type ChartDataMessage = number
 export type ExportedDatas = {
     data: [{ viewersCount: ChartDataViewer[] }, { messagesCount: ChartDataMessage[] }];
     labels: string[];
+    title: string;
 }
 
 
@@ -185,6 +186,24 @@ export default class ChartExtension {
     };
 
     /**
+     * Import a brand new dataset to the chart
+     * @param { ExportedDatas } data 
+     */
+    importData(data: ExportedDatas): void {
+        if (this.chart) {
+            this.chart.data.labels = data.labels;
+            this.chart.data.datasets.find(dataset => dataset.stack === "viewersCount")!.data = data.data[0].viewersCount;
+            this.chart.data.datasets.find(dataset => dataset.stack === "messagesCount")!.data = data.data[1].messagesCount;
+        }
+
+        if (this.chart?.options.plugins?.title) {
+            this.chart.options.plugins.title.text = data.title;
+        }
+
+        this.chart?.update();
+    };
+
+    /**
      * Get ride of decimal for ticks (Y labels).
      * @param { string | number } value 
      * @returns { number }
@@ -210,7 +229,7 @@ export default class ChartExtension {
      * Get datas from the chart
      * @returns { ExportedDatas }
      */
-    public getDatas(): ExportedDatas {
+    getDatas(): ExportedDatas {
         const data = this.chart?.data.datasets.map((dataset) => {
             return {
                 [dataset.stack as string]: dataset.data
@@ -218,10 +237,10 @@ export default class ChartExtension {
         });
         const labels = this.chart?.data.labels;
 
-        return { data, labels } as ExportedDatas;
+        return { data, labels, title: this.chartTitle } as ExportedDatas;
     };
 
-    public addData(chartDataViewer: ChartDataViewer, messagesCount: ChartDataMessage): void {
+    addData(chartDataViewer: ChartDataViewer, messagesCount: ChartDataMessage): void {
         
         if (this._isDocumentHidden) { // If _isDocumentHidden is true, the user is not focusing the document anymore, therefore we keep data in memory in order to update chart later.
             this.chartDataViewer.push(chartDataViewer);
