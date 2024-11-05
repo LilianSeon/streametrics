@@ -10,7 +10,7 @@ import { MessageCounter } from './js/messageCounter';
 // CSS
 import './assets/css/index.css'; // Font
 
-const DELAY_MS: number = 1000;
+const DELAY_MS: number = 5000;
 
 let chartExtension: ChartExtension | undefined;
 //let data: ChartDataViewer[] = [];
