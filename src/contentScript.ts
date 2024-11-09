@@ -1,20 +1,24 @@
-import { isURLTwitch, getNbViewer, waitForElm, getDuration, formatChartTitle, getGameName, backGroundThemeObserver, ThemeBackgroundColor, extractDataFromJSON, getChatContainer, downloadJSON, getStreamerName } from './utils/utils';
+// Utils
+import { isURLTwitch, getNbViewer, waitForElm, getDuration, formatChartTitle, getGameName, backGroundThemeObserver, ThemeBackgroundColor, extractDataFromJSON, getChatContainer, downloadJSON, getStreamerName, isDarkModeActivated } from './utils/utils';
 import { getStorage, setStorage } from './utils/utilsStorage'
-import ChartExtension, { ChartDataViewer } from './js/chartExtension';
 import IntervalManager from './js/intervalManager';
 
-// Template
-import Accordion, { OnClickExportButtonHandler, OnClickPlayPauseButtonHandler, OnChangeImportHandler, OnClickClearButtonHandler } from './templates/accordion';
+// Components
+import Accordion, { OnClickExportButtonHandler, OnClickPlayPauseButtonHandler, OnChangeImportHandler, OnClickClearButtonHandler } from './components/Accordion';
 import { MessageCounter } from './js/messageCounter';
+import Toast, { ToastMessage } from './components/Toast';
+import ChartExtension, { ChartDataViewer } from './js/chartExtension';
 
 // CSS
 import './assets/css/index.css'; // Font
+
 
 const DELAY_MS: number = 5000;
 
 let chartExtension: ChartExtension | undefined;
 //let data: ChartDataViewer[] = [];
 let accordionComponent: Accordion | undefined;
+//let toastComponent: Toast | undefined;
 let accordionElement: HTMLElement | undefined;
 let isExtensionInitialized: boolean = false;
 let messageCounter: MessageCounter | undefined;
@@ -81,12 +85,13 @@ const onChangeImportHandler: OnChangeImportHandler = async (event: Event): Promi
             const isDataImported = await chartExtension.importData(data);
 
             if (isDataImported) {
+                new Toast('success', accordionComponent!.toastContainer, ToastMessage.importSuccess);
                 intervalManager.clear();
                 accordionComponent.isPlaying = false;
                 hasImportedData = true;
             }
-        } catch (_error) {
-            // TODO: handle error, if import data fail.
+        } catch (error) {
+            new Toast('error', accordionComponent!.toastContainer, ToastMessage.importError);
         }
     }
 };
@@ -153,6 +158,7 @@ const initChartInDOM = async () => {
         const textColor: string = document.documentElement.className.includes('dark') ? '#ffffff' : '#000000';
         chartExtension = new ChartExtension(accordionElement, chartTitle, textColor, navigator.language);
         backGroundThemeObserver(document, updateDefaultColor);
+        updateDefaultColor(isDarkModeActivated() ? 'dark' : 'light');
     }
 };
 
@@ -184,7 +190,15 @@ chrome.runtime.onMessage.addListener((request, _sender) => { // When user goes f
 
 const updateDefaultColor = (theme: ThemeBackgroundColor): void => {
     if (chartExtension instanceof ChartExtension) {
-        const newColor = (theme === 'dark') ? '#ffffff' : '#000000';
+        let newColor: string;
+        if (theme === 'dark') { // Dark mode
+            newColor = '#ffffff';
+            accordionComponent?.accordion?.classList.add('dark'); // Add dark css class for tailwind
+        } else { // Light mode
+            newColor = '#000000';
+            accordionComponent?.accordion?.classList.remove('dark');
+        }
+
         chartExtension.setDefaultColor(newColor);
     }
 };

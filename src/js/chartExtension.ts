@@ -12,6 +12,7 @@ import { customSegmentTooltip } from './plugins/customSegmentTooltip';
 
 // Types
 import { Peak, isArrayOfStrings, isArray, isString } from '../utils/utils';
+import { ToastMessage } from '../components/Toast';
 
 
 export type ChartExtensionData = ChartDataViewer[] | [] | ChartDataMessage[];
@@ -62,7 +63,7 @@ export default class ChartExtension {
         const html: string = `<div id="extensionChartContainer" height="${ height }" style="margin-left: 20px;margin-right: 20px;margin-bottom: 10px;"><canvas id="extensionChart" height="${ height }" style="width: 100%"></canvas></div>`;
 
         if (this.container) {
-            this.container.insertAdjacentHTML('afterend', html);
+            this.container.insertAdjacentHTML('beforeend', html);
             this.canvas = document.getElementById('extensionChart') as HTMLCanvasElement;
             this._initChart(this.canvas);
         } else {
@@ -257,7 +258,7 @@ export default class ChartExtension {
 
                 resolve(true);
             } else {
-                reject("Incorrect JSON format");
+                reject(ToastMessage.importError);
             }
         });
     };
@@ -402,6 +403,7 @@ export default class ChartExtension {
             Chart.defaults.color = newValue;
             Chart.defaults.borderColor = 'transparent';
             Chart.defaults.font.size = 13;
+            this.chart?.update('none');
         }
     };
 
