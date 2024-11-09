@@ -402,6 +402,7 @@ export default class ChartExtension {
             Chart.defaults.color = newValue;
             Chart.defaults.borderColor = 'transparent';
             Chart.defaults.font.size = 13;
+            this.chart?.update('none');
         }
     };
 

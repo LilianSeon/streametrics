@@ -24,6 +24,7 @@ export default defineConfig({
         'css/accordion.css': './src/assets/css/accordion.css',
         'fonts/pacifico.woff2': './src/assets/fonts/pacifico.woff2',
         'css/index.css': './src/assets/css/index.css',
+        'css/output.css': './src/assets/css/output.css',
       },
       output: {
         entryFileNames: "[name].js",
