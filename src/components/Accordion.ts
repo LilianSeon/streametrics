@@ -12,6 +12,7 @@ interface IAccordion<E extends Element> {
     accordion: E;
     isExpanded: boolean;
     isPlaying: boolean;
+    toastContainer: HTMLDivElement;
     collapseChartContainer(): void;
     destroy(): void;
     expandChartContainer(): void;
@@ -30,6 +31,7 @@ export default class Accordion implements IAccordion<Element> {
     importInput: HTMLInputElement | null;
     playPauseButtonContainer: HTMLElement | null;
     tabContent: HTMLElement | null;
+    toastContainer: HTMLDivElement;
     isExpanded: boolean;
     #isPlaying: boolean = true;
     private onChangeImportHandler: OnChangeImportHandler;
@@ -85,6 +87,7 @@ export default class Accordion implements IAccordion<Element> {
 
                     </div>
                     <div id="tab__content" class="tab__content">
+                        <div id="toastContainer" class="relative mt-3 flex flex-col space-y-20 z-50"></div>
                         <p id="chartContainer"></p>
                     </div>
                 </div>
@@ -115,6 +118,8 @@ export default class Accordion implements IAccordion<Element> {
         this.onClickClearButtonHandler = onClickClearButtonHandler;
         this.clearButtonContainer?.addEventListener('click', this.onClickClearButtonHandler);
 
+        // Toast
+        this.toastContainer = document.getElementById('toastContainer') as HTMLDivElement;
 
         this.arrowAccordion = document.getElementById('arrowAccordion');
         this.arrowAccordion?.addEventListener('click', onClickArrowAccordionHandler);

@@ -6,7 +6,7 @@ import IntervalManager from './js/intervalManager';
 // Components
 import Accordion, { OnClickExportButtonHandler, OnClickPlayPauseButtonHandler, OnChangeImportHandler, OnClickClearButtonHandler } from './components/Accordion';
 import { MessageCounter } from './js/messageCounter';
-import Toast from './components/Toast';
+import Toast, { ToastMessage } from './components/Toast';
 import ChartExtension, { ChartDataViewer } from './js/chartExtension';
 
 // CSS
@@ -18,7 +18,7 @@ const DELAY_MS: number = 5000;
 let chartExtension: ChartExtension | undefined;
 //let data: ChartDataViewer[] = [];
 let accordionComponent: Accordion | undefined;
-let toastComponent: Toast | undefined;
+//let toastComponent: Toast | undefined;
 let accordionElement: HTMLElement | undefined;
 let isExtensionInitialized: boolean = false;
 let messageCounter: MessageCounter | undefined;
@@ -85,12 +85,13 @@ const onChangeImportHandler: OnChangeImportHandler = async (event: Event): Promi
             const isDataImported = await chartExtension.importData(data);
 
             if (isDataImported) {
+                new Toast('success', accordionComponent!.toastContainer, ToastMessage.importSuccess);
                 intervalManager.clear();
                 accordionComponent.isPlaying = false;
                 hasImportedData = true;
             }
-        } catch (_error) {
-            // TODO: handle error, if import data fail.
+        } catch (error) {
+            new Toast('error', accordionComponent!.toastContainer, ToastMessage.importError);
         }
     }
 };
@@ -152,11 +153,10 @@ const initChartInDOM = async () => {
         accordionComponent = new Accordion(informationContainer, onClickArrowAccordionHandler, onClickExportButtonHandler, onChangeImportHandler, onClickPlayPauseButtonHandler, onClickClearHandler, isAccordionExpanded);
         accordionElement = accordionComponent.getChartContainer() as HTMLElement;
     }
-    if (accordionElement && typeof chartExtension == 'undefined' && typeof toastComponent == 'undefined') {
+    if (accordionElement && typeof chartExtension == 'undefined') {
         const chartTitle: string = formatChartTitle(window.location.pathname);
         const textColor: string = document.documentElement.className.includes('dark') ? '#ffffff' : '#000000';
         chartExtension = new ChartExtension(accordionElement, chartTitle, textColor, navigator.language);
-        toastComponent = new Toast(accordionElement);
         backGroundThemeObserver(document, updateDefaultColor);
         updateDefaultColor(isDarkModeActivated() ? 'dark' : 'light');
     }

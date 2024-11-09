@@ -2,7 +2,11 @@
 export default {
   content: ["./src/**/*.ts"],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        'darkColor': 'rgb(83, 83, 95, 0.38)'
+      }
+    },
   },
   plugins: [],
   darkMode: 'selector',
