@@ -102,9 +102,8 @@ const onClickExportButtonHandler: OnClickExportButtonHandler = (): void => {
 
 const onClickHideShowMessageButtonHandler : OnClickHideShowMessageButtonHandler = (isDisplayMessage: boolean): void => {
     if (chartExtension && accordionComponent) {
-        console.log(isDisplayMessage)
         accordionComponent.isDisplayMessage = !isDisplayMessage;
-        chartExtension.hideDataset('messagesCount');
+        (isDisplayMessage) ? chartExtension.hideMessagesCountDataset() : chartExtension.showMessagesCountDataset();
     }
 };
 

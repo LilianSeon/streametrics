@@ -14,6 +14,7 @@ import { customSegmentTooltip } from './plugins/customSegmentTooltip';
 import { Peak, isArrayOfStrings, isArray, isString } from '../utils/utils';
 import { ToastMessage } from '../components/Toast';
 
+export type DatasetName = "viewersCount" | "messagesCount";
 
 export type ChartExtensionData = ChartDataViewer[] | [] | ChartDataMessage[];
 
@@ -167,8 +168,10 @@ export default class ChartExtension {
                         y: { // nbViewer
                             position: 'left',
                             stack: 'chartExtension',
+                            beginAtZero: false,
                             ticks: {
-                                callback: this.#tickFormatCallback.bind(this)
+                                callback: this.#tickFormatCallback.bind(this),
+                                maxTicksLimit: 7
                             }
                             //stackWeight: 2,
                         },
@@ -262,12 +265,30 @@ export default class ChartExtension {
         });
     };
 
-    hideDataset(datasetName: "viewersCount" | "messagesCount") {
+    /**
+     * Hide messages count bars in chart in order to let all space for viewers count line
+     */
+    hideMessagesCountDataset(): void {
         if (this.chart) {
-            //this.chart.data.datasets.find(dataset => dataset.stack === datasetName)!.hidden = true;
-            this.chart.data.datasets = this.chart.data.datasets.filter(dataset => dataset.stack !== datasetName);
+            this.chart.data.datasets.find(dataset => dataset.stack === "messagesCount")!.hidden = true;
             this.chart.options.scales!.y2!.display = false;
-            this.chart.resize(1216, 251) // WIP
+            this.chart.options.scales!.y!.stack = undefined;
+            //@ts-ignore
+            this.chart.options.scales!.y!.beginAtZero = true;
+            this.chart.update();
+        }
+    };
+
+    /**
+     * Display messages count bars in chart
+     */
+    showMessagesCountDataset(): void {
+        if (this.chart) {
+            this.chart.data.datasets.find(dataset => dataset.stack === "messagesCount")!.hidden = false;
+            this.chart.options.scales!.y2!.display = true;
+            this.chart.options.scales!.y!.stack = 'chartExtension';
+            //@ts-ignore
+            this.chart.options.scales!.y!.beginAtZero = false;
             this.chart.update();
         }
     };
