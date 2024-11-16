@@ -686,6 +686,10 @@ video {
   flex-shrink: 0;
 }
 
+.resize {
+  resize: both;
+}
+
 .flex-col {
   flex-direction: column;
 }

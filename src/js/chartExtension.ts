@@ -172,7 +172,6 @@ export default class ChartExtension {
                             }
                             //stackWeight: 2,
                         },
-                        
                         x: {
                             ticks: {
                                 maxTicksLimit: 10
@@ -261,6 +260,16 @@ export default class ChartExtension {
                 reject(ToastMessage.importError);
             }
         });
+    };
+
+    hideDataset(datasetName: "viewersCount" | "messagesCount") {
+        if (this.chart) {
+            //this.chart.data.datasets.find(dataset => dataset.stack === datasetName)!.hidden = true;
+            this.chart.data.datasets = this.chart.data.datasets.filter(dataset => dataset.stack !== datasetName);
+            this.chart.options.scales!.y2!.display = false;
+            this.chart.resize(1216, 251) // WIP
+            this.chart.update();
+        }
     };
 
     /**
