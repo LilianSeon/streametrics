@@ -107,7 +107,7 @@ export default class Toast implements IToast<Element> {
 
     /**
      * 
-     * @returns { string } close button id
+     * @returns { string } closeButton id
      */
     #getCloseButtonId(): string {
         return 'closeToast-'+this.id;
