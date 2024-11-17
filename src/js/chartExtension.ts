@@ -162,7 +162,8 @@ export default class ChartExtension {
                             //stackWeight: 1,
                             beginAtZero: true,
                             ticks: {
-                                callback: this.#tickFormatCallback.bind(this)
+                                callback: this.#tickFormatCallback.bind(this),
+                                maxTicksLimit: 7
                             }
                         },
                         y: { // nbViewer
@@ -266,7 +267,31 @@ export default class ChartExtension {
     };
 
     /**
-     * Hide messages count bars in chart in order to let all space for viewers count line
+     * Hide viewers count line chart in order to let all space for messages count line
+     */
+    hideViewersCountDataset(): void {
+        if (this.chart) {
+            this.chart.data.datasets.find(dataset => dataset.stack === "viewersCount")!.hidden = true;
+            this.chart.options.scales!.y!.display = false;
+            this.chart.options.scales!.y2!.stack = undefined;
+            this.chart.update();
+        }
+    };
+
+    /**
+     * Show viewers count line chart
+     */
+    showViewersCountDataset(): void {
+        if (this.chart) {
+            this.chart.data.datasets.find(dataset => dataset.stack === "viewersCount")!.hidden = false;
+            this.chart.options.scales!.y!.display = true;
+            this.chart.options.scales!.y2!.stack = 'chartExtension';
+            this.chart.update();
+        }
+    };
+
+    /**
+     * Hide messages count bars chart in order to let all space for viewers count line
      */
     hideMessagesCountDataset(): void {
         if (this.chart) {
@@ -274,13 +299,13 @@ export default class ChartExtension {
             this.chart.options.scales!.y2!.display = false;
             this.chart.options.scales!.y!.stack = undefined;
             //@ts-ignore
-            this.chart.options.scales!.y!.beginAtZero = true;
+            //this.chart.options.scales!.y!.beginAtZero = true;
             this.chart.update();
         }
     };
 
     /**
-     * Display messages count bars in chart
+     * Display messages count bars chart
      */
     showMessagesCountDataset(): void {
         if (this.chart) {
@@ -288,7 +313,7 @@ export default class ChartExtension {
             this.chart.options.scales!.y2!.display = true;
             this.chart.options.scales!.y!.stack = 'chartExtension';
             //@ts-ignore
-            this.chart.options.scales!.y!.beginAtZero = false;
+            //this.chart.options.scales!.y!.beginAtZero = false;
             this.chart.update();
         }
     };

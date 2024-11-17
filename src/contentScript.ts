@@ -4,7 +4,7 @@ import { getStorage, setStorage } from './utils/utilsStorage'
 import IntervalManager from './js/intervalManager';
 
 // Components
-import Accordion, { OnClickExportButtonHandler, OnClickPlayPauseButtonHandler, OnChangeImportHandler, OnClickClearButtonHandler, OnClickHideShowMessageButtonHandler } from './components/Accordion';
+import Accordion, { OnClickExportButtonHandler, OnClickPlayPauseButtonHandler, OnChangeImportHandler, OnClickClearButtonHandler, OnClickHideShowMessageButtonHandler, OnClickHideShowViewerButtonHandler } from './components/Accordion';
 import { MessageCounter } from './js/messageCounter';
 import Toast, { ToastMessage } from './components/Toast';
 import ChartExtension, { ChartDataViewer } from './js/chartExtension';
@@ -100,10 +100,17 @@ const onClickExportButtonHandler: OnClickExportButtonHandler = (): void => {
     if (chartExtension) downloadJSON(getStreamerName(document)+'_datas.json', chartExtension.getDatas());
 };
 
+const onClickHideShowViewerButtonHandler : OnClickHideShowViewerButtonHandler = (isDisplayViewer: boolean): void => {
+    if (chartExtension && accordionComponent) {
+        (isDisplayViewer) ? chartExtension.hideViewersCountDataset() : chartExtension.showViewersCountDataset();
+        accordionComponent.isDisplayViewer = !isDisplayViewer;
+    }
+};
+
 const onClickHideShowMessageButtonHandler : OnClickHideShowMessageButtonHandler = (isDisplayMessage: boolean): void => {
     if (chartExtension && accordionComponent) {
-        accordionComponent.isDisplayMessage = !isDisplayMessage;
         (isDisplayMessage) ? chartExtension.hideMessagesCountDataset() : chartExtension.showMessagesCountDataset();
+        accordionComponent.isDisplayMessage = !isDisplayMessage;
     }
 };
 
@@ -157,7 +164,7 @@ const initChartInDOM = async () => {
     if (informationContainer && typeof accordionComponent == 'undefined' && typeof accordionElement == 'undefined' && document.getElementById("accordionExtension") === null) {
         const { isAccordionExpanded } = await getStorage(['isAccordionExpanded']);
 
-        accordionComponent = new Accordion(informationContainer, onClickArrowAccordionHandler, onClickExportButtonHandler, onChangeImportHandler, onClickPlayPauseButtonHandler, onClickClearHandler, onClickHideShowMessageButtonHandler, isAccordionExpanded);
+        accordionComponent = new Accordion(informationContainer, onClickArrowAccordionHandler, onClickExportButtonHandler, onChangeImportHandler, onClickPlayPauseButtonHandler, onClickClearHandler, onClickHideShowMessageButtonHandler, onClickHideShowViewerButtonHandler, isAccordionExpanded);
         accordionElement = accordionComponent.getChartContainer() as HTMLElement;
     }
     if (accordionElement && typeof chartExtension == 'undefined') {
