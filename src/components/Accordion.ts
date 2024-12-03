@@ -4,6 +4,7 @@ import '../assets/css/accordion.css';
 export type OnClickArrowAccordionHandler = () => void;
 export type OnClickClearButtonHandler = () => void;
 export type OnClickExportButtonHandler = (event: MouseEvent) => void;
+export type OnClickExportImageButtonHandler = (event: MouseEvent) => void;
 export type OnClickPlayPauseButtonHandler = (isPlaying: boolean) => void;
 export type OnClickHideShowMessageButtonHandler = (isDisplay: boolean) => void;
 export type OnClickHideShowViewerButtonHandler = (isDisplay: boolean) => void;
@@ -35,6 +36,7 @@ export default class Accordion implements IAccordion<Element> {
     chartContainer: HTMLElement | null;
     clearButtonContainer: HTMLElement | null;
     exportButtonContainer: HTMLElement | null;
+    exportImageButtonContainer: HTMLElement | null;
     importButtonContainer: HTMLElement | null;
     importInput: HTMLInputElement | null;
     playPauseButtonContainer: HTMLElement | null;
@@ -50,11 +52,12 @@ export default class Accordion implements IAccordion<Element> {
     private onClickArrowAccordionHandler: OnClickArrowAccordionHandler;
     private onClickClearButtonHandler: OnClickClearButtonHandler;
     private onClickExportButtonHandler: OnClickExportButtonHandler;
+    private onClickExportImageButtonHandler: OnClickExportImageButtonHandler;
     private onClickPlayPauseButtonHandler: OnClickPlayPauseButtonHandler;
     private onClickHideShowMessageButtonHandler: OnClickHideShowMessageButtonHandler;
     private onClickHideShowViewerButtonHandler: OnClickHideShowViewerButtonHandler;
 
-    constructor(element: Element, onClickArrowAccordionHandler: OnClickArrowAccordionHandler, onClickExportButtonHandler: OnClickExportButtonHandler, onChangeImportHandler: OnChangeImportHandler, onClickPlayPauseButtonHandler: OnClickPlayPauseButtonHandler, onClickClearButtonHandler: OnClickClearButtonHandler, onClickHideShowMessageButtonHandler: OnClickHideShowMessageButtonHandler, onClickHideShowViewerButtonHandler: OnClickHideShowViewerButtonHandler, isExpanded: boolean) {
+    constructor(element: Element, onClickArrowAccordionHandler: OnClickArrowAccordionHandler, onClickExportButtonHandler: OnClickExportButtonHandler, onChangeImportHandler: OnChangeImportHandler, onClickPlayPauseButtonHandler: OnClickPlayPauseButtonHandler, onClickClearButtonHandler: OnClickClearButtonHandler, onClickHideShowMessageButtonHandler: OnClickHideShowMessageButtonHandler, onClickHideShowViewerButtonHandler: OnClickHideShowViewerButtonHandler, onClickExportImageButtonHandler: OnClickExportImageButtonHandler, isExpanded: boolean) {
 
         const htmlString = `
             <section id="accordionExtension" class="accordionExtension">
@@ -65,6 +68,12 @@ export default class Accordion implements IAccordion<Element> {
                 </style>
                 <div class="tabExtension">
                     <div class="flex-container bg-primary px-2">
+
+                        <button id="exportImageButton" class="my-auto mx-0.5 text-blue-700 border border-blue-700 hover:bg-slate-700 hover:text-white font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center me-2 dark:text-white dark:hover:text-white dark:hover:bg-slate-700" title="Download chart image">
+                            <svg id="exportImageButtonIcon" class="w-9 h-9" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M1 5.25A2.25 2.25 0 0 1 3.25 3h13.5A2.25 2.25 0 0 1 19 5.25v9.5A2.25 2.25 0 0 1 16.75 17H3.25A2.25 2.25 0 0 1 1 14.75v-9.5Zm1.5 5.81v3.69c0 .414.336.75.75.75h13.5a.75.75 0 0 0 .75-.75v-2.69l-2.22-2.219a.75.75 0 0 0-1.06 0l-1.91 1.909.47.47a.75.75 0 1 1-1.06 1.06L6.53 8.091a.75.75 0 0 0-1.06 0l-2.97 2.97ZM12 7a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
 
                         <button id="hideShowViewerButton" class="my-auto mx-0.5 text-blue-700 border border-blue-700 hover:bg-slate-700 hover:text-white font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center me-2 dark:text-white dark:hover:text-white dark:hover:bg-slate-700" title="Hide viewer line">
                             <svg id="hideShowViewerIcon" class="w-9 h-9" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -141,6 +150,11 @@ export default class Accordion implements IAccordion<Element> {
         this.exportButtonContainer = document.getElementById('exportButton');
         this.onClickExportButtonHandler = onClickExportButtonHandler;
         this.exportButtonContainer?.addEventListener('click', this.onClickExportButtonHandler);
+
+        // Set exportImageButton callback
+        this.exportImageButtonContainer = document.getElementById('exportImageButton');
+        this.onClickExportImageButtonHandler = onClickExportImageButtonHandler;
+        this.exportImageButtonContainer?.addEventListener('click', this.onClickExportImageButtonHandler);
 
         // Set importData callback
         this.importButtonContainer = document.getElementById('importButton');
@@ -302,6 +316,7 @@ export default class Accordion implements IAccordion<Element> {
         this.accordion.remove();
         this.arrowAccordion?.removeEventListener('click', this.onClickArrowAccordionHandler);
         this.exportButtonContainer?.removeEventListener('click', this.onClickExportButtonHandler);
+        this.exportImageButtonContainer?.removeEventListener('click', this.onClickExportImageButtonHandler);
         this.importButtonContainer?.removeEventListener('click', this.#onClickImportButtonHandler);
         this.importInput?.removeEventListener('change', this.onChangeImportHandler); 
         this.playPauseButtonContainer?.removeEventListener('click', this.onClickPlayPauseButtonHandlerFunction);

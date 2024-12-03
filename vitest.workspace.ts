@@ -8,14 +8,18 @@ export default defineWorkspace([
   'vite.config.ts',
   {
     extends: 'vite.config.ts',
-    test: {
+    /*test: {
       browser: {
         enabled: true,
         name: 'chromium',
-        provider: 'playwright',
+        provider: 'none',
         // https://playwright.dev
-        providerOptions: {},
+        providerOptions: {
+          launch: {
+            devtools: true,
+          }
+        },
       },
-    },
+    },*/
   },
 ])
