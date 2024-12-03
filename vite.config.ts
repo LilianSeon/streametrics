@@ -4,13 +4,13 @@ import react from '@vitejs/plugin-react'
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
-  test: {
+  /*test: {
     browser: {
       enabled: true,
       provider: 'playwright',
       name: 'chromium',
     }
-  },
+  },*/
   build: {
     target: "ES2020",
     outDir: 'dist',

@@ -1,10 +1,12 @@
+/// <reference types="chrome"/>
+
 // Utils
-import { isURLTwitch, getNbViewer, waitForElm, getDuration, formatChartTitle, getGameName, backGroundThemeObserver, ThemeBackgroundColor, extractDataFromJSON, getChatContainer, downloadJSON, getStreamerName, isDarkModeActivated } from './utils/utils';
+import { isURLTwitch, getNbViewer, waitForElm, getDuration, formatChartTitle, getGameName, backGroundThemeObserver, ThemeBackgroundColor, extractDataFromJSON, getChatContainer, downloadJSON, downloadImage, getStreamerName, isDarkModeActivated } from './utils/utils';
 import { getStorage, setStorage } from './utils/utilsStorage'
 import IntervalManager from './js/intervalManager';
 
 // Components
-import Accordion, { OnClickExportButtonHandler, OnClickPlayPauseButtonHandler, OnChangeImportHandler, OnClickClearButtonHandler, OnClickHideShowMessageButtonHandler, OnClickHideShowViewerButtonHandler } from './components/Accordion';
+import Accordion, { OnClickExportButtonHandler, OnClickExportImageButtonHandler, OnClickPlayPauseButtonHandler, OnChangeImportHandler, OnClickClearButtonHandler, OnClickHideShowMessageButtonHandler, OnClickHideShowViewerButtonHandler } from './components/Accordion';
 import { MessageCounter } from './js/messageCounter';
 import Toast, { ToastMessage } from './components/Toast';
 import ChartExtension, { ChartDataViewer } from './js/chartExtension';
@@ -96,6 +98,11 @@ const onChangeImportHandler: OnChangeImportHandler = async (event: Event): Promi
     }
 };
 
+const onClickExportImageButtonHandler: OnClickExportImageButtonHandler = () => {
+    const imageString = chartExtension?.exportImage();
+    if (imageString) downloadImage(getStreamerName(document)+'_chart_image.png', imageString);
+};
+
 const onClickExportButtonHandler: OnClickExportButtonHandler = (): void => {
     if (chartExtension) downloadJSON(getStreamerName(document)+'_datas.json', chartExtension.getDatas());
 };
@@ -118,9 +125,9 @@ const onClickPlayPauseButtonHandler: OnClickPlayPauseButtonHandler = (isPlaying:
     if (isPlaying) {
         intervalManager?.pause();
     } else {
-        if (hasImportedData) {
-            chartExtension?.clearData();
-            chartExtension?.clearTitle();
+        if (hasImportedData && chartExtension) {
+            chartExtension.clearData();
+            chartExtension.clearTitle();
         }
         intervalManager?.play();
         hasImportedData = false;
@@ -164,7 +171,7 @@ const initChartInDOM = async () => {
     if (informationContainer && typeof accordionComponent == 'undefined' && typeof accordionElement == 'undefined' && document.getElementById("accordionExtension") === null) {
         const { isAccordionExpanded } = await getStorage(['isAccordionExpanded']);
 
-        accordionComponent = new Accordion(informationContainer, onClickArrowAccordionHandler, onClickExportButtonHandler, onChangeImportHandler, onClickPlayPauseButtonHandler, onClickClearHandler, onClickHideShowMessageButtonHandler, onClickHideShowViewerButtonHandler, isAccordionExpanded);
+        accordionComponent = new Accordion(informationContainer, onClickArrowAccordionHandler, onClickExportButtonHandler, onChangeImportHandler, onClickPlayPauseButtonHandler, onClickClearHandler, onClickHideShowMessageButtonHandler, onClickHideShowViewerButtonHandler, onClickExportImageButtonHandler, isAccordionExpanded);
         accordionElement = accordionComponent.getChartContainer() as HTMLElement;
     }
     if (accordionElement && typeof chartExtension == 'undefined') {

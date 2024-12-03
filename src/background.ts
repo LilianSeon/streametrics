@@ -1,3 +1,4 @@
+/// <reference types="chrome"/>
 
 let tabToUrl: any = {};
 

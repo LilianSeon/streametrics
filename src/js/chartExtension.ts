@@ -266,6 +266,10 @@ export default class ChartExtension {
         });
     };
 
+    exportImage(): string | null {
+        return this.chart ? this.chart.toBase64Image() : null;
+    };
+
     /**
      * Hide viewers count line chart in order to let all space for messages count line
      */

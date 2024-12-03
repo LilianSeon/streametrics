@@ -365,8 +365,27 @@ const downloadJSON = (fileName: string, jsonData: object): void => {
     // Create a Blob with the JSON content
     const blob = new Blob([jsonString], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
+    startDownload(url, fileName);
+    URL.revokeObjectURL(url);
+};
+
+/**
+ * Export image
+ * @param { string } fileName 
+ * @param { string } href 
+ */
+const downloadImage = (fileName: string, href: string) => {
+    startDownload(href, fileName);
+};
+
+/**
+ * Create a <a> tag with download attribute to upload a file to user
+ * @param { string } href url 
+ * @param { string } fileName 
+ */
+const startDownload = (href: string, fileName: string): void => {
     const a = document.createElement('a');
-    a.href = url;
+    a.href = href;
     a.download = fileName;
     document.body.appendChild(a);
 
@@ -374,7 +393,6 @@ const downloadJSON = (fileName: string, jsonData: object): void => {
 
     // Remove the anchor element and revoke the object URL
     document.body.removeChild(a);
-    URL.revokeObjectURL(url);
 };
 
 const extractDataFromJSON = (event: Event): Promise<ExportedDatas> => {
@@ -436,4 +454,4 @@ const generateRandomId = (): string => {
     return Math.random().toString(36).substring(2, 8);
 };
 
-export { isURLTwitch, getNbViewer, waitForElm, getDuration, removeSpaceInString, formatChartTitle, getGameName, computedDataLabel, backGroundThemeObserver, detectPeaks, findPeaks, getPercentageOf, getStreamerName, getChatContainer, deleteSequenceSameNumber, downloadJSON, extractDataFromJSON, isArrayOfStrings, isArray, isString, isDarkModeActivated, generateRandomId };
+export { isURLTwitch, getNbViewer, waitForElm, getDuration, removeSpaceInString, formatChartTitle, getGameName, computedDataLabel, backGroundThemeObserver, detectPeaks, findPeaks, getPercentageOf, getStreamerName, getChatContainer, deleteSequenceSameNumber, downloadJSON, extractDataFromJSON, isArrayOfStrings, isArray, isString, isDarkModeActivated, generateRandomId, downloadImage };
