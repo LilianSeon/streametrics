@@ -1,0 +1,355 @@
+export type OnClickPlayPauseButtonHandlerBottomNav = (isPlaying: boolean) => void;
+export type OnClickExportButtonHandlerBottomNav = (event: MouseEvent) => void;
+export type OnClickExportImageButtonHandlerBottomNav = (event: MouseEvent) => void;
+export type OnClickHideShowBarButtonHandlerBottomNav = (isDisplay: boolean) => void;
+export type OnClickHideShowLineButtonHandlerBottomNav = (isDisplay: boolean) => void;
+export type OnClickClearButtonHandlerBottomNav = () => void;
+export type OnChangeImportHandlerBottomNav = (event: Event) => Promise<void>;
+
+enum TooltipText {
+    Play = 'Play',
+    Pause = 'Pause',
+    Clear = 'Clear data',
+    Download = 'Download',
+    ImportData = 'Import data',
+    DownloadImage = 'Image',
+    DownloadData = 'Data'
+};
+
+interface IBottomNavigation<E extends Element> {
+    bottomNavigation: E;
+    isPlaying: boolean;
+};
+
+export default class BottomNavigation implements IBottomNavigation<Element> {
+    bottomNavigation: Element;
+    clearButtonContainer: HTMLElement | null;
+    downloadButtonContainer: HTMLElement | null;
+    downloadDropdownButtonContainer: HTMLElement | null;
+    exportButtonContainer: HTMLElement | null;
+    exportImageButtonContainer: HTMLElement | null;
+    importButtonContainer: HTMLElement | null;
+    importInput: HTMLInputElement | null;
+    #isPlaying: boolean = true;
+    playPauseButtonContainer: HTMLElement | null;
+    hideShowButtonContainer: HTMLElement | null;
+    hideShowCheckboxLine: HTMLInputElement | null;
+    hideShowCheckboxBar: HTMLInputElement | null;
+    playPauseButtonTooltip: HTMLElement | null;
+    #isDisplayBar: boolean = true;
+    #isDisplayLine: boolean = true;
+    private onClickExportButtonHandler: OnClickExportButtonHandlerBottomNav;
+    private onClickExportImageButtonHandler: OnClickExportImageButtonHandlerBottomNav;
+    private onChangeImportHandler: OnChangeImportHandlerBottomNav;
+    private onClickHideShowBarButtonHandler: OnClickHideShowBarButtonHandlerBottomNav;
+    private onClickHideShowLineButtonHandler: OnClickHideShowLineButtonHandlerBottomNav;
+    private onClickClearButtonHandler: OnClickClearButtonHandlerBottomNav;
+    private onClickPlayPauseButtonHandler: OnClickPlayPauseButtonHandlerBottomNav;
+
+    constructor(element: Element, onClickPlayPauseButtonHandler: OnClickPlayPauseButtonHandlerBottomNav, onClickHideShowBarButtonHandler: OnClickHideShowBarButtonHandlerBottomNav, onClickHideShowLineButtonHandler: OnClickHideShowLineButtonHandlerBottomNav, onClickClearButtonHandler: OnClickClearButtonHandlerBottomNav, onChangeImportHandler: OnChangeImportHandlerBottomNav, onClickExportButtonHandler: OnClickExportButtonHandlerBottomNav, onClickExportImageButtonHandler: OnClickExportImageButtonHandlerBottomNav) {
+
+        const htmlString = `
+            <div id="bottomNavigation" class="absolute z-50 w-full h-20 max-w-lg -translate-x-1/2 bg-white border border-gray-200 rounded-full bottom-4 left-1/2 dark:bg-gray-700 dark:border-gray-600">
+                <div class="grid h-full max-w-lg grid-cols-5 mx-auto">
+
+                    <button id="hideShowButton" type="button" class="inline-flex flex-col items-center justify-center px-5 rounded-s-full hover:bg-gray-50 dark:hover:bg-gray-800 group">
+                        <svg class="w-8 h-8 mb-1 text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-500 pointer-events-none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M3.28 2.22a.75.75 0 0 0-1.06 1.06l14.5 14.5a.75.75 0 1 0 1.06-1.06l-1.745-1.745a10.029 10.029 0 0 0 3.3-4.38 1.651 1.651 0 0 0 0-1.185A10.004 10.004 0 0 0 9.999 3a9.956 9.956 0 0 0-4.744 1.194L3.28 2.22ZM7.752 6.69l1.092 1.092a2.5 2.5 0 0 1 3.374 3.373l1.091 1.092a4 4 0 0 0-5.557-5.557Z" clip-rule="evenodd" />
+                            <path d="m10.748 13.93 2.523 2.523a9.987 9.987 0 0 1-3.27.547c-4.258 0-7.894-2.66-9.337-6.41a1.651 1.651 0 0 1 0-1.186A10.007 10.007 0 0 1 2.839 6.02L6.07 9.252a4 4 0 0 0 4.678 4.678Z" />
+                        </svg>
+                    </button>
+                    <div id="tooltip-hideShowButton" class="absolute invisible transition-opacity duration-500 opacity-0 z-10 w-32 -top-32 font-medium bg-white rounded-lg shadow dark:bg-gray-700 hover:visible hover:opacity-95">
+                        <ul class="p-3 space-y-1 text-lg text-gray-700 dark:text-gray-200">
+                            <li>
+                                <div class="flex items-center p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-600">
+                                    <input id="hideShowCheckboxBar" type="checkbox" value="${this.#isDisplayBar}" checked="${this.#isDisplayBar}" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
+                                    <label for="hideShowCheckboxBar" class="w-full ms-7 text-xl font-medium text-gray-900 rounded dark:text-gray-300">Bar</label>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="flex items-center p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-600">
+                                    <input id="hideShowCheckboxLine" type="checkbox" value="${this.#isDisplayLine}" checked="${this.#isDisplayLine}" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
+                                    <label for="hideShowCheckboxLine" class="w-full ms-7 text-xl font-medium text-gray-900 rounded dark:text-gray-300">Line</label>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <button id="clearButton" type="button" class="inline-flex flex-col items-center justify-center px-5 hover:bg-gray-50 dark:hover:bg-gray-800 group">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 mb-1 text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-500 pointer-events-none" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M8.75 1A2.75 2.75 0 0 0 6 3.75v.443c-.795.077-1.584.176-2.365.298a.75.75 0 1 0 .23 1.482l.149-.022.841 10.518A2.75 2.75 0 0 0 7.596 19h4.807a2.75 2.75 0 0 0 2.742-2.53l.841-10.52.149.023a.75.75 0 0 0 .23-1.482A41.03 41.03 0 0 0 14 4.193V3.75A2.75 2.75 0 0 0 11.25 1h-2.5ZM10 4c.84 0 1.673.025 2.5.075V3.75c0-.69-.56-1.25-1.25-1.25h-2.5c-.69 0-1.25.56-1.25 1.25v.325C8.327 4.025 9.16 4 10 4ZM8.58 7.72a.75.75 0 0 0-1.5.06l.3 7.5a.75.75 0 1 0 1.5-.06l-.3-7.5Zm4.34.06a.75.75 0 1 0-1.5-.06l-.3 7.5a.75.75 0 1 0 1.5.06l.3-7.5Z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
+                    <div id="tooltip-clearButton" class="absolute text-xl z-10 invisible inline-block px-3 py-2 -top-14 font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 dark:bg-gray-700">
+                        ${ TooltipText.Clear }
+                    </div>
+
+                    <div class="flex items-center justify-center">
+                        <button id="playPauseButton" type="button" class="inline-flex items-center justify-center w-14 h-14 font-medium bg-blue-600 rounded-full hover:bg-blue-700 group focus:outline-none">
+                            <svg id="pauseIcon" class="show w-7 h-7 text-white pointer-events-none" style="margin-left: 1px;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M5.75 3a.75.75 0 0 0-.75.75v12.5c0 .414.336.75.75.75h1.5a.75.75 0 0 0 .75-.75V3.75A.75.75 0 0 0 7.25 3h-1.5ZM12.75 3a.75.75 0 0 0-.75.75v12.5c0 .414.336.75.75.75h1.5a.75.75 0 0 0 .75-.75V3.75a.75.75 0 0 0-.75-.75h-1.5Z" />
+                            </svg>
+                            <svg id="playIcon" class="hide w-7 h-7 text-white pointer-events-none" style="margin-left: 3px;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M6.3 2.84A1.5 1.5 0 0 0 4 4.11v11.78a1.5 1.5 0 0 0 2.3 1.27l9.344-5.891a1.5 1.5 0 0 0 0-2.538L6.3 2.841Z" />
+                            </svg>
+                        </button>
+                    </div>
+                    <div id="tooltip-playPauseButton" class="absolute text-xl z-10 invisible inline-block px-3 py-2 -top-14 font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 dark:bg-gray-700">
+                        ${(this.#isPlaying) ? TooltipText.Pause : TooltipText.Play }
+                    </div>
+
+                    <button data-tooltip-target="tooltip-settings" type="button" class="inline-flex flex-col items-center justify-center px-5 hover:bg-gray-50 dark:hover:bg-gray-800 group">
+                        <svg class="w-8 h-8 mb-1 text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7.75 4H19M7.75 4a2.25 2.25 0 0 1-4.5 0m4.5 0a2.25 2.25 0 0 0-4.5 0M1 4h2.25m13.5 6H19m-2.25 0a2.25 2.25 0 0 1-4.5 0m4.5 0a2.25 2.25 0 0 0-4.5 0M1 10h11.25m-4.5 6H19M7.75 16a2.25 2.25 0 0 1-4.5 0m4.5 0a2.25 2.25 0 0 0-4.5 0M1 16h2.25"/>
+                        </svg>
+                    </button>
+                    <div id="tooltip-settings" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700">
+                        Settings
+                    </div>
+
+                    <button id="downloadButton" type="button" class="inline-flex flex-col items-center justify-center px-5 rounded-e-full hover:bg-gray-50 dark:hover:bg-gray-800 group">
+                        <svg class="w-8 h-8 mb-1 pointer-events-none text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M14.707 7.793a1 1 0 0 0-1.414 0L11 10.086V1.5a1 1 0 0 0-2 0v8.586L6.707 7.793a1 1 0 1 0-1.414 1.414l4 4a1 1 0 0 0 1.416 0l4-4a1 1 0 0 0-.002-1.414Z"/>
+                            <path d="M18 12h-2.55l-2.975 2.975a3.5 3.5 0 0 1-4.95 0L4.55 12H2a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2Zm-3 5a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"/>
+                        </svg>
+                    </button>
+                    <div id="tooltip-downloadButton" class="absolute z-10 -top-[7.4rem] invisible transition-opacity duration-300 opacity-0 hover:visible hover:opacity-95 bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700">
+                        <ul class="py-2 text-xl font-medium text-gray-700 dark:text-gray-200">
+                            <li>
+                                <button id="downloadDropdownButton" type="button" class="flex items-center justify-between w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
+                                    ${ TooltipText.Download }
+                                    <svg class="w-2.5 h-2.5 ms-3 rtl:rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
+                                    </svg>
+                                </button>
+                                <div id="tooltip-downloadDropdownButton" class="absolute z-10 invisible opacity-0 left-[11.5rem] top-0 bg-white divide-y divide-gray-600 rounded-lg shadow w-44 hover:opacity-95 hover:visible dark:bg-gray-700 transition-opacity duration-300">
+                                    <ul class="py-2 text-xl font-medium divide-y divide-gray-100 text-gray-700 dark:divide-gray-600 dark:text-gray-200">
+                                        <li>
+                                            <button id="exportButton" type="button" class="flex items-center w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
+                                                <svg class="w-6 h-6 mr-3 fill-gray-700 dark:fill-gray-200" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                                    <path d="M6,6A2,2,0,0,1,8,4,1,1,0,0,0,8,2,4,4,0,0,0,4,6V9a2,2,0,0,1-2,2,1,1,0,0,0,0,2,2,2,0,0,1,2,2v3a4,4,0,0,0,4,4,1,1,0,0,0,0-2,2,2,0,0,1-2-2V15a4,4,0,0,0-1.38-3A4,4,0,0,0,6,9Zm16,5a2,2,0,0,1-2-2V6a4,4,0,0,0-4-4,1,1,0,0,0,0,2,2,2,0,0,1,2,2V9a4,4,0,0,0,1.38,3A4,4,0,0,0,18,15v3a2,2,0,0,1-2,2,1,1,0,0,0,0,2,4,4,0,0,0,4-4V15a2,2,0,0,1,2-2,1,1,0,0,0,0-2Z"/>
+                                                </svg>
+                                                ${ TooltipText.DownloadData }
+                                            </button>
+                                        </li>
+                                        <li class="border-solid border-t border-gray-200">
+                                            <button id="exportImageButton" type="button" class="dark:border-gray-700 flex items-center w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
+                                                <svg class="w-6 h-6 mr-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
+                                                    <path fill-rule="evenodd" d="M2 4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V4Zm10.5 5.707a.5.5 0 0 0-.146-.353l-1-1a.5.5 0 0 0-.708 0L9.354 9.646a.5.5 0 0 1-.708 0L6.354 7.354a.5.5 0 0 0-.708 0l-2 2a.5.5 0 0 0-.146.353V12a.5.5 0 0 0 .5.5h8a.5.5 0 0 0 .5-.5V9.707ZM12 5a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z" clip-rule="evenodd" />
+                                                </svg>
+                                                ${ TooltipText.DownloadImage }
+                                            </button>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </li>
+                            <li>
+                                <input type="file" id="importInput" accept="application/json" hidden />
+                                <button id="importButton" type="button" class="flex items-center justify-between w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
+                                    ${ TooltipText.ImportData }
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        element.insertAdjacentHTML('beforeend', htmlString);
+
+        this.bottomNavigation = document.getElementById('bottomNavigation') as Element;
+
+        // Set playPauseButton callback
+        this.playPauseButtonContainer = document.getElementById('playPauseButton');
+        this.playPauseButtonTooltip = document.getElementById('tooltip-playPauseButton');
+        this.playPauseButtonContainer?.addEventListener('click', this.onClickPlayPauseButtonHandlerFunction.bind(this));
+        this.playPauseButtonContainer?.addEventListener('mouseover', this.onMouseoverPlayPauseButtonHandlerFunction.bind(this));
+        this.playPauseButtonContainer?.addEventListener('mouseout', this.onMouseoutPlayPauseButtonHandlerFunction.bind(this));
+        this.onClickPlayPauseButtonHandler = onClickPlayPauseButtonHandler;
+        
+        // Set hideShowButton callback
+        this.hideShowButtonContainer = document.getElementById('hideShowButton');
+        this.hideShowButtonContainer?.addEventListener('mouseover', this.onMouseoverPlayPauseButtonHandlerFunction.bind(this));
+        this.hideShowButtonContainer?.addEventListener('mouseout', this.onMouseoutPlayPauseButtonHandlerFunction.bind(this));
+        this.hideShowCheckboxLine = document.getElementById('hideShowCheckboxLine') as HTMLInputElement;
+        this.hideShowCheckboxLine?.addEventListener('change', this.onClickHideShowLineButtonHandlerFunction.bind(this));
+        this.onClickHideShowLineButtonHandler = onClickHideShowLineButtonHandler;
+        this.hideShowCheckboxBar = document.getElementById('hideShowCheckboxBar') as HTMLInputElement;
+        this.hideShowCheckboxBar?.addEventListener('change', this.onClickHideShowBarButtonHandlerFunction.bind(this));
+        this.onClickHideShowBarButtonHandler = onClickHideShowBarButtonHandler;
+
+        // Set clearButton callback
+        this.clearButtonContainer = document.getElementById('clearButton');
+        this.onClickClearButtonHandler = onClickClearButtonHandler;
+        this.clearButtonContainer?.addEventListener('click', this.onClickClearButtonHandler);
+        this.clearButtonContainer?.addEventListener('mouseover', this.onMouseoverPlayPauseButtonHandlerFunction.bind(this));
+        this.clearButtonContainer?.addEventListener('mouseout', this.onMouseoutPlayPauseButtonHandlerFunction.bind(this));
+
+        // Set downloadButton callback
+        this.downloadButtonContainer = document.getElementById('downloadButton');
+        this.downloadButtonContainer?.addEventListener('mouseover', this.onMouseoverPlayPauseButtonHandlerFunction.bind(this));
+        this.downloadButtonContainer?.addEventListener('mouseout', this.onMouseoutPlayPauseButtonHandlerFunction.bind(this));
+        this.downloadDropdownButtonContainer = document.getElementById('downloadDropdownButton');
+        this.downloadDropdownButtonContainer?.addEventListener('mouseover', this.onMouseoverDownloadDropdownButtonHandlerFunction.bind(this));
+        this.downloadDropdownButtonContainer?.addEventListener('mouseout', this.onMouseoutPlayPauseButtonHandlerFunction.bind(this));
+
+        // Set importData callback
+        this.importButtonContainer = document.getElementById('importButton');
+        this.importButtonContainer?.addEventListener('click', this.#onClickImportButtonHandler);
+        this.onChangeImportHandler = onChangeImportHandler;
+        this.importInput = document.getElementById('importInput') as HTMLInputElement;
+        this.importInput?.addEventListener('change', this.onChangeImportHandler);
+
+        // Set exportButton callback
+        this.exportButtonContainer = document.getElementById('exportButton');
+        this.onClickExportButtonHandler = onClickExportButtonHandler;
+        this.exportButtonContainer?.addEventListener('click', this.onClickExportButtonHandler);
+
+        // Set exportImageButton callback
+        this.exportImageButtonContainer = document.getElementById('exportImageButton');
+        this.onClickExportImageButtonHandler = onClickExportImageButtonHandler;
+        this.exportImageButtonContainer?.addEventListener('click', this.onClickExportImageButtonHandler);
+
+    };
+
+    /**
+     * Change svg icon play / pause and update tooltip
+     * @param { boolean } newValue
+     */
+    set isPlaying(newValue: boolean) {
+        this.#isPlaying = newValue;
+        const pauseIcon = document.getElementById('pauseIcon');
+        const playIcon = document.getElementById('playIcon');
+        const check = pauseIcon && playIcon && this.playPauseButtonContainer;
+
+        if (newValue && check && this.playPauseButtonTooltip) {
+
+            pauseIcon.classList.add('show');
+            pauseIcon.classList.remove('hide');
+            playIcon.classList.add('hide');
+            playIcon.classList.remove('show');
+            this.playPauseButtonTooltip.innerText = TooltipText.Pause;
+
+        } if (!newValue && check && this.playPauseButtonTooltip) {
+            pauseIcon.classList.add('hide');
+            pauseIcon.classList.remove('show');
+            playIcon.classList.add('show');
+            playIcon.classList.remove('hide');
+            this.playPauseButtonTooltip.innerText = TooltipText.Play;
+        }
+    };
+
+    get isPlaying(): boolean {
+        return this.#isPlaying;
+    };
+
+    set isDisplayLine(newValue: boolean) {
+        this.#isDisplayLine = newValue;
+    };
+
+    set isDisplayBar(newValue: boolean) {
+        this.#isDisplayBar = newValue;
+    };
+
+    get isDisplayBar(): boolean {
+        return this.#isDisplayBar;
+    };
+
+    /**
+     * Click on #importInput to trigger file explore dialog
+     */
+    #onClickImportButtonHandler(): void {
+        document.getElementById('importInput')?.click();
+    }
+
+    onClickHideShowLineButtonHandlerFunction(): void {
+        this.onClickHideShowLineButtonHandler(this.#isDisplayLine);
+    };
+
+    onClickHideShowBarButtonHandlerFunction(): void {
+        this.onClickHideShowBarButtonHandler(this.#isDisplayBar);
+    }
+
+    onMouseoverPlayPauseButtonHandlerFunction(event: Event): void {
+        let id = (<Element>event?.target).id
+        if(id) {
+            this.#showTooltip(id);
+        }
+    };
+
+    onMouseoverDownloadDropdownButtonHandlerFunction(event: Event): void {
+        let id = (<Element>event?.target).id
+        if(id) {
+            this.#showTooltip(id, 120);
+        }
+    };
+
+    onMouseoutPlayPauseButtonHandlerFunction(event: Event): void {
+        let id = (<Element>event?.target).id
+        if(id) {
+            this.#hideTooltip(id, 300);
+        }
+    };
+
+    onClickPlayPauseButtonHandlerFunction(): void {
+        this.onClickPlayPauseButtonHandler(this.isPlaying);
+    };
+
+    /**
+     * 
+     * @param { string } id Partial button id
+     * @param { number } left
+     */
+    #showTooltip(id: string, left?: number) {
+        const element = document.getElementById('tooltip-' + id);
+        const button = document.getElementById(id);
+        
+        if (element && button) {
+            element.style.left = left ? (button.offsetLeft - 5 + left).toString()+'px' : button.offsetLeft - 5 + 'px';
+            element.classList.remove('invisible', 'opacity-0');
+            element.classList.add ('visible', 'opacity-95');
+        }
+    };
+
+    /**
+     * 
+     * @param { string } id Partial button id
+     */
+    #hideTooltip(id: string, delay?: number) {
+        const element = document.getElementById('tooltip-' + id);
+
+        const hide = () => {
+            if (element) {
+                element.classList.add('invisible', 'opacity-0');
+                element.classList.remove ('visible', 'opacity-95');
+            }
+        }
+
+        if (delay) {
+            setTimeout(() => {
+                hide();
+            }, delay);
+        } else {
+            hide();
+        }
+    };
+
+    /**
+     * Remove bottomNavigation from DOM
+     */
+    destroy(): void {
+        this.bottomNavigation.remove();
+        this.playPauseButtonContainer?.removeEventListener('click', this.onClickPlayPauseButtonHandlerFunction.bind(this));
+        this.playPauseButtonContainer?.removeEventListener('mouseover', this.onMouseoverPlayPauseButtonHandlerFunction.bind(this));
+        this.playPauseButtonContainer?.removeEventListener('mouseout', this.onMouseoutPlayPauseButtonHandlerFunction.bind(this));
+        this.clearButtonContainer?.removeEventListener('click', this.onClickClearButtonHandler);
+        this.clearButtonContainer?.removeEventListener('mouseover', this.onMouseoverPlayPauseButtonHandlerFunction.bind(this));
+        this.clearButtonContainer?.removeEventListener('mouseout', this.onMouseoutPlayPauseButtonHandlerFunction.bind(this));
+        this.downloadDropdownButtonContainer?.removeEventListener('mouseover', this.onMouseoverPlayPauseButtonHandlerFunction.bind(this));
+        this.downloadDropdownButtonContainer?.removeEventListener('mouseout', this.onMouseoutPlayPauseButtonHandlerFunction.bind(this));
+        this.importButtonContainer?.removeEventListener('click', this.#onClickImportButtonHandler);
+        this.importInput?.removeEventListener('change', this.onChangeImportHandler);
+        this.exportButtonContainer?.removeEventListener('click', this.onClickExportButtonHandler);
+        this.exportImageButtonContainer?.removeEventListener('click', this.onClickExportImageButtonHandler);
+    };
+};

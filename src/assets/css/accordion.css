@@ -11,8 +11,6 @@
 /* Core styles/functionality */
 .tabExtension input {
   position: absolute;
-  opacity: 0;
-  z-index: -1;
 }
 .tab__content {
   max-height: 0;
