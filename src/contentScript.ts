@@ -6,7 +6,7 @@ import { getStorage, setStorage } from './utils/utilsStorage'
 import IntervalManager from './js/intervalManager';
 
 // Components
-import Accordion, { OnClickExportButtonHandler, OnClickExportImageButtonHandler, OnClickPlayPauseButtonHandler, OnChangeImportHandler, OnClickClearButtonHandler, OnClickHideShowMessageButtonHandler, OnClickHideShowViewerButtonHandler } from './components/Accordion';
+import Accordion, { OnChangeRefreshValueHandler, OnClickExportButtonHandler, OnClickExportImageButtonHandler, OnClickPlayPauseButtonHandler, OnChangeImportHandler, OnClickClearButtonHandler, OnClickHideShowMessageButtonHandler, OnClickHideShowViewerButtonHandler } from './components/Accordion';
 import { MessageCounter } from './js/messageCounter';
 import Toast, { ToastMessage } from './components/Toast';
 import ChartExtension, { ChartDataViewer } from './js/chartExtension';
@@ -98,13 +98,18 @@ const onChangeImportHandler: OnChangeImportHandler = async (event: Event): Promi
     }
 };
 
+const onChangeRefreshValue: OnChangeRefreshValueHandler= async (refreshValue: number) => {
+    await setStorage({ 'refreshValue': refreshValue });
+    intervalManager?.updateInterval(refreshValue * 1000);
+};
+
 const onClickExportImageButtonHandler: OnClickExportImageButtonHandler = () => {
     const imageString = chartExtension?.exportImage();
     if (imageString) downloadImage(getStreamerName(document)+'_chart_image.png', imageString);
 };
 
 const onClickExportButtonHandler: OnClickExportButtonHandler = (): void => {
-    if (chartExtension) downloadJSON(getStreamerName(document)+'_datas.json', chartExtension.getDatas());
+    if (chartExtension) downloadJSON(getStreamerName(document)+'_data.json', chartExtension.getDatas());
 };
 
 const onClickHideShowViewerButtonHandler : OnClickHideShowViewerButtonHandler = (isDisplayViewer: boolean): void => {
@@ -170,8 +175,9 @@ const initChartInDOM = async () => {
 
     if (informationContainer && typeof accordionComponent == 'undefined' && typeof accordionElement == 'undefined' && document.getElementById("accordionExtension") === null) {
         const { isAccordionExpanded } = await getStorage(['isAccordionExpanded']);
+        const { refreshValue } = await getStorage(['refreshValue']);
 
-        accordionComponent = new Accordion(informationContainer, onClickArrowAccordionHandler, onClickExportButtonHandler, onChangeImportHandler, onClickPlayPauseButtonHandler, onClickClearHandler, onClickHideShowMessageButtonHandler, onClickHideShowViewerButtonHandler, onClickExportImageButtonHandler, isAccordionExpanded);
+        accordionComponent = new Accordion(informationContainer, refreshValue ?? 5, onClickArrowAccordionHandler, onClickExportButtonHandler, onChangeImportHandler, onClickPlayPauseButtonHandler, onClickClearHandler, onClickHideShowMessageButtonHandler, onClickHideShowViewerButtonHandler, onClickExportImageButtonHandler, onChangeRefreshValue, isAccordionExpanded);
         accordionElement = accordionComponent.getChartContainer() as HTMLElement;
     }
     if (accordionElement && typeof chartExtension == 'undefined') {

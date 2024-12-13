@@ -5,6 +5,7 @@ export type OnClickHideShowBarButtonHandlerBottomNav = (isDisplay: boolean) => v
 export type OnClickHideShowLineButtonHandlerBottomNav = (isDisplay: boolean) => void;
 export type OnClickClearButtonHandlerBottomNav = () => void;
 export type OnChangeImportHandlerBottomNav = (event: Event) => Promise<void>;
+export type OnChangeRefreshValueBottomNav= (newRefreshValue: number) => void;
 
 enum TooltipText {
     Play = 'Play',
@@ -19,6 +20,7 @@ enum TooltipText {
 interface IBottomNavigation<E extends Element> {
     bottomNavigation: E;
     isPlaying: boolean;
+    refreshValue: number;
 };
 
 export default class BottomNavigation implements IBottomNavigation<Element> {
@@ -30,14 +32,24 @@ export default class BottomNavigation implements IBottomNavigation<Element> {
     exportImageButtonContainer: HTMLElement | null;
     importButtonContainer: HTMLElement | null;
     importInput: HTMLInputElement | null;
-    #isPlaying: boolean = true;
     playPauseButtonContainer: HTMLElement | null;
     hideShowButtonContainer: HTMLElement | null;
     hideShowCheckboxLine: HTMLInputElement | null;
     hideShowCheckboxBar: HTMLInputElement | null;
     playPauseButtonTooltip: HTMLElement | null;
+    progressBar: HTMLElement | null;
+    sliderContainer: HTMLElement | null;
+    speedButtonContainer: HTMLElement | null;
+    thumb: HTMLElement | null;
+    tooltipSlider: HTMLElement | null;
+    #isDraggingSlider: boolean = false;
     #isDisplayBar: boolean = true;
     #isDisplayLine: boolean = true;
+    #isPlaying: boolean = true;
+    #onChangeRefreshValue: OnChangeRefreshValueBottomNav;
+    #sliderValueMax: number = 30;
+    #sliderValueMin: number = 1;
+    #refreshValue: number;
     private onClickExportButtonHandler: OnClickExportButtonHandlerBottomNav;
     private onClickExportImageButtonHandler: OnClickExportImageButtonHandlerBottomNav;
     private onChangeImportHandler: OnChangeImportHandlerBottomNav;
@@ -46,7 +58,7 @@ export default class BottomNavigation implements IBottomNavigation<Element> {
     private onClickClearButtonHandler: OnClickClearButtonHandlerBottomNav;
     private onClickPlayPauseButtonHandler: OnClickPlayPauseButtonHandlerBottomNav;
 
-    constructor(element: Element, onClickPlayPauseButtonHandler: OnClickPlayPauseButtonHandlerBottomNav, onClickHideShowBarButtonHandler: OnClickHideShowBarButtonHandlerBottomNav, onClickHideShowLineButtonHandler: OnClickHideShowLineButtonHandlerBottomNav, onClickClearButtonHandler: OnClickClearButtonHandlerBottomNav, onChangeImportHandler: OnChangeImportHandlerBottomNav, onClickExportButtonHandler: OnClickExportButtonHandlerBottomNav, onClickExportImageButtonHandler: OnClickExportImageButtonHandlerBottomNav) {
+    constructor(element: Element, refreshValue: number, onClickPlayPauseButtonHandler: OnClickPlayPauseButtonHandlerBottomNav, onClickHideShowBarButtonHandler: OnClickHideShowBarButtonHandlerBottomNav, onClickHideShowLineButtonHandler: OnClickHideShowLineButtonHandlerBottomNav, onClickClearButtonHandler: OnClickClearButtonHandlerBottomNav, onChangeImportHandler: OnChangeImportHandlerBottomNav, onClickExportButtonHandler: OnClickExportButtonHandlerBottomNav, onClickExportImageButtonHandler: OnClickExportImageButtonHandlerBottomNav, onChangeRefreshValue: OnChangeRefreshValueBottomNav) {
 
         const htmlString = `
             <div id="bottomNavigation" class="absolute z-50 w-full h-20 max-w-lg -translate-x-1/2 bg-white border border-gray-200 rounded-full bottom-4 left-1/2 dark:bg-gray-700 dark:border-gray-600">
@@ -63,13 +75,13 @@ export default class BottomNavigation implements IBottomNavigation<Element> {
                             <li>
                                 <div class="flex items-center p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-600">
                                     <input id="hideShowCheckboxBar" type="checkbox" value="${this.#isDisplayBar}" checked="${this.#isDisplayBar}" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
-                                    <label for="hideShowCheckboxBar" class="w-full ms-7 text-xl font-medium text-gray-900 rounded dark:text-gray-300">Bar</label>
+                                    <label for="hideShowCheckboxBar" class="w-full ms-7 text-xl font-medium text-gray-900 rounded dark:text-gray-300 select-none">Bar</label>
                                 </div>
                             </li>
                             <li>
                                 <div class="flex items-center p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-600">
                                     <input id="hideShowCheckboxLine" type="checkbox" value="${this.#isDisplayLine}" checked="${this.#isDisplayLine}" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
-                                    <label for="hideShowCheckboxLine" class="w-full ms-7 text-xl font-medium text-gray-900 rounded dark:text-gray-300">Line</label>
+                                    <label for="hideShowCheckboxLine" class="w-full ms-7 text-xl font-medium text-gray-900 rounded dark:text-gray-300 select-none">Line</label>
                                 </div>
                             </li>
                         </ul>
@@ -80,7 +92,7 @@ export default class BottomNavigation implements IBottomNavigation<Element> {
                             <path fill-rule="evenodd" d="M8.75 1A2.75 2.75 0 0 0 6 3.75v.443c-.795.077-1.584.176-2.365.298a.75.75 0 1 0 .23 1.482l.149-.022.841 10.518A2.75 2.75 0 0 0 7.596 19h4.807a2.75 2.75 0 0 0 2.742-2.53l.841-10.52.149.023a.75.75 0 0 0 .23-1.482A41.03 41.03 0 0 0 14 4.193V3.75A2.75 2.75 0 0 0 11.25 1h-2.5ZM10 4c.84 0 1.673.025 2.5.075V3.75c0-.69-.56-1.25-1.25-1.25h-2.5c-.69 0-1.25.56-1.25 1.25v.325C8.327 4.025 9.16 4 10 4ZM8.58 7.72a.75.75 0 0 0-1.5.06l.3 7.5a.75.75 0 1 0 1.5-.06l-.3-7.5Zm4.34.06a.75.75 0 1 0-1.5-.06l-.3 7.5a.75.75 0 1 0 1.5.06l.3-7.5Z" clip-rule="evenodd" />
                         </svg>
                     </button>
-                    <div id="tooltip-clearButton" class="absolute text-xl z-10 invisible inline-block px-3 py-2 -top-14 font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 dark:bg-gray-700">
+                    <div id="tooltip-clearButton" class="absolute text-xl z-10 invisible inline-block px-3 py-2 -top-14 font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 dark:bg-gray-700 select-none">
                         ${ TooltipText.Clear }
                     </div>
 
@@ -94,18 +106,35 @@ export default class BottomNavigation implements IBottomNavigation<Element> {
                             </svg>
                         </button>
                     </div>
-                    <div id="tooltip-playPauseButton" class="absolute text-xl z-10 invisible inline-block px-3 py-2 -top-14 font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 dark:bg-gray-700">
+                    <div id="tooltip-playPauseButton" class="absolute text-xl z-10 invisible inline-block px-3 py-2 -top-14 font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 dark:bg-gray-700 select-none">
                         ${(this.#isPlaying) ? TooltipText.Pause : TooltipText.Play }
                     </div>
 
-                    <button data-tooltip-target="tooltip-settings" type="button" class="inline-flex flex-col items-center justify-center px-5 hover:bg-gray-50 dark:hover:bg-gray-800 group">
-                        <svg class="w-8 h-8 mb-1 text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                    <button id="speedButton" type="button" class="inline-flex flex-col items-center justify-center px-5 hover:bg-gray-50 dark:hover:bg-gray-800 group">
+                        <svg class="w-8 h-8 mb-1 pointer-events-none text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
                             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7.75 4H19M7.75 4a2.25 2.25 0 0 1-4.5 0m4.5 0a2.25 2.25 0 0 0-4.5 0M1 4h2.25m13.5 6H19m-2.25 0a2.25 2.25 0 0 1-4.5 0m4.5 0a2.25 2.25 0 0 0-4.5 0M1 10h11.25m-4.5 6H19M7.75 16a2.25 2.25 0 0 1-4.5 0m4.5 0a2.25 2.25 0 0 0-4.5 0M1 16h2.25"/>
                         </svg>
                     </button>
-                    <div id="tooltip-settings" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700">
-                        Settings
-                    </div>
+                    <div id="tooltip-speedButton" class="absolute text-lg z-10 invisible opacity-0 inline-block pb-2 pt-4 px-6 -top-32 -left-1/2 font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm hover:visible hover:opacity-95 dark:bg-gray-700">
+                        <div class="flow-root text-white select-none">
+                            <div class="float-left">Refresh rate :</div>
+                            <div class="float-right">
+                                <span id="refreshRate" class="font-semibold text-xl">${ refreshValue }</span>
+                                <span class="text-sm">/sec</span>
+                            </div>
+                        </div>
+                        <div class="flex w-64 m-auto items-center h-14 pb-4 justify-center">
+                                <div class="py-1 relative min-w-full">
+                                    <div id="slider" class="relative w-full h-1.5 bg-gray-300 rounded cursor-pointer">
+                                        <div id="progressBar" class="absolute h-full bg-blue-600 rounded hover:bg-blue-700" style="width: 50%;"></div>
+                                        <div id="thumb" class="absolute top-1/2 w-4 h-4 bg-white rounded-full transform -translate-y-1/2 cursor-pointer" style="left: 50%;"></div>
+                                        <div id="tooltipSlider" class="absolute hidden -top-2.5 bg-slate-500 text-white px-2 py-1 rounded transform -translate-y-full -translate-x-1/2 shadow-sm select-none">${ refreshValue }</div>
+                                        <div class="absolute text-white -ml-1 bottom-0 left-0 -mb-10 select-none">${ this.#sliderValueMin }s</div>
+                                        <div class="absolute text-white -mr-1 bottom-0 right-0 -mb-10 select-none">${ this.#sliderValueMax }s</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
                     <button id="downloadButton" type="button" class="inline-flex flex-col items-center justify-center px-5 rounded-e-full hover:bg-gray-50 dark:hover:bg-gray-800 group">
                         <svg class="w-8 h-8 mb-1 pointer-events-none text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
@@ -116,14 +145,14 @@ export default class BottomNavigation implements IBottomNavigation<Element> {
                     <div id="tooltip-downloadButton" class="absolute z-10 -top-[7.4rem] invisible transition-opacity duration-300 opacity-0 hover:visible hover:opacity-95 bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700">
                         <ul class="py-2 text-xl font-medium text-gray-700 dark:text-gray-200">
                             <li>
-                                <button id="downloadDropdownButton" type="button" class="flex items-center justify-between w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
+                                <button id="downloadDropdownButton" type="button" class="flex items-center justify-between w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white select-none">
                                     ${ TooltipText.Download }
                                     <svg class="w-2.5 h-2.5 ms-3 rtl:rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
                                         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
                                     </svg>
                                 </button>
                                 <div id="tooltip-downloadDropdownButton" class="absolute z-10 invisible opacity-0 left-[11.5rem] top-0 bg-white divide-y divide-gray-600 rounded-lg shadow w-44 hover:opacity-95 hover:visible dark:bg-gray-700 transition-opacity duration-300">
-                                    <ul class="py-2 text-xl font-medium divide-y divide-gray-100 text-gray-700 dark:divide-gray-600 dark:text-gray-200">
+                                    <ul class="py-2 text-xl font-medium divide-y divide-gray-100 text-gray-700 dark:divide-gray-600 dark:text-gray-200 select-none">
                                         <li>
                                             <button id="exportButton" type="button" class="flex items-center w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
                                                 <svg class="w-6 h-6 mr-3 fill-gray-700 dark:fill-gray-200" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -145,7 +174,7 @@ export default class BottomNavigation implements IBottomNavigation<Element> {
                             </li>
                             <li>
                                 <input type="file" id="importInput" accept="application/json" hidden />
-                                <button id="importButton" type="button" class="flex items-center justify-between w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
+                                <button id="importButton" type="button" class="flex items-center justify-between w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white select-none">
                                     ${ TooltipText.ImportData }
                                 </button>
                             </li>
@@ -210,10 +239,26 @@ export default class BottomNavigation implements IBottomNavigation<Element> {
         this.onClickExportImageButtonHandler = onClickExportImageButtonHandler;
         this.exportImageButtonContainer?.addEventListener('click', this.onClickExportImageButtonHandler);
 
+        // Set speedButton callback
+        this.speedButtonContainer = document.getElementById('speedButton');
+        this.speedButtonContainer?.addEventListener('mouseover', this.onMouseoverSpeedButtonHandlerFunction.bind(this));
+        this.speedButtonContainer?.addEventListener('mouseout', this.onMouseoutPlayPauseButtonHandlerFunction.bind(this));
+
+        // Set slider callback
+        this.#refreshValue = refreshValue;
+        this.sliderContainer = document.getElementById('slider');
+        this.sliderContainer?.addEventListener('mousedown', this.onMousedownSliderHandlerFunction.bind(this));
+        this.sliderContainer?.addEventListener('mouseup', this.stopDragging.bind(this), false);
+        this.sliderContainer?.addEventListener('mousemove', this.onMousemoveSliderHandlerFunction.bind(this));
+        this.thumb = document.getElementById('thumb');
+        this.progressBar = document.getElementById('progressBar');
+        this.tooltipSlider = document.getElementById('tooltipSlider');
+        this.updateSlicer(this.#refreshValue, this.sliderContainer!.getBoundingClientRect());
+        this.#onChangeRefreshValue = onChangeRefreshValue;
     };
 
     /**
-     * Change svg icon play / pause and update tooltip
+     * Change svg icon play / pause and update tooltip.
      * @param { boolean } newValue
      */
     set isPlaying(newValue: boolean) {
@@ -255,12 +300,115 @@ export default class BottomNavigation implements IBottomNavigation<Element> {
         return this.#isDisplayBar;
     };
 
+    set refreshValue(newValue: number) {
+        document.getElementById('refreshRate')!.innerText = newValue.toString();
+        this.#refreshValue = newValue;
+    };
+
+    get refreshValue(): number {
+        return this.#refreshValue;
+    };
+
     /**
-     * Click on #importInput to trigger file explore dialog
+     * Initiates the dragging process for the slider.
+     * @param { MouseEvent } event - The mouse event that triggered the dragging.
+     */
+    onMousedownSliderHandlerFunction(event: MouseEvent): void {
+        this.#isDraggingSlider = true;
+        if (this.sliderContainer) {
+            const rect = this.sliderContainer.getBoundingClientRect();
+            this.updateSlicerAndTooltip(this.getSliderValue(event, rect), rect);
+        }
+        
+    };
+
+    /**
+     * Dragging process for the slider.
+     * @param { MouseEvent } event - The mouse event that triggered the dragging.
+     */
+    onMousemoveSliderHandlerFunction(event: MouseEvent): void {
+        if (this.#isDraggingSlider && this.sliderContainer) {
+            const rect = this.sliderContainer.getBoundingClientRect();
+            this.updateSlicerAndTooltip(this.getSliderValue(event, rect), rect);
+        }
+        
+    };
+
+    /**
+     * Updates the slider components based on the current value.
+     * @param { number } value - The current value of the slider (sliderValueMin-sliderValueMax).
+     * @param { DOMRect } rect - The bounding rectangle of the slider element.
+     */
+    updateSlicer(value: number, rect: DOMRect): void {
+        const position = this.#getSliderPosition(value, rect);
+
+        if (this.thumb && this.progressBar && this.tooltipSlider) {
+            this.thumb.style.left = `${position - this.thumb.getBoundingClientRect().width / 2 }px`;
+            this.progressBar.style.width = `${position}px`;
+        }
+    };
+
+    /**
+     * Updates the tooltip and slider components based on the current value.
+     * @param { number } value - The current value of the slider (sliderValueMin-sliderValueMax).
+     * @param { DOMRect } rect - The bounding rectangle of the slider element.
+     */
+    updateSlicerAndTooltip(value: number, rect: DOMRect): void {
+        const position = this.#getSliderPosition(value, rect);
+        this.updateSlicer(value, rect);
+
+        if (this.thumb && this.progressBar && this.tooltipSlider) {
+            this.tooltipSlider.style.left = `${position}px`;
+            this.tooltipSlider.textContent = value.toString();
+            this.tooltipSlider.classList.remove('hidden');
+        }
+    };
+
+    /**
+     * Returns slider X position.
+     * @param value 
+     * @param rect 
+     * @returns 
+     */
+    #getSliderPosition(value: number, rect: DOMRect): number {
+        const sliderWidth = rect.width;
+        const position = (value / this.#sliderValueMax) * sliderWidth;
+
+        return position;
+    };
+
+    /**
+     * Calculates the slider value based on the mouse position.
+     * @param { MouseEvent } event - The mouse event object.
+     * @param { DOMRect } rect - The bounding rectangle of the slider element.
+     * @returns { number } - The calculated slider value (3-180).
+     */
+    getSliderValue(event: MouseEvent, rect: DOMRect): number {
+        const offsetX = event.clientX - rect.left;
+        const value = Math.max(this.#sliderValueMin, Math.min(this.#sliderValueMax, (offsetX / rect.width) * this.#sliderValueMax));
+        
+        return Math.round(value);
+    };
+
+    /**
+     * Stops the dragging process and hides the tooltip.
+     */
+    stopDragging(event: MouseEvent): void {
+        const rect = this.sliderContainer!.getBoundingClientRect();
+        this.#isDraggingSlider = false;
+        this.refreshValue = this.getSliderValue(event, rect);
+        this.#onChangeRefreshValue(this.#refreshValue);
+        if (this.tooltipSlider) {
+            this.tooltipSlider.classList.add('hidden');
+        }
+    };
+
+    /**
+     * Click on #importInput to trigger file explore dialog.
      */
     #onClickImportButtonHandler(): void {
         document.getElementById('importInput')?.click();
-    }
+    };
 
     onClickHideShowLineButtonHandlerFunction(): void {
         this.onClickHideShowLineButtonHandler(this.#isDisplayLine);
@@ -268,7 +416,14 @@ export default class BottomNavigation implements IBottomNavigation<Element> {
 
     onClickHideShowBarButtonHandlerFunction(): void {
         this.onClickHideShowBarButtonHandler(this.#isDisplayBar);
-    }
+    };
+
+    onMouseoverSpeedButtonHandlerFunction(event: Event): void {
+        let id = (<Element>event?.target).id
+        if(id) {
+            this.#showTooltip(id, -55);
+        }
+    };
 
     onMouseoverPlayPauseButtonHandlerFunction(event: Event): void {
         let id = (<Element>event?.target).id
@@ -351,5 +506,8 @@ export default class BottomNavigation implements IBottomNavigation<Element> {
         this.importInput?.removeEventListener('change', this.onChangeImportHandler);
         this.exportButtonContainer?.removeEventListener('click', this.onClickExportButtonHandler);
         this.exportImageButtonContainer?.removeEventListener('click', this.onClickExportImageButtonHandler);
+        this.sliderContainer?.removeEventListener('mouseup', this.stopDragging.bind(this));
+        this.sliderContainer?.removeEventListener('mousedown', this.onMousedownSliderHandlerFunction.bind(this));
+        this.sliderContainer?.addEventListener('mousemove', this.onMousemoveSliderHandlerFunction.bind(this));
     };
 };

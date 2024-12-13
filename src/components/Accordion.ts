@@ -2,7 +2,7 @@
 import '../assets/css/accordion.css';
 
 // Component
-import BottomNavigation, { OnClickPlayPauseButtonHandlerBottomNav, OnClickHideShowBarButtonHandlerBottomNav, OnClickHideShowLineButtonHandlerBottomNav, OnClickClearButtonHandlerBottomNav, OnChangeImportHandlerBottomNav, OnClickExportButtonHandlerBottomNav, OnClickExportImageButtonHandlerBottomNav } from './BottomNavigation';
+import BottomNavigation, { OnClickPlayPauseButtonHandlerBottomNav, OnClickHideShowBarButtonHandlerBottomNav, OnClickHideShowLineButtonHandlerBottomNav, OnClickClearButtonHandlerBottomNav, OnChangeImportHandlerBottomNav, OnClickExportButtonHandlerBottomNav, OnClickExportImageButtonHandlerBottomNav, OnChangeRefreshValueBottomNav } from './BottomNavigation';
 
 export type OnClickArrowAccordionHandler = () => void;
 export type OnClickClearButtonHandler = OnClickClearButtonHandlerBottomNav;
@@ -12,6 +12,7 @@ export type OnClickPlayPauseButtonHandler = OnClickPlayPauseButtonHandlerBottomN
 export type OnClickHideShowMessageButtonHandler = OnClickHideShowBarButtonHandlerBottomNav;
 export type OnClickHideShowViewerButtonHandler = OnClickHideShowLineButtonHandlerBottomNav;
 export type OnChangeImportHandler = OnChangeImportHandlerBottomNav;
+export type OnChangeRefreshValueHandler = OnChangeRefreshValueBottomNav;
 
 interface IAccordion<E extends Element> {
     arrowAccordion: E | null;
@@ -41,7 +42,7 @@ export default class Accordion implements IAccordion<Element> {
     #isDisplayViewer: boolean = true;
     private onClickArrowAccordionHandler: OnClickArrowAccordionHandler;
 
-    constructor(element: Element, onClickArrowAccordionHandler: OnClickArrowAccordionHandler, onClickExportButtonHandler: OnClickExportButtonHandler, onChangeImportHandler: OnChangeImportHandler, onClickPlayPauseButtonHandler: OnClickPlayPauseButtonHandler, onClickClearButtonHandler: OnClickClearButtonHandler, onClickHideShowMessageButtonHandler: OnClickHideShowMessageButtonHandler, onClickHideShowViewerButtonHandler: OnClickHideShowViewerButtonHandler, onClickExportImageButtonHandler: OnClickExportImageButtonHandler, isExpanded: boolean) {
+    constructor(element: Element, refreshValue: number, onClickArrowAccordionHandler: OnClickArrowAccordionHandler, onClickExportButtonHandler: OnClickExportButtonHandler, onChangeImportHandler: OnChangeImportHandler, onClickPlayPauseButtonHandler: OnClickPlayPauseButtonHandler, onClickClearButtonHandler: OnClickClearButtonHandler, onClickHideShowMessageButtonHandler: OnClickHideShowMessageButtonHandler, onClickHideShowViewerButtonHandler: OnClickHideShowViewerButtonHandler, onClickExportImageButtonHandler: OnClickExportImageButtonHandler, onChangeRefreshValue: OnChangeRefreshValueHandler, isExpanded: boolean) {
 
         const htmlString = `
             <section id="accordionExtension" class="accordionExtension">
@@ -51,7 +52,7 @@ export default class Accordion implements IAccordion<Element> {
                     }
                 </style>
                 <div class="tabExtension">
-                    <div class="flex-container bg-primary px-2">>
+                    <div class="flex-container bg-primary px-2">
 
                         <div id="headerLabel" class="tab__label">TwitchChart</div>
                         <div id="arrowAccordion" class="arrowExtension last-item"></div>
@@ -79,7 +80,7 @@ export default class Accordion implements IAccordion<Element> {
         this.onClickArrowAccordionHandler = onClickArrowAccordionHandler;
 
         // Init BottomNavigation
-        this.bottomNavigation = (this.tabContent) ? new BottomNavigation(this.tabContent, onClickPlayPauseButtonHandler, onClickHideShowMessageButtonHandler, onClickHideShowViewerButtonHandler, onClickClearButtonHandler, onChangeImportHandler, onClickExportButtonHandler, onClickExportImageButtonHandler) : undefined;
+        this.bottomNavigation = (this.tabContent) ? new BottomNavigation(this.tabContent, refreshValue, onClickPlayPauseButtonHandler, onClickHideShowMessageButtonHandler, onClickHideShowViewerButtonHandler, onClickClearButtonHandler, onChangeImportHandler, onClickExportButtonHandler, onClickExportImageButtonHandler, onChangeRefreshValue) : undefined;
 
         isExpanded ? this.expandChartContainer() : this.collapseChartContainer();
     };
