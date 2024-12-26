@@ -1,5 +1,5 @@
 /**
- * A manager for handling a interval with pause and resume functionality
+ * A manager for handling a interval with pause and resume functionality.
  */
 export default class IntervalManager {
     private intervalId: ReturnType<typeof setInterval> | null = null;
@@ -17,7 +17,7 @@ export default class IntervalManager {
     };
 
     /**
-     * Starts the interval if it hasn't been started yet
+     * Starts the interval if it hasn't been started yet.
      */
     play() {
         if (this.hasStarted) return; // Prevents multiple calls to play from restarting
@@ -27,7 +27,7 @@ export default class IntervalManager {
 
     /**
      * Pauses the interval, saving the remaining time
-     * clears the current interval and calculates the remaining time
+     * clears the current interval and calculates the remaining time.
      */
     pause(): void {
         if (this.intervalId) {
@@ -39,23 +39,29 @@ export default class IntervalManager {
     };
 
     /**
-     * Resumes the interval with the remaining time
+     * Resumes the interval with the remaining time.
      */
-    resume(): void {
+    resume(wait: boolean = true): void {
         if (this.intervalId) return; // Avoid creating multiple intervals
         this.start = Date.now();
         
         // Set a timeout for the first tick, then start the interval
-        this.intervalId = setTimeout(() => {
-            this.callback();
+        if (wait) {
+            this.intervalId = setTimeout(() => {
+                this.callback();
+                this.intervalId = setInterval(this.callback, this.intervalDuration);
+                this.start = Date.now(); // Reset start for accurate future pauses
+                this.remaining = this.intervalDuration;
+            }, this.remaining);
+        } else {
             this.intervalId = setInterval(this.callback, this.intervalDuration);
             this.start = Date.now(); // Reset start for accurate future pauses
             this.remaining = this.intervalDuration;
-        }, this.remaining);
+        }
     };
 
     /**
-     * Clears the interval and resets the remaining time
+     * Clears the interval and resets the remaining time.
      */
     clear(): void {
         if (this.intervalId) {
@@ -64,5 +70,16 @@ export default class IntervalManager {
         }
         this.remaining = this.intervalDuration;
         this.hasStarted = false;
+    };
+
+    /**
+     * Update interval then resume.
+     * @param { number } newInterval 
+     */
+    updateInterval(newInterval: number): void {
+        this.clear();
+        this.intervalDuration = newInterval;
+        this.hasStarted = true;
+        this.resume(false);
     };
 };
