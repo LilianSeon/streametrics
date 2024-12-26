@@ -8,14 +8,13 @@ import IntervalManager from './js/intervalManager';
 // Components
 import Accordion, { OnChangeRefreshValueHandler, OnClickExportButtonHandler, OnClickExportImageButtonHandler, OnClickPlayPauseButtonHandler, OnChangeImportHandler, OnClickClearButtonHandler, OnClickHideShowMessageButtonHandler, OnClickHideShowViewerButtonHandler } from './components/Accordion';
 import { MessageCounter } from './js/messageCounter';
-import Toast, { ToastMessage } from './components/Toast';
+import { ToastMessage } from './components/Toast';
 import ChartExtension, { ChartDataViewer } from './js/chartExtension';
 
 // CSS
 import './assets/css/index.css'; // Font
+import ToastManager from './js/toastManager';
 
-
-const DELAY_MS: number = 5000;
 
 let chartExtension: ChartExtension | undefined;
 //let data: ChartDataViewer[] = [];
@@ -27,6 +26,7 @@ let messageCounter: MessageCounter | undefined;
 let loopCounter: number = 0;
 let intervalManager: IntervalManager| undefined;
 let hasImportedData: boolean = false;
+let toastManager: ToastManager | undefined;
 
 /**
  * Get needed data then add it to the Chart
@@ -75,9 +75,13 @@ const onClickArrowAccordionHandler = async (): Promise<void> => {
 };
 
 const onClickClearHandler: OnClickClearButtonHandler = () => {
-    chartExtension?.clearData();
-    chartExtension?.clearTitle();
-    hasImportedData = false;
+    if (typeof toastManager !== 'undefined') {
+        toastManager.addToQueue('interactive', ToastMessage.interactiveMessage, ToastMessage.interactiveTitle, () => {
+            chartExtension?.clearData();
+            chartExtension?.clearTitle();
+            hasImportedData = false;
+        });
+    }
 };
 
 const onChangeImportHandler: OnChangeImportHandler = async (event: Event): Promise<void> => {
@@ -87,13 +91,13 @@ const onChangeImportHandler: OnChangeImportHandler = async (event: Event): Promi
             const isDataImported = await chartExtension.importData(data);
 
             if (isDataImported) {
-                new Toast('success', accordionComponent!.toastContainer, ToastMessage.importSuccess);
+                toastManager?.addToQueue('success', ToastMessage.importSuccess);
                 intervalManager.clear();
                 accordionComponent.isPlaying = false;
                 hasImportedData = true;
             }
         } catch (error) {
-            new Toast('error', accordionComponent!.toastContainer, ToastMessage.importError);
+            toastManager?.addToQueue('error', ToastMessage.importError);
         }
     }
 };
@@ -167,15 +171,15 @@ const initChartInDOM = async () => {
         messageCounter = new MessageCounter(getChatContainer(document));
     }
 
-    if (typeof intervalManager === 'undefined') {
-        intervalManager = new IntervalManager(startLoopGetData, DELAY_MS);
-    }
-
     await initStorage();
 
     if (informationContainer && typeof accordionComponent == 'undefined' && typeof accordionElement == 'undefined' && document.getElementById("accordionExtension") === null) {
         const { isAccordionExpanded } = await getStorage(['isAccordionExpanded']);
         const { refreshValue } = await getStorage(['refreshValue']);
+
+        if (typeof intervalManager === 'undefined') {
+            intervalManager = new IntervalManager(startLoopGetData, (refreshValue ?? 5) * 1000);
+        }
 
         accordionComponent = new Accordion(informationContainer, refreshValue ?? 5, onClickArrowAccordionHandler, onClickExportButtonHandler, onChangeImportHandler, onClickPlayPauseButtonHandler, onClickClearHandler, onClickHideShowMessageButtonHandler, onClickHideShowViewerButtonHandler, onClickExportImageButtonHandler, onChangeRefreshValue, isAccordionExpanded);
         accordionElement = accordionComponent.getChartContainer() as HTMLElement;
@@ -186,6 +190,7 @@ const initChartInDOM = async () => {
         chartExtension = new ChartExtension(accordionElement, chartTitle, textColor, navigator.language);
         backGroundThemeObserver(document, updateDefaultColor);
         updateDefaultColor(isDarkModeActivated() ? 'dark' : 'light');
+        toastManager = new ToastManager(accordionComponent!.toastContainer);
     }
 };
 

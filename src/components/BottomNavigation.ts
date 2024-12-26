@@ -74,14 +74,14 @@ export default class BottomNavigation implements IBottomNavigation<Element> {
                         <ul class="p-3 space-y-1 text-lg text-gray-700 dark:text-gray-200">
                             <li>
                                 <div class="flex items-center p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-600">
-                                    <input id="hideShowCheckboxBar" type="checkbox" value="${this.#isDisplayBar}" checked="${this.#isDisplayBar}" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
-                                    <label for="hideShowCheckboxBar" class="w-full ms-7 text-xl font-medium text-gray-900 rounded dark:text-gray-300 select-none">Bar</label>
+                                    <input id="hideShowCheckboxBar" type="checkbox" value="${this.#isDisplayBar}" checked="${this.#isDisplayBar}" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded dark:bg-gray-600 dark:border-gray-500 cursor-pointer">
+                                    <label for="hideShowCheckboxBar" class="w-full ms-7 text-xl font-medium text-gray-900 rounded dark:text-gray-300 select-none cursor-pointer">Bar</label>
                                 </div>
                             </li>
                             <li>
                                 <div class="flex items-center p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-600">
-                                    <input id="hideShowCheckboxLine" type="checkbox" value="${this.#isDisplayLine}" checked="${this.#isDisplayLine}" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
-                                    <label for="hideShowCheckboxLine" class="w-full ms-7 text-xl font-medium text-gray-900 rounded dark:text-gray-300 select-none">Line</label>
+                                    <input id="hideShowCheckboxLine" type="checkbox" value="${this.#isDisplayLine}" checked="${this.#isDisplayLine}" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded dark:bg-gray-600 dark:border-gray-500 cursor-pointer">
+                                    <label for="hideShowCheckboxLine" class="w-full ms-7 text-xl font-medium text-gray-900 rounded dark:text-gray-300 select-none cursor-pointer">Line</label>
                                 </div>
                             </li>
                         </ul>
@@ -125,9 +125,9 @@ export default class BottomNavigation implements IBottomNavigation<Element> {
                         </div>
                         <div class="flex w-64 m-auto items-center h-14 pb-4 justify-center">
                                 <div class="py-1 relative min-w-full">
-                                    <div id="slider" class="relative w-full h-1.5 bg-gray-300 rounded cursor-pointer">
-                                        <div id="progressBar" class="absolute h-full bg-blue-600 rounded hover:bg-blue-700" style="width: 50%;"></div>
-                                        <div id="thumb" class="absolute top-1/2 w-4 h-4 bg-white rounded-full transform -translate-y-1/2 cursor-pointer" style="left: 50%;"></div>
+                                    <div id="slider" class="relative w-full h-1.5 bg-gray-300 rounded cursor-pointer group">
+                                        <div id="progressBar" class="absolute h-full bg-blue-600 rounded group-hover:bg-blue-700" style="width: 50%;"></div>
+                                        <div id="thumb" class="absolute top-1/2 w-4 h-4 bg-white rounded-full transform -translate-y-1/2 cursor-pointer hover:scale-110 transition-transform duration-200" style="left: 50%;"></div>
                                         <div id="tooltipSlider" class="absolute hidden -top-2.5 bg-slate-500 text-white px-2 py-1 rounded transform -translate-y-full -translate-x-1/2 shadow-sm select-none">${ refreshValue }</div>
                                         <div class="absolute text-white -ml-1 bottom-0 left-0 -mb-10 select-none">${ this.#sliderValueMin }s</div>
                                         <div class="absolute text-white -mr-1 bottom-0 right-0 -mb-10 select-none">${ this.#sliderValueMax }s</div>

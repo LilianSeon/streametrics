@@ -59,7 +59,7 @@ export default class Accordion implements IAccordion<Element> {
 
                     </div>
                     <div id="tab__content" class="tab__content relative">
-                        <div id="toastContainer" class="relative mt-3 flex flex-col space-y-20 z-50"></div>
+                        <div id="toastContainer" class="absolute right-4 mt-3 flex flex-col space-y-5 z-50"></div>
                         <p id="chartContainer"></p>
                     </div>
                 </div>
