@@ -77,11 +77,6 @@
   color: #fff;
 }
 
-.last-item {
-  margin-left: auto;
-  margin-top: 3px;
-}
-
 .flex-container {
   display: flex;
   justify-content: space-between; 
@@ -114,6 +109,7 @@
   width: 1em;
   height: 1em;
   text-align: center;
+  transform-origin: center;
   transform: var(--arrowTransform);
   transition: transform 0.35s ease;
   right: 15px;
@@ -142,17 +138,4 @@
 .tabExtension + .flex-container > .arrowExtension::after  { /* not */
   margin-bottom: 10px;
   margin-right: 0px;
-}
-
-/* Arrow animation */
-.arrowExtension:hover::after { /* not */
-  animation: bounce .7s infinite;
-}
-@keyframes bounce {
-  25% {
-    transform: var(--arrowTransform) translate(.25rem);
-  }
-  75% {
-    transform: var(--arrowTransform) translate(-.25rem);
-  }
 }

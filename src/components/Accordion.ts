@@ -46,16 +46,13 @@ export default class Accordion implements IAccordion<Element> {
 
         const htmlString = `
             <section id="accordionExtension" class="accordionExtension">
-                <style>
-                    :root {
-                        --arrowTransform: rotate(${ isExpanded ? 270 : 90 }deg);
-                    }
-                </style>
                 <div class="tabExtension">
                     <div class="flex-container bg-primary px-2">
 
                         <div id="headerLabel" class="tab__label">TwitchChart</div>
-                        <div id="arrowAccordion" class="arrowExtension last-item"></div>
+                        <div id="arrowAccordion" class="my-auto mr-3 cursor-pointer transition-transform duration-350 ${ isExpanded ? 'rotate-180' : '' }">
+                            <svg class="h-8 w-8 text-black dark:text-white "  width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">  <path stroke="none" d="M0 0h24v24H0z"/>  <polyline points="6 15 12 9 18 15" /></svg>
+                        </div>
 
                     </div>
                     <div id="tab__content" class="tab__content relative">
@@ -129,7 +126,7 @@ export default class Accordion implements IAccordion<Element> {
     expandChartContainer(): void {
         if (this.tabContent && this.arrowAccordion) {
             this.tabContent.style.maxHeight = '300px';
-            this.arrowAccordion.style.setProperty('--arrowTransform', 'rotate(270deg)');
+            this.arrowAccordion.classList.toggle('rotate-180');
             this.isExpanded = true;
         }
     };
@@ -137,7 +134,7 @@ export default class Accordion implements IAccordion<Element> {
     collapseChartContainer(): void {
         if (this.tabContent && this.arrowAccordion) {
             this.tabContent.style.maxHeight = '0px';
-            this.arrowAccordion.style.setProperty('--arrowTransform', 'rotate(90deg)');
+            this.arrowAccordion.classList.toggle('rotate-180');
             this.isExpanded = false;
         }
     };
