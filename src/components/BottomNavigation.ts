@@ -39,6 +39,7 @@ export default class BottomNavigation implements IBottomNavigation<Element> {
     playPauseButtonTooltip: HTMLElement | null;
     progressBar: HTMLElement | null;
     sliderContainer: HTMLElement | null;
+    sliderTooltipContainer: HTMLElement | null;
     speedButtonContainer: HTMLElement | null;
     thumb: HTMLElement | null;
     tooltipSlider: HTMLElement | null;
@@ -115,7 +116,7 @@ export default class BottomNavigation implements IBottomNavigation<Element> {
                             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7.75 4H19M7.75 4a2.25 2.25 0 0 1-4.5 0m4.5 0a2.25 2.25 0 0 0-4.5 0M1 4h2.25m13.5 6H19m-2.25 0a2.25 2.25 0 0 1-4.5 0m4.5 0a2.25 2.25 0 0 0-4.5 0M1 10h11.25m-4.5 6H19M7.75 16a2.25 2.25 0 0 1-4.5 0m4.5 0a2.25 2.25 0 0 0-4.5 0M1 16h2.25"/>
                         </svg>
                     </button>
-                    <div id="tooltip-speedButton" class="absolute text-lg z-10 invisible opacity-0 inline-block pb-2 pt-4 px-6 -top-32 -left-1/2 font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm hover:visible hover:opacity-95 dark:bg-gray-700">
+                    <div id="tooltip-speedButton" class="absolute text-lg z-10 invisible opacity-0 inline-block pb-5 pt-4 px-6 -top-32 -left-1/2 font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm hover:visible hover:opacity-95 dark:bg-gray-700">
                         <div class="flow-root text-white select-none">
                             <div class="float-left">Refresh rate :</div>
                             <div class="float-right">
@@ -123,14 +124,16 @@ export default class BottomNavigation implements IBottomNavigation<Element> {
                                 <span class="text-sm">/sec</span>
                             </div>
                         </div>
-                        <div class="flex w-64 m-auto items-center h-14 pb-4 justify-center">
+                        <div class="flex w-64 m-auto items-center h-12 justify-center">
                                 <div class="py-1 relative min-w-full">
                                     <div id="slider" class="relative w-full h-1.5 bg-gray-300 rounded cursor-pointer group">
                                         <div id="progressBar" class="absolute h-full bg-blue-600 rounded group-hover:bg-blue-700" style="width: 50%;"></div>
                                         <div id="thumb" class="absolute top-1/2 w-4 h-4 bg-white rounded-full transform -translate-y-1/2 cursor-pointer hover:scale-110 transition-transform duration-200" style="left: 50%;"></div>
                                         <div id="tooltipSlider" class="absolute hidden -top-2.5 bg-slate-500 text-white px-2 py-1 rounded transform -translate-y-full -translate-x-1/2 shadow-sm select-none">${ refreshValue }</div>
-                                        <div class="absolute text-white -ml-1 bottom-0 left-0 -mb-10 select-none">${ this.#sliderValueMin }s</div>
-                                        <div class="absolute text-white -mr-1 bottom-0 right-0 -mb-10 select-none">${ this.#sliderValueMax }s</div>
+                                    </div>
+                                    <div class="relative w-full">
+                                        <div class="absolute text-white -ml-1 bottom-0 left-0 -mb-9 select-none">${ this.#sliderValueMin }s</div>
+                                        <div class="absolute text-white -mr-1 bottom-0 right-0 -mb-9 select-none">${ this.#sliderValueMax }s</div>
                                     </div>
                                 </div>
                             </div>
@@ -247,9 +250,11 @@ export default class BottomNavigation implements IBottomNavigation<Element> {
         // Set slider callback
         this.#refreshValue = refreshValue;
         this.sliderContainer = document.getElementById('slider');
-        this.sliderContainer?.addEventListener('mousedown', this.onMousedownSliderHandlerFunction.bind(this));
-        this.sliderContainer?.addEventListener('mouseup', this.stopDragging.bind(this), false);
-        this.sliderContainer?.addEventListener('mousemove', this.onMousemoveSliderHandlerFunction.bind(this));
+        this.sliderTooltipContainer = document.getElementById('tooltip-speedButton');
+        this.sliderTooltipContainer?.addEventListener('mousedown', this.onMousedownSliderHandlerFunction.bind(this));
+        this.sliderTooltipContainer?.addEventListener('mouseup', this.stopDragging.bind(this), false);
+        this.sliderTooltipContainer?.addEventListener('mousemove', this.onMousemoveSliderHandlerFunction.bind(this));
+        this.sliderTooltipContainer?.addEventListener('mouseleave', this.stopDragging.bind(this), false);
         this.thumb = document.getElementById('thumb');
         this.progressBar = document.getElementById('progressBar');
         this.tooltipSlider = document.getElementById('tooltipSlider');
@@ -314,12 +319,13 @@ export default class BottomNavigation implements IBottomNavigation<Element> {
      * @param { MouseEvent } event - The mouse event that triggered the dragging.
      */
     onMousedownSliderHandlerFunction(event: MouseEvent): void {
-        this.#isDraggingSlider = true;
-        if (this.sliderContainer) {
-            const rect = this.sliderContainer.getBoundingClientRect();
-            this.updateSlicerAndTooltip(this.getSliderValue(event, rect), rect);
+        if ((<HTMLElement>event?.target)?.id && ((<HTMLElement>event.target).id === "slider" || (<HTMLElement>event.target).id === "progressBar" || (<HTMLElement>event.target).id === "thumb")) {
+            this.#isDraggingSlider = true;
+            if (this.sliderContainer && this.sliderTooltipContainer) {
+                const rect = this.sliderContainer.getBoundingClientRect();
+                this.updateSlicerAndTooltip(this.getSliderValue(event, rect), rect);
+            }
         }
-        
     };
 
     /**
@@ -394,12 +400,14 @@ export default class BottomNavigation implements IBottomNavigation<Element> {
      * Stops the dragging process and hides the tooltip.
      */
     stopDragging(event: MouseEvent): void {
-        const rect = this.sliderContainer!.getBoundingClientRect();
-        this.#isDraggingSlider = false;
-        this.refreshValue = this.getSliderValue(event, rect);
-        this.#onChangeRefreshValue(this.#refreshValue);
-        if (this.tooltipSlider) {
-            this.tooltipSlider.classList.add('hidden');
+        if (this.#isDraggingSlider) {
+            const rect = this.sliderContainer!.getBoundingClientRect();
+            this.#isDraggingSlider = false;
+            this.refreshValue = this.getSliderValue(event, rect);
+            this.#onChangeRefreshValue(this.#refreshValue);
+            if (this.tooltipSlider) {
+                this.tooltipSlider.classList.add('hidden');
+            }
         }
     };
 
@@ -506,8 +514,9 @@ export default class BottomNavigation implements IBottomNavigation<Element> {
         this.importInput?.removeEventListener('change', this.onChangeImportHandler);
         this.exportButtonContainer?.removeEventListener('click', this.onClickExportButtonHandler);
         this.exportImageButtonContainer?.removeEventListener('click', this.onClickExportImageButtonHandler);
-        this.sliderContainer?.removeEventListener('mouseup', this.stopDragging.bind(this));
-        this.sliderContainer?.removeEventListener('mousedown', this.onMousedownSliderHandlerFunction.bind(this));
-        this.sliderContainer?.addEventListener('mousemove', this.onMousemoveSliderHandlerFunction.bind(this));
+        this.sliderTooltipContainer?.removeEventListener('mousedown', this.onMousedownSliderHandlerFunction.bind(this));
+        this.sliderTooltipContainer?.removeEventListener('mouseup', this.stopDragging.bind(this), false);
+        this.sliderTooltipContainer?.removeEventListener('mousemove', this.onMousemoveSliderHandlerFunction.bind(this));
+        this.sliderTooltipContainer?.removeEventListener('mouseleave', this.stopDragging.bind(this), false);
     };
 };
