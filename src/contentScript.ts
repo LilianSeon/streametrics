@@ -105,6 +105,7 @@ const onChangeImportHandler: OnChangeImportHandler = async (event: Event): Promi
 const onChangeRefreshValue: OnChangeRefreshValueHandler= async (refreshValue: number) => {
     await setStorage({ 'refreshValue': refreshValue });
     intervalManager?.updateInterval(refreshValue * 1000);
+    if (accordionComponent?.isPlaying) intervalManager?.resume(false);
 };
 
 const onClickExportImageButtonHandler: OnClickExportImageButtonHandler = () => {
@@ -138,7 +139,7 @@ const onClickPlayPauseButtonHandler: OnClickPlayPauseButtonHandler = (isPlaying:
             chartExtension.clearData();
             chartExtension.clearTitle();
         }
-        intervalManager?.play();
+        intervalManager?.resume();
         hasImportedData = false;
     }
 

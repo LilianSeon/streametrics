@@ -1,6 +1,6 @@
 :root {
   /*--primaryExtension: #227093;*/
-  --primaryExtension: rgba(83, 83, 95, 0.38); /*#9147ff;*/
+  --primaryExtension: #334155; /*#9147ff;*/
   --secondaryExtension: #ff5252;
   --backgroundExtension: #eee;
   --highlightExtension: #ffda79;
@@ -22,14 +22,14 @@
   max-height: 255px;
 }
 
+.borderBottomNav {
+  border-bottom: 15px solid transparent !important;
+}
 
 
 /* Visual styles */
 .accordionExtension {
   box-sizing: border-box;
-  color: var(--themeExtension);
-  border: 2px solid;
-  border-radius: 0.5rem;
   overflow: hidden;
   margin-left: 3rem;
   margin-right: 3rem;

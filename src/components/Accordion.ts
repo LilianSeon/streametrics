@@ -45,9 +45,9 @@ export default class Accordion implements IAccordion<Element> {
     constructor(element: Element, refreshValue: number, onClickArrowAccordionHandler: OnClickArrowAccordionHandler, onClickExportButtonHandler: OnClickExportButtonHandler, onChangeImportHandler: OnChangeImportHandler, onClickPlayPauseButtonHandler: OnClickPlayPauseButtonHandler, onClickClearButtonHandler: OnClickClearButtonHandler, onClickHideShowMessageButtonHandler: OnClickHideShowMessageButtonHandler, onClickHideShowViewerButtonHandler: OnClickHideShowViewerButtonHandler, onClickExportImageButtonHandler: OnClickExportImageButtonHandler, onChangeRefreshValue: OnChangeRefreshValueHandler, isExpanded: boolean) {
 
         const htmlString = `
-            <section id="accordionExtension" class="accordionExtension">
+            <section id="accordionExtension" class="accordionExtension border-2 border-solid dark:border-zinc-800 rounded-lg">
                 <div class="tabExtension">
-                    <div class="flex-container bg-primary px-2">
+                    <div class="flex-container dark:bg-zinc-800 px-2">
 
                         <div id="headerLabel" class="tab__label">TwitchChart</div>
                         <div id="arrowAccordion" class="my-auto mr-3 cursor-pointer transition-transform duration-350 ${ isExpanded ? 'rotate-180' : '' }">

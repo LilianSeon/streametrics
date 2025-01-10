@@ -73,13 +73,12 @@ export default class IntervalManager {
     };
 
     /**
-     * Update interval then resume.
+     * Update interval.
      * @param { number } newInterval 
      */
     updateInterval(newInterval: number): void {
         this.clear();
         this.intervalDuration = newInterval;
         this.hasStarted = true;
-        this.resume(false);
     };
 };
