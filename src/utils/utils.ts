@@ -277,7 +277,7 @@ const getNbViewer = (document: Document): number => {
  */
 const getDuration = (document: Document): string | undefined => {
 
-    const getHTMLElementByClass = document.getElementsByClassName("live-time")[0]?.innerHTML
+    const getHTMLElementByClass = (document.getElementsByClassName("live-time")[0].children[0] as HTMLElement).innerText
 
     return getHTMLElementByClass;
 };

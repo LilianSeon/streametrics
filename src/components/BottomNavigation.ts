@@ -63,7 +63,7 @@ export default class BottomNavigation implements IBottomNavigation<Element> {
     constructor(element: Element, refreshValue: number, onClickPlayPauseButtonHandler: OnClickPlayPauseButtonHandlerBottomNav, onClickHideShowBarButtonHandler: OnClickHideShowBarButtonHandlerBottomNav, onClickHideShowLineButtonHandler: OnClickHideShowLineButtonHandlerBottomNav, onClickClearButtonHandler: OnClickClearButtonHandlerBottomNav, onChangeImportHandler: OnChangeImportHandlerBottomNav, onClickExportButtonHandler: OnClickExportButtonHandlerBottomNav, onClickExportImageButtonHandler: OnClickExportImageButtonHandlerBottomNav, onChangeRefreshValue: OnChangeRefreshValueBottomNav) {
 
         const htmlString = `
-        <div class="group/outer absolute z-50 w-full max-w-lg -translate-x-1/2 left-1/2 -bottom-[57px] hover:-bottom-[7px] transition-all duration-200 border-8 border-solid border-transparent borderBottomNav">
+        <div class="group/outer absolute z-50 w-full max-w-lg -translate-x-1/2 left-1/2 -bottom-[58px] hover:-bottom-[7px] transition-all duration-200 border-8 border-solid border-transparent borderBottomNav">
             <div id="bottomNavigation" class="h-20 bg-gray-700 rounded-full border-8">
                 <span class="absolute w-8 h-1 -translate-x-1/2 bg-gray-300 rounded-lg top-[2px] left-1/2 dark:bg-gray-400 opacity-100 transition-opacity group-hover/outer:opacity-0 duration-200"></span>
                 <div class="grid h-full max-w-lg grid-cols-5 mx-auto">

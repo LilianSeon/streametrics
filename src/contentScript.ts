@@ -45,6 +45,8 @@ const startLoopGetData = () => {
 
         //const peaks: Peak[] = computedDataLabel(data, nbViewer) || []; // return dataLabel if needed;
 
+        console.log(duration)
+
         const newData = {
             id: loopCounter,
             duration,
