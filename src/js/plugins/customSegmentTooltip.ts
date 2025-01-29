@@ -14,14 +14,11 @@ export const customSegmentTooltip = {
                 const element = elements[0];
                 const datasetIndex = element.datasetIndex;
                 const index = element.index;
-
+                //@ts-expect-error
                 const dataset = chart.data.datasets[datasetIndex];
+                //@ts-expect-error
                 const prevIndex = index > 0 ? index - 1 : null;
 
-                if (prevIndex !== null) {
-                    console.log(`Hovered on segment between index ${prevIndex} and ${index}`);
-                    console.log(`Previous value: ${dataset.data[prevIndex]}, Current value: ${dataset.data[index]}`);
-                }
             }
         }
     }

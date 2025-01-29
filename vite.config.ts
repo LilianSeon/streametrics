@@ -12,7 +12,7 @@ export default defineConfig({
     }
   },*/
   build: {
-    target: "ES2020",
+    target: ["ESNext"],
     outDir: 'dist',
     minify: false,
     rollupOptions: {
@@ -25,18 +25,20 @@ export default defineConfig({
         'fonts/pacifico.woff2': './src/assets/fonts/pacifico.woff2',
         'css/index.css': './src/assets/css/index.css',
         'css/output.css': './src/assets/css/output.css',
+        'images/logo-transparent.png': './src/assets/images/logo-transparent.png',
       },
       output: {
         entryFileNames: "[name].js",
         assetFileNames: (assetInfo) => {
           console.log(assetInfo.name, assetInfo.type)
           if (assetInfo.name == "pacifico.woff2") return "fonts/pacifico.woff2";
+          if (assetInfo.name == "logo-transparent.png") return "images/logo-transparent.png";
           return assetInfo.name as string;
         }
       }
     }
   },
   resolve: {
-    extensions: [".js", ".json", ".ts", ".tsx", ".css", ".woff2"]
+    extensions: [".js", ".json", ".ts", ".tsx", ".css", ".woff2", ".png"]
   }
 })

@@ -22,7 +22,7 @@
         }
     ],
     "web_accessible_resources": [{
-        "resources": ["fonts/pacifico.woff2"],
+        "resources": ["fonts/pacifico.woff2", "images/logo-transparent.png"],
         "matches": ["https://www.twitch.tv/*", "https://www.twitch.tv/*"]
     }]
 }

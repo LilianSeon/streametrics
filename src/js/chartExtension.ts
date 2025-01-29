@@ -1,4 +1,6 @@
 import { Chart, ScriptableLineSegmentContext } from 'chart.js/auto';
+//import zoomPlugin from 'chartjs-plugin-zoom'
+import zoomPlugin from './ChartjsPluginZoom';
 /*import ChartDataLabels from 'chartjs-plugin-datalabels';
 
 // Register the plugin to all charts:
@@ -128,6 +130,19 @@ export default class ChartExtension {
                         intersect: false
                     }, 
                     plugins: {
+                        //@ts-ignore
+                        zoom: {
+                            pan: {
+                                enabled: true,
+                                mode: 'x'
+                            },
+                            zoom: {
+                              wheel: {
+                                enabled: true,
+                              },
+                              mode: 'x',
+                            }
+                        },
                         colors: {
                             forceOverride: true
                         },
@@ -186,6 +201,8 @@ export default class ChartExtension {
                 },
                 plugins: [verticalHoverLine, customSegmentTooltip]
             });
+
+            Chart.register(zoomPlugin);
         }
     };
 

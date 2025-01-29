@@ -44,14 +44,20 @@ export default class Accordion implements IAccordion<Element> {
 
     constructor(element: Element, refreshValue: number, onClickArrowAccordionHandler: OnClickArrowAccordionHandler, onClickExportButtonHandler: OnClickExportButtonHandler, onChangeImportHandler: OnChangeImportHandler, onClickPlayPauseButtonHandler: OnClickPlayPauseButtonHandler, onClickClearButtonHandler: OnClickClearButtonHandler, onClickHideShowMessageButtonHandler: OnClickHideShowMessageButtonHandler, onClickHideShowViewerButtonHandler: OnClickHideShowViewerButtonHandler, onClickExportImageButtonHandler: OnClickExportImageButtonHandler, onChangeRefreshValue: OnChangeRefreshValueHandler, isExpanded: boolean) {
 
+        const imgSrc = chrome.runtime.getURL('images/logo-transparent.png');
+
         const htmlString = `
             <section id="accordionExtension" class="accordionExtension border-2 border-solid dark:border-zinc-800 rounded-lg">
                 <div class="tabExtension">
                     <div class="flex-container dark:bg-zinc-800 px-2">
 
-                        <div id="headerLabel" class="h-10 mb-3 text-center text-white text-xl p-4">StreamMetrics</div>
+                        
+                        <div id="headerLabel" class="pt-2 pb-3 h-20 text-center text-white text-xl flex">
+                            <img class="my-auto h-14 rounded-full inline-block" src="${ imgSrc }" alt="logo" />
+                            <div class="my-auto ml-4 self-center text-3xl font-semibold whitespace-nowrap tracking-wide inline-block text-black dark:text-white">StreaMetrics</div>
+                        </div>
                         <div id="arrowAccordion" class="my-auto mr-3 cursor-pointer transition-transform duration-350 ${ isExpanded ? 'rotate-180' : '' }">
-                            <svg class="h-8 w-8 text-black dark:text-white "  width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">  <path stroke="none" d="M0 0h24v24H0z"/>  <polyline points="6 15 12 9 18 15" /></svg>
+                            <svg class="h-8 w-8 text-black dark:text-white" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">  <path stroke="none" d="M0 0h24v24H0z"/>  <polyline points="6 15 12 9 18 15" /></svg>
                         </div>
 
                     </div>

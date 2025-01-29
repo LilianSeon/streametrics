@@ -43,9 +43,7 @@ const startLoopGetData = () => {
             messageAmount = messageCounter.getAmountOfNewMessages(messageCounter.previousMessagesCount);
         }
 
-        //const peaks: Peak[] = computedDataLabel(data, nbViewer) || []; // return dataLabel if needed;
-
-        console.log(duration)
+        //const peaks: Peak[] = computedDataLabel(data, nbViewer) || []; // return dataLabel if needed; 
 
         const newData = {
             id: loopCounter,

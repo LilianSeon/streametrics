@@ -104,10 +104,10 @@ export default class BottomNavigation implements IBottomNavigation<Element> {
 
                     <div class="flex items-center justify-center">
                         <button id="playPauseButton" type="button" class="inline-flex items-center justify-center w-14 h-14 font-medium bg-blue-600 rounded-full hover:bg-blue-700 group focus:outline-none">
-                            <svg id="pauseIcon" class="show w-7 h-7 text-white pointer-events-none" style="margin-left: 1px;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <svg id="pauseIcon" class="show w-7 h-7 text-white pointer-events-none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                                 <path d="M5.75 3a.75.75 0 0 0-.75.75v12.5c0 .414.336.75.75.75h1.5a.75.75 0 0 0 .75-.75V3.75A.75.75 0 0 0 7.25 3h-1.5ZM12.75 3a.75.75 0 0 0-.75.75v12.5c0 .414.336.75.75.75h1.5a.75.75 0 0 0 .75-.75V3.75a.75.75 0 0 0-.75-.75h-1.5Z" />
                             </svg>
-                            <svg id="playIcon" class="hide w-7 h-7 text-white pointer-events-none" style="margin-left: 3px;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <svg id="playIcon" class="hide w-7 h-7 text-white pointer-events-none" style="margin-left: 2px;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                                 <path d="M6.3 2.84A1.5 1.5 0 0 0 4 4.11v11.78a1.5 1.5 0 0 0 2.3 1.27l9.344-5.891a1.5 1.5 0 0 0 0-2.538L6.3 2.841Z" />
                             </svg>
                         </button>
