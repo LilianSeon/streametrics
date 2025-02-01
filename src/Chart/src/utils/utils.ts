@@ -1,4 +1,4 @@
-import { ChartDataViewer, ChartExtensionData, ExportedDatas } from "../js/chartExtension";
+import { ChartDataViewer, ChartExtensionData, ExportedDatas } from "../index";
 import { ChatContainer } from "../js/messageCounter";
 
 export type Peak = {

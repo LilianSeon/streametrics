@@ -11,8 +11,8 @@ import { Browser, connect, ExtensionTransport} from 'puppeteer-core/lib/esm/pupp
 
 // Data mockup
 import { data1 } from './mockup/data1';
-import { ChartDataViewer } from "../js/chartExtension";
-import ChartExtension from "../js/chartExtension";
+import { ChartDataViewer } from "../Chart/src/index";
+import ChartExtension from "../Chart/src/index";
 
 let chartExtension: ChartExtension;
 let browser: Browser;
@@ -46,6 +46,7 @@ describe('Utils functions', () => {
     });
 
     test('detectPeaks', () => {
+        //@ts-ignore
         if (chartExtension) {
             data1.forEach((data: ChartDataViewer) => {
                 chartExtension.addData(data, 15);

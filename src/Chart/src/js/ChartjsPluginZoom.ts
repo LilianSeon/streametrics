@@ -5,7 +5,7 @@
  * (c) 2016-2024 chartjs-plugin-zoom Contributors
  * Released under the MIT License
  */
-//import Hammer from 'hammerjs';
+import Hammer from './hammer';
 import { each, valueOrDefault, almostEquals, callback, sign, getRelativePosition, _isPointInArea } from 'chart.js/helpers';
 
 const getModifierKey = opts => opts && opts.enabled && opts.modifierKey;
@@ -910,9 +910,9 @@ const plugin = {
       || Object.prototype.hasOwnProperty.call(options.pan, 'overScaleMode')) {
       console.warn('The option `overScaleMode` is deprecated. Please use `scaleMode` instead (and update `mode` as desired).');
     }
-    /*if (Hammer) {
+    if (Hammer) {
       startHammer(chart, options);
-    }*/
+    }
     chart.pan = (delta, panScales, transition) => pan(chart, delta, panScales, transition);
     chart.zoom = (args, transition) => zoom(chart, args, transition);
     chart.zoomRect = (p0, p1, transition) => zoomRect(chart, p0, p1, transition);
@@ -940,10 +940,10 @@ const plugin = {
     const state = getState(chart);
     const previousOptions = state.options;
     state.options = options;
-    /*if (hammerOptionsChanged(previousOptions, options)) {
+    if (hammerOptionsChanged(previousOptions, options)) {
       stopHammer(chart);
       startHammer(chart, options);
-    }*/
+    }
     addListeners(chart, options);
   },
   beforeDatasetsDraw(chart, _args, options) {
@@ -960,9 +960,9 @@ const plugin = {
   },
   stop: function(chart) {
     removeListeners(chart);
-    /*if (Hammer) {
+    if (Hammer) {
       stopHammer(chart);
-    }*/
+    }
     removeState(chart);
   },
   panFunctions,

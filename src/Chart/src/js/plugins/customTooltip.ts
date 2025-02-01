@@ -1,4 +1,4 @@
-import { ChartDataViewer } from "../chartExtension.js";
+import { ChartDataViewer } from "../../index";
 
 
 /**

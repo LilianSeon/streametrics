@@ -1,19 +1,19 @@
 /// <reference types="chrome"/>
 
 // Utils
-import { isURLTwitch, getNbViewer, waitForElm, getDuration, formatChartTitle, getGameName, backGroundThemeObserver, ThemeBackgroundColor, extractDataFromJSON, getChatContainer, downloadJSON, downloadImage, getStreamerName, isDarkModeActivated } from './utils/utils';
-import { getStorage, setStorage } from './utils/utilsStorage'
-import IntervalManager from './js/intervalManager';
+import { isURLTwitch, getNbViewer, waitForElm, getDuration, formatChartTitle, getGameName, backGroundThemeObserver, ThemeBackgroundColor, extractDataFromJSON, getChatContainer, downloadJSON, downloadImage, getStreamerName, isDarkModeActivated } from './Chart/src/utils/utils';
+import { getStorage, setStorage } from './Chart/src/utils/utilsStorage'
+import IntervalManager from './Chart/src/js/intervalManager';
 
 // Components
-import Accordion, { OnChangeRefreshValueHandler, OnClickExportButtonHandler, OnClickExportImageButtonHandler, OnClickPlayPauseButtonHandler, OnChangeImportHandler, OnClickClearButtonHandler, OnClickHideShowMessageButtonHandler, OnClickHideShowViewerButtonHandler } from './components/Accordion';
-import { MessageCounter } from './js/messageCounter';
-import { ToastMessage } from './components/Toast';
-import ChartExtension, { ChartDataViewer } from './js/chartExtension';
+import Accordion, { OnChangeRefreshValueHandler, OnClickExportButtonHandler, OnClickExportImageButtonHandler, OnClickPlayPauseButtonHandler, OnChangeImportHandler, OnClickClearButtonHandler, OnClickHideShowMessageButtonHandler, OnClickHideShowViewerButtonHandler } from './Chart/src/components/Accordion';
+import { MessageCounter } from './Chart/src/js/messageCounter';
+import { ToastMessage } from './Chart/src/components/Toast';
+import ChartExtension, { ChartDataViewer } from './Chart/src/index';
 
 // CSS
-import './assets/css/index.css'; // Font
-import ToastManager from './js/toastManager';
+import './Chart/src/assets/css/index.css'; // Font
+import ToastManager from './Chart/src/js/toastManager';
 
 
 let chartExtension: ChartExtension | undefined;

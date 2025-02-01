@@ -1,4 +1,4 @@
-import { ChartDataViewer } from "../../js/chartExtension";
+import { ChartDataViewer } from "../../Chart/src/index";
 
 export const data1: ChartDataViewer[] = [
     {

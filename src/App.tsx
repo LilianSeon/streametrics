@@ -1,5 +1,4 @@
 import { useEffect } from 'react';
-import './App.css'
 import './background';
 //import ChartExtension from './js/chartExtension';
 

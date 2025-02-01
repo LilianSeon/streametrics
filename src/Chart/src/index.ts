@@ -1,20 +1,20 @@
 import { Chart, ScriptableLineSegmentContext } from 'chart.js/auto';
 //import zoomPlugin from 'chartjs-plugin-zoom'
-import zoomPlugin from './ChartjsPluginZoom';
+import zoomPlugin from './js/ChartjsPluginZoom';
 /*import ChartDataLabels from 'chartjs-plugin-datalabels';
 
 // Register the plugin to all charts:
 Chart.register(ChartDataLabels);*/
 
 // Chart Custom Plugin
-import verticalHoverLine from './plugins/verticalHoverLine';
-import { customTooltipTitle, customTooltipLabel, customTooltipAfterFooter } from './plugins/customTooltip';
-import { customSegmentTooltip } from './plugins/customSegmentTooltip';
+import verticalHoverLine from './js/plugins/verticalHoverLine';
+import { customTooltipTitle, customTooltipLabel, customTooltipAfterFooter } from './js/plugins/customTooltip';
+import { customSegmentTooltip } from './js/plugins/customSegmentTooltip';
 //import customDatalabels from './plugins/customDatalabels';
 
 // Types
-import { Peak, isArrayOfStrings, isArray, isString } from '../utils/utils';
-import { ToastMessage } from '../components/Toast';
+import { Peak, isArrayOfStrings, isArray, isString } from './utils/utils';
+import { ToastMessage } from './components/Toast';
 
 export type DatasetName = "viewersCount" | "messagesCount";
 
@@ -134,13 +134,29 @@ export default class ChartExtension {
                         zoom: {
                             pan: {
                                 enabled: true,
-                                mode: 'x'
+                                mode: 'x',
+                                //@ts-ignore
+                                onPanStart: (chart: any) => {
+                                    console.log('onPan : ', chart)
+                                }
                             },
                             zoom: {
-                              wheel: {
-                                enabled: true,
-                              },
-                              mode: 'x',
+                                wheel: {
+                                    enabled: true,
+                                },
+                                drag: {
+                                    enabled: true,
+                                    modifierKey: 'ctrl'
+                                },
+                                onZoom: ({ chart }: any) => {
+                                    console.log('onZoom : ', chart, chart.getZoomLevel())
+                                },
+                                mode: 'x',
+                            },
+                            limits: {
+                                x: {
+                                  minRange: 4
+                                }
                             }
                         },
                         colors: {

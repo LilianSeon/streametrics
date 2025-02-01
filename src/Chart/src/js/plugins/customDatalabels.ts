@@ -1,5 +1,5 @@
 import { Context } from "chartjs-plugin-datalabels";
-import { ChartDataViewer } from "../chartExtension";
+import { ChartDataViewer } from "../../index";
 import { Options } from "chartjs-plugin-datalabels/types/options";
 
 const customDatalabels: Options = {
