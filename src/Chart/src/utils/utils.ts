@@ -15,6 +15,13 @@ export type DataLabelComputed = {
 
 export type ThemeBackgroundColor = 'dark' | 'light';
 
+export type DownLoadCallbacks = {
+    loadstart?: (((ev: ProgressEvent) => any) | null) | (() => any),
+    error?: (((ev: ProgressEvent) => any) | null) | (() => any),
+    progress?: (((ev: ProgressEvent) => any) | null) | (() => any),
+    loadend?: (((ev: ProgressEvent) => any) | null) | (() => any),
+};
+
 
 /**
  * Delete continuous value in array
@@ -277,7 +284,7 @@ const getNbViewer = (document: Document): number => {
  */
 const getDuration = (document: Document): string | undefined => {
 
-    const getHTMLElementByClass = (document.getElementsByClassName("live-time")[0].children[0] as HTMLElement).innerText
+    const getHTMLElementByClass = (document.getElementsByClassName("live-time")[0]?.children[0] as HTMLElement)?.innerText
 
     return getHTMLElementByClass;
 };
@@ -357,45 +364,78 @@ const formatChartTitle = (string: string): string => {
  * Export datas from the chart by downloading a json file
  * @param { string } fileName 
  * @param { object } jsonData 
+ * @param { DownLoadCallbacks } callBacks XMLHttpRequest events callbacks
  */
-const downloadJSON = (fileName: string, jsonData: object): void => {
+const downloadJSON = (fileName: string, jsonData: object, callBacks: DownLoadCallbacks): void => {
     // Convert the JSON data to a string
     const jsonString = JSON.stringify(jsonData, null, 2); // pretty display with indentation
 
     // Create a Blob with the JSON content
     const blob = new Blob([jsonString], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
-    startDownload(url, fileName);
+    startDownload(url, fileName, callBacks);
     URL.revokeObjectURL(url);
 };
 
 /**
- * Export image
+ * Export image.
  * @param { string } fileName 
- * @param { string } href 
+ * @param { string } href
+ * @param { DownLoadCallbacks } callBacks XMLHttpRequest events callbacks
  */
-const downloadImage = (fileName: string, href: string) => {
-    startDownload(href, fileName);
+const downloadImage = (fileName: string, href: string, callBacks: DownLoadCallbacks) => {
+    startDownload(href, fileName, callBacks);
 };
 
 /**
- * Create a <a> tag with download attribute to upload a file to user
- * @param { string } href url 
- * @param { string } fileName 
+ * Create a <a> tag with download attribute to upload a file to user.
+ * @param { string } url 
+ * @param { string } fileName
+ * @param { DownLoadCallbacks } callBacks XMLHttpRequest events callbacks
  */
-const startDownload = (href: string, fileName: string): void => {
-    const a = document.createElement('a');
-    a.href = href;
-    a.download = fileName;
-    document.body.appendChild(a);
+const startDownload = (url: string, fileName: string, callBacks: DownLoadCallbacks): void => {
+    let blob: Blob;
+    let xmlHTTP = new XMLHttpRequest();
+    xmlHTTP.open('GET', url, true);
+    xmlHTTP.responseType = 'arraybuffer';
 
-    a.click();
+    xmlHTTP.onload = function() {
+        blob = new Blob([this.response]);
+    };
 
-    // Remove the anchor element and revoke the object URL
-    document.body.removeChild(a);
+    xmlHTTP.onloadstart = progress => {
+        console.log("onloadstart :", progress, (progress.loaded/progress.total)*100)
+        if (callBacks.loadstart) callBacks.loadstart(progress);
+    };
+
+    xmlHTTP.onprogress = progress => {
+        console.log("onprogress :", progress, (progress.loaded/progress.total)*100)
+        if (callBacks.progress) callBacks.progress(progress);
+    };
+
+    xmlHTTP.onloadend = progress => {
+        console.log("onloadend :", progress, (progress.loaded/progress.total)*100)
+        const tempEl = document.createElement("a");
+        document.body.appendChild(tempEl);
+        //@ts-ignore
+        tempEl.style = "display: none";
+        url = window.URL.createObjectURL(blob);
+        tempEl.href = url;
+        tempEl.download = fileName;
+        tempEl.click();
+        document.body.removeChild(tempEl);
+        window.URL.revokeObjectURL(url);
+        if (callBacks.loadend) callBacks.loadend(progress);
+    };
+
+    xmlHTTP.onerror = (progress) => {
+        if (callBacks.error) callBacks.error(progress);
+    };
+
+    xmlHTTP.send();
 };
 
-const extractDataFromJSON = (event: Event): Promise<ExportedDatas> => {
+const extractDataFromJSON = (event: Event, callBacks: DownLoadCallbacks): Promise<ExportedDatas> => {
     return new Promise((resolve: (value: ExportedDatas) => void, reject) => {
         if (event.target instanceof HTMLInputElement) {
             const reader = new FileReader();
@@ -406,15 +446,26 @@ const extractDataFromJSON = (event: Event): Promise<ExportedDatas> => {
             reader.onloadend = readerEvent => {
                 const content = readerEvent?.target?.result as string;
                 resolve(JSON.parse(content) as ExportedDatas);
+                if (callBacks?.loadend) callBacks.loadend(readerEvent);
             };
             
-            reader.onerror = (event: Event) => {
+            reader.onerror = (event) => {
                 reject(event);
+                if (callBacks?.error) callBacks.error(event);
             };
 
-            reader.onabort = (event: Event) => {
+            reader.onabort = (event) => {
                 reject(event);
+                if (callBacks?.error) callBacks.error(event);
             };
+
+            reader.onloadstart = (event) => {
+                if (callBacks?.loadstart) callBacks.loadstart(event);
+            };
+
+            reader.onprogress = (progress) => {
+                if (callBacks?.progress) callBacks.progress(progress);
+            }
         }
     });
 };
@@ -454,4 +505,13 @@ const generateRandomId = (): string => {
     return Math.random().toString(36).substring(2, 8);
 };
 
-export { isURLTwitch, getNbViewer, waitForElm, getDuration, removeSpaceInString, formatChartTitle, getGameName, computedDataLabel, backGroundThemeObserver, detectPeaks, findPeaks, getPercentageOf, getStreamerName, getChatContainer, deleteSequenceSameNumber, downloadJSON, extractDataFromJSON, isArrayOfStrings, isArray, isString, isDarkModeActivated, generateRandomId, downloadImage };
+/**
+ * Delay program’s execution for a given number of milliseconds.
+ * @param { number } ms 
+ * @returns { Promise<unknown> }
+ */
+const wait = (ms: number): Promise<unknown> => {
+    return new Promise(resolve => setTimeout(resolve, ms));
+};
+
+export { isURLTwitch, getNbViewer, waitForElm, wait, getDuration, removeSpaceInString, formatChartTitle, getGameName, computedDataLabel, backGroundThemeObserver, detectPeaks, findPeaks, getPercentageOf, getStreamerName, getChatContainer, deleteSequenceSameNumber, downloadJSON, extractDataFromJSON, isArrayOfStrings, isArray, isString, isDarkModeActivated, generateRandomId, downloadImage };

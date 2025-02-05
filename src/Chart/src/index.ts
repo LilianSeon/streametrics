@@ -13,7 +13,7 @@ import { customSegmentTooltip } from './js/plugins/customSegmentTooltip';
 //import customDatalabels from './plugins/customDatalabels';
 
 // Types
-import { Peak, isArrayOfStrings, isArray, isString } from './utils/utils';
+import { Peak, isArrayOfStrings, isArray, isString, DownLoadCallbacks } from './utils/utils';
 import { ToastMessage } from './components/Toast';
 
 export type DatasetName = "viewersCount" | "messagesCount";
@@ -37,6 +37,8 @@ export type ExportedDatas = {
     labels: string[];
     title: string;
 }
+
+export type ChartDownLoadCallbacks = DownLoadCallbacks;
 
 
 export default class ChartExtension {
@@ -149,7 +151,13 @@ export default class ChartExtension {
                                     modifierKey: 'ctrl'
                                 },
                                 onZoom: ({ chart }: any) => {
-                                    console.log('onZoom : ', chart, chart.getZoomLevel())
+                                    console.log('onZoom : ', chart.getZoomLevel(), chart.getZoomedScaleBounds(), chart.isZoomingOrPanning(), chart.isZoomedOrPanned())
+                                },
+                                onZoomComplete: ({ chart }: any) => {
+                                    console.log('onZoomComplete : ', chart.getZoomLevel(), chart.getZoomedScaleBounds(), chart.isZoomingOrPanning(), chart.isZoomedOrPanned())
+                                },
+                                onZoomRejected: ({ event }: any) => {
+                                    console.log('onZoomRejected : ', event)
                                 },
                                 mode: 'x',
                             },

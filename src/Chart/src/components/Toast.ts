@@ -6,7 +6,9 @@ import '../assets/css/output.css';
 
 
 export enum ToastMessage {
-    importError = 'Incorrect JSON format.',
+    downloadError = 'Data could not be downloaded.',
+    importError = 'Data could not be imported.',
+    importErrorFormat = 'Incorrect JSON format.',
     importSuccess = 'Data imported successfully.',
     interactiveTitle = 'Delete data',
     interactiveMessage = 'Are you sure you want to delete this chart?',

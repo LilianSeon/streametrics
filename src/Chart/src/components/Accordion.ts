@@ -33,8 +33,10 @@ export default class Accordion implements IAccordion<Element> {
     arrowAccordion: HTMLElement | null;
     accordion: Element;
     chartContainer: HTMLElement | null;
-    tabContent: HTMLElement | null;
     bottomNavigation: BottomNavigation | undefined;
+    progressBar: HTMLDivElement;
+    progressBarContainer: HTMLDivElement;
+    tabContent: HTMLElement | null;
     toastContainer: HTMLDivElement;
     isExpanded: boolean;
     #isPlaying: boolean = true;
@@ -50,8 +52,6 @@ export default class Accordion implements IAccordion<Element> {
             <section id="accordionExtension" class="accordionExtension border-2 border-solid dark:border-zinc-800 rounded-lg">
                 <div class="tabExtension">
                     <div class="flex-container dark:bg-zinc-800 px-2">
-
-                        
                         <div id="headerLabel" class="pt-2 pb-3 h-20 text-center text-white text-xl flex">
                             <img class="my-auto h-14 rounded-full inline-block" src="${ imgSrc }" alt="logo" />
                             <div class="my-auto ml-4 self-center text-3xl font-semibold whitespace-nowrap tracking-wide inline-block text-black dark:text-white">StreaMetrics</div>
@@ -59,7 +59,9 @@ export default class Accordion implements IAccordion<Element> {
                         <div id="arrowAccordion" class="my-auto mr-3 cursor-pointer transition-transform duration-350 ${ isExpanded ? 'rotate-180' : '' }">
                             <svg class="h-8 w-8 text-black dark:text-white" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">  <path stroke="none" d="M0 0h24v24H0z"/>  <polyline points="6 15 12 9 18 15" /></svg>
                         </div>
-
+                    </div>
+                    <div id="progressBarContainer" class="w-full rounded-full h-1 mb-4 bg-transparent">
+                        <div id="chartProgressBar" class="bg-blue-600 h-1 rounded-full dark:bg-blue-500 transition-all duration-50 ease-in-out" style="width: 0%"></div>
                     </div>
                     <div id="tab__content" class="tab__content relative">
                         <div id="toastContainer" class="absolute right-4 mt-3 flex flex-col space-y-5 z-50"></div>
@@ -79,6 +81,8 @@ export default class Accordion implements IAccordion<Element> {
         this.accordion = document.getElementById('accordionExtension') as Element;
         this.chartContainer = document.getElementById('chartContainer');
         this.tabContent = document.getElementById('tab__content');
+        this.progressBar = document.getElementById('chartProgressBar') as HTMLDivElement;
+        this.progressBarContainer = document.getElementById('progressBarContainer') as HTMLDivElement;
         this.isExpanded = isExpanded || true;
         this.onClickArrowAccordionHandler = onClickArrowAccordionHandler;
 
@@ -127,6 +131,23 @@ export default class Accordion implements IAccordion<Element> {
 
     getChartContainer(): Element | null {
         return this.chartContainer;
+    };
+
+    /**
+     * 
+     * @param {number } width width percentage %
+     */
+    setProgressBarWidth(width: number): void {
+
+        if (width === 0) {
+            this.progressBar.classList.remove('duration-50');
+            this.progressBar.classList.add('duration-0');
+        } else {
+            this.progressBar.classList.remove('duration-0');
+            this.progressBar.classList.add('duration-50');
+        }
+
+        if (this.progressBar) this.progressBar.setAttribute('style', `width: ${ width }%`);
     };
 
     expandChartContainer(): void {
