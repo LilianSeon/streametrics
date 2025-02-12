@@ -51,6 +51,7 @@ export default class ChartExtension {
     chartDataMessageCount: ChartDataMessage[];
     _isDocumentHidden: boolean;
     language: NavigatorLanguage["language"];
+    #lastZoomLevel: number | undefined;
 
     constructor(container: HTMLElement, title?: string, defaultColor?:  string, language?: NavigatorLanguage["language"]){
         this.container = container;
@@ -137,10 +138,6 @@ export default class ChartExtension {
                             pan: {
                                 enabled: true,
                                 mode: 'x',
-                                //@ts-ignore
-                                onPanStart: (chart: any) => {
-                                    console.log('onPan : ', chart)
-                                }
                             },
                             zoom: {
                                 wheel: {
@@ -151,13 +148,11 @@ export default class ChartExtension {
                                     modifierKey: 'ctrl'
                                 },
                                 onZoom: ({ chart }: any) => {
-                                    console.log('onZoom : ', chart.getZoomLevel(), chart.getZoomedScaleBounds(), chart.isZoomingOrPanning(), chart.isZoomedOrPanned())
-                                },
-                                onZoomComplete: ({ chart }: any) => {
-                                    console.log('onZoomComplete : ', chart.getZoomLevel(), chart.getZoomedScaleBounds(), chart.isZoomingOrPanning(), chart.isZoomedOrPanned())
-                                },
-                                onZoomRejected: ({ event }: any) => {
-                                    console.log('onZoomRejected : ', event)
+                                    const currentZoomLevel = chart.getZoomLevel();
+                                    if (this.#lastZoomLevel && this.#lastZoomLevel === currentZoomLevel && currentZoomLevel < 2) {
+                                        chart.resetZoom();
+                                    }
+                                    this.#lastZoomLevel = currentZoomLevel;
                                 },
                                 mode: 'x',
                             },
