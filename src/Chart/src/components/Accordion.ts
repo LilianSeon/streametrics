@@ -60,7 +60,7 @@ export default class Accordion implements IAccordion<Element> {
                             <svg class="h-8 w-8 text-black dark:text-white" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">  <path stroke="none" d="M0 0h24v24H0z"/>  <polyline points="6 15 12 9 18 15" /></svg>
                         </div>
                     </div>
-                    <div id="progressBarContainer" class="w-full rounded-full h-1 mb-4 bg-transparent">
+                    <div id="progressBarContainer" class="w-full rounded-full h-1 mb-2 bg-transparent">
                         <div id="chartProgressBar" class="bg-blue-600 h-1 rounded-full dark:bg-blue-500 transition-all duration-50 ease-in-out" style="width: 0%"></div>
                     </div>
                     <div id="tab__content" class="tab__content relative">
@@ -151,17 +151,21 @@ export default class Accordion implements IAccordion<Element> {
     };
 
     expandChartContainer(): void {
-        if (this.tabContent && this.arrowAccordion) {
+        if (this.tabContent && this.arrowAccordion && this.progressBarContainer) {
             this.tabContent.style.maxHeight = '300px';
             this.arrowAccordion.classList.toggle('rotate-180');
+            this.progressBarContainer.classList.add('block');
+            this.progressBarContainer.classList.remove('hidden');
             this.isExpanded = true;
         }
     };
 
     collapseChartContainer(): void {
-        if (this.tabContent && this.arrowAccordion) {
+        if (this.tabContent && this.arrowAccordion && this.progressBarContainer) {
             this.tabContent.style.maxHeight = '0px';
             this.arrowAccordion.classList.toggle('rotate-180');
+            this.progressBarContainer.classList.add('hidden');
+            this.progressBarContainer.classList.remove('block');
             this.isExpanded = false;
         }
     };

@@ -177,7 +177,7 @@ export default class ChartExtension {
                             callbacks: {
                                 title: customTooltipTitle,
                                 label: (context) => customTooltipLabel(context, this.language),
-                                afterFooter: customTooltipAfterFooter
+                                afterFooter: (context) => customTooltipAfterFooter(context, this.language.includes('fr') ? 'fr' : 'en')
                             },
                         },
                         legend: {

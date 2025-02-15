@@ -1,4 +1,6 @@
+import { Languages } from "../../assets/nls/Texts";
 import { ChartDataViewer } from "../../index";
+import { timeAgo } from "../../utils/utils";
 
 
 /**
@@ -6,12 +8,12 @@ import { ChartDataViewer } from "../../index";
  * @param context 
  * @returns { string } 15/08/2024 17:44:11
  */
-const customTooltipAfterFooter = (context: any): string => {
+const customTooltipAfterFooter = (context: any, lang: Languages): string => {
 
     if (context[0].dataset.stack === 'viewersCount') {
         const { time }: { time: Date | string } = context[0].raw;
 
-        return new Date(time).toLocaleDateString() + ' ' + new Date(time).toLocaleTimeString();
+        return timeAgo(new Date(time), lang);
     } else if (context[0].dataset.stack === 'messagesCount') {
         return '';
     } else {
