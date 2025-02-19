@@ -1,19 +1,19 @@
 /// <reference types="chrome"/>
 
 // Utils
-import { isURLTwitch, getNbViewer, waitForElm, getDuration, formatChartTitle, getGameName, backGroundThemeObserver, ThemeBackgroundColor, extractDataFromJSON, getChatContainer, downloadJSON, downloadImage, getStreamerName, isDarkModeActivated, wait } from './Chart/src/utils/utils';
-import { getStorage, setStorage } from './Chart/src/utils/utilsStorage'
-import IntervalManager from './Chart/src/js/intervalManager';
+import { isURLTwitch, getNbViewer, waitForElm, getDuration, formatChartTitle, getGameName, backGroundThemeObserver, ThemeBackgroundColor, extractDataFromJSON, getChatContainer, downloadJSON, downloadImage, getStreamerName, isDarkModeActivated, wait } from './components/Chart/src/utils/utils';
+import { getStorage, setStorage } from './components/Chart/src/utils/utilsStorage';
+import IntervalManager from './components/Chart/src/js/intervalManager';
 
 // Components
-import Accordion, { OnChangeRefreshValueHandler, OnClickExportButtonHandler, OnClickExportImageButtonHandler, OnClickPlayPauseButtonHandler, OnChangeImportHandler, OnClickClearButtonHandler, OnClickHideShowMessageButtonHandler, OnClickHideShowViewerButtonHandler } from './Chart/src/components/Accordion';
-import { MessageCounter } from './Chart/src/js/messageCounter';
-import { ToastMessage } from './Chart/src/components/Toast';
-import ChartExtension, { ChartDataViewer, ChartDownLoadCallbacks } from './Chart/src/index';
+import Accordion, { OnChangeRefreshValueHandler, OnClickExportButtonHandler, OnClickExportImageButtonHandler, OnClickPlayPauseButtonHandler, OnChangeImportHandler, OnClickClearButtonHandler, OnClickHideShowMessageButtonHandler, OnClickHideShowViewerButtonHandler } from './components/Chart/src/components/Accordion';
+import { MessageCounter } from './components/Chart/src/js/messageCounter';
+import { ToastMessage } from './components/Chart/src/components/Toast';
+import ChartExtension, { ChartDataViewer, ChartDownLoadCallbacks } from './components/Chart/src/index';
+import ToastManager from './components/Chart/src/js/toastManager';
 
 // CSS
-import './Chart/src/assets/css/index.css'; // Font
-import ToastManager from './Chart/src/js/toastManager';
+import './components/Chart/src/assets/css/index.css'; // Font
 
 
 let chartExtension: ChartExtension | undefined;
@@ -215,7 +215,8 @@ const initChartInDOM = async () => {
     if (accordionElement && typeof chartExtension == 'undefined') {
         const chartTitle: string = formatChartTitle(window.location.pathname);
         const textColor: string = document.documentElement.className.includes('dark') ? '#ffffff' : '#000000';
-        chartExtension = new ChartExtension(accordionElement, chartTitle, textColor, navigator.language);
+        const { language } = await getStorage(["language"])
+        chartExtension = new ChartExtension(accordionElement, chartTitle, textColor, language);
         accordionComponent?.setProgressBarWidth(70);
         backGroundThemeObserver(document, updateDefaultColor);
         updateDefaultColor(isDarkModeActivated() ? 'dark' : 'light');
@@ -226,6 +227,14 @@ const initChartInDOM = async () => {
         accordionComponent?.setProgressBarWidth(0);
     }
 };
+
+chrome.storage.onChanged.addListener((changes) => {
+    for (let [key, { newValue }] of Object.entries(changes)) {
+      if (key === "language" && chartExtension) {
+        chartExtension.language = newValue;
+      }
+    }
+});
 
 chrome.runtime.onMessage.addListener((request, _sender) => { // When user goes from a Twitch URL to another Twitch URL
     console.log("Message received in contentScript:", request);

@@ -50,10 +50,10 @@ export default class ChartExtension {
     defaultColor: string = '#fff'; // Label color
     chartDataMessageCount: ChartDataMessage[];
     _isDocumentHidden: boolean;
-    language: NavigatorLanguage["language"];
+    language: string;
     #lastZoomLevel: number | undefined;
 
-    constructor(container: HTMLElement, title?: string, defaultColor?:  string, language?: NavigatorLanguage["language"]){
+    constructor(container: HTMLElement, title?: string, defaultColor?:  string, language?: string){
         this.container = container;
         this.canvas = null;
         this.chart = null;
@@ -177,7 +177,7 @@ export default class ChartExtension {
                             callbacks: {
                                 title: customTooltipTitle,
                                 label: (context) => customTooltipLabel(context, this.language),
-                                afterFooter: (context) => customTooltipAfterFooter(context, this.language.includes('fr') ? 'fr' : 'en')
+                                afterFooter: customTooltipAfterFooter
                             },
                         },
                         legend: {

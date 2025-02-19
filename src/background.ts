@@ -2,6 +2,17 @@
 
 let tabToUrl: any = {};
 
+chrome.runtime.onInstalled.addListener(async (details: chrome.runtime.InstalledDetails) => {
+    console.log('onInstalled', details)
+
+    // When user install this extension for the first time set local storage
+    if (details.reason === chrome.runtime.OnInstalledReason.INSTALL) {
+        await chrome.storage.local.set({ language: "en" });
+        await chrome.storage.local.set({ isAccordionExpanded: true });
+        await chrome.storage.local.set({ refreshValue: 5 });
+    }
+});
+
 chrome.runtime.onMessage.addListener((request, _sender) => {
     console.log("Message received in background script:", request);
 

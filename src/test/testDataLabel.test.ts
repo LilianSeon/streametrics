@@ -11,8 +11,8 @@ import { Browser, connect, ExtensionTransport} from 'puppeteer-core/lib/esm/pupp
 
 // Data mockup
 import { data1 } from './mockup/data1';
-import { ChartDataViewer } from "../Chart/src/index";
-import ChartExtension from "../Chart/src/index";
+import { ChartDataViewer } from "../components/Chart/src/index";
+import ChartExtension from "../components/Chart/src/index";
 
 let chartExtension: ChartExtension;
 let browser: Browser;

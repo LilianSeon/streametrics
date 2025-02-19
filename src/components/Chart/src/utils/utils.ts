@@ -1,4 +1,4 @@
-import { Languages, timeAgoTextsEN, timeAgoTextsFR } from "../assets/nls/Texts";
+import { timeAgoTextsEN } from "../assets/nls/Texts";
 import { ChartDataViewer, ChartExtensionData, ExportedDatas } from "../index";
 import { ChatContainer } from "../js/messageCounter";
 
@@ -521,50 +521,42 @@ const wait = (ms: number): Promise<unknown> => {
  * @param { string } singular - The singular form of the time unit
  * @param { string } plural - The plural form of the time unit
  * @param { string } agoText - ago string
- * @param { Languages } lang - Refer to navigator language
  * @returns { string } A formatted string indicating the elapsed time
  */
-const formatTimeString = (value: number, singular: string, plural: string, agoText: string, lang: Languages): string => {
-
-    if (lang === 'en') {
-        return `${ value } ${ value > 1 ? plural : singular } ${ agoText }`;
-    } else {
-        return `${ agoText } ${ value } ${ value > 1 ? plural : singular }`;
-    }
+const formatTimeString = (value: number, singular: string, plural: string, agoText: string): string => {
+    return `${ value } ${ value > 1 ? plural : singular } ${ agoText }`;
 };
 
 /**
  * Returns a human-readable string representing the time elapsed since a given date.
  * @param { Date } date - The date from which to calculate the elapsed time
- * @param { Languages } lang - Refer to navigator language
  * @returns { string } A formatted string describing how long ago the event occurred
  */
-const timeAgo = (date: Date, lang: Languages): string => {
+const timeAgo = (date: Date): string => {
     const now = new Date();
     const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-    const isLangEN = lang === 'en';
-    const texts = isLangEN ? timeAgoTextsEN : timeAgoTextsFR;
+    const { singular, plural, ago } = timeAgoTextsEN;
 
-    if (seconds < 5) return texts.justNow;
-    if (seconds < 60) return formatTimeString(seconds, texts.singular.second, texts.plural.second, texts.ago, lang);
+    if (seconds < 5) return timeAgoTextsEN.justNow;
+    if (seconds < 60) return formatTimeString(seconds, singular.second, plural.second, ago);
 
     const minutes = Math.floor(seconds / 60);
-    if (minutes < 60) return formatTimeString(minutes, texts.singular.minute, texts.plural.minute, texts.ago, lang);
+    if (minutes < 60) return formatTimeString(minutes, singular.minute, plural.minute, ago);
 
     const hours = Math.floor(minutes / 60);
-    if (hours < 24) return formatTimeString(hours, texts.singular.hour, texts.plural.hour, texts.ago, lang);
+    if (hours < 24) return formatTimeString(hours, singular.hour, plural.hour, ago);
 
     const days = Math.floor(hours / 24);
-    if (days < 7) return formatTimeString(days, texts.singular.day, texts.plural.day, texts.ago, lang);
+    if (days < 7) return formatTimeString(days, singular.day, plural.day, ago);
     
     const weeks = Math.floor(days / 7);
-    if (weeks < 4) return formatTimeString(weeks, texts.singular.week, texts.plural.week, texts.ago, lang);
+    if (weeks < 4) return formatTimeString(weeks, singular.week, plural.week, ago);
     
     const months = Math.floor(days / 30);
-    if (months < 12) return formatTimeString(months, texts.singular.month, texts.plural.month, texts.ago, lang);
+    if (months < 12) return formatTimeString(months, singular.month, plural.month, ago);
     
     const years = Math.floor(days / 365);
-    return formatTimeString(years, texts.singular.year, texts.plural.year, texts.ago, lang);
+    return formatTimeString(years, singular.year, plural.year, ago);
 };
 
 export { timeAgo, isURLTwitch, getNbViewer, waitForElm, wait, getDuration, removeSpaceInString, formatChartTitle, getGameName, computedDataLabel, backGroundThemeObserver, detectPeaks, findPeaks, getPercentageOf, getStreamerName, getChatContainer, deleteSequenceSameNumber, downloadJSON, extractDataFromJSON, isArrayOfStrings, isArray, isString, isDarkModeActivated, generateRandomId, downloadImage };
