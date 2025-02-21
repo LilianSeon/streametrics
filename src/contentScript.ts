@@ -1,8 +1,8 @@
 /// <reference types="chrome"/>
 
 // Utils
-import { isURLTwitch, getNbViewer, waitForElm, getDuration, formatChartTitle, getGameName, backGroundThemeObserver, ThemeBackgroundColor, extractDataFromJSON, getChatContainer, downloadJSON, downloadImage, getStreamerName, isDarkModeActivated, wait } from './components/Chart/src/utils/utils';
-import { getStorage, setStorage } from './components/Chart/src/utils/utilsStorage';
+import { getStreamerImage, isURLTwitch, getNbViewer, waitForElm, getDuration, formatChartTitle, getGameName, backGroundThemeObserver, ThemeBackgroundColor, extractDataFromJSON, getChatContainer, downloadJSON, downloadImage, getStreamerName, isDarkModeActivated, wait, getCurrentTabId } from './components/Chart/src/utils/utils';
+import { addStreamersListStorage, getStorage, setStorage } from './components/Chart/src/utils/utilsStorage';
 import IntervalManager from './components/Chart/src/js/intervalManager';
 
 // Components
@@ -14,6 +14,9 @@ import ToastManager from './components/Chart/src/js/toastManager';
 
 // CSS
 import './components/Chart/src/assets/css/index.css'; // Font
+
+// Typing
+import { StorageStreamerListType } from './typings/StorageType';
 
 
 let chartExtension: ChartExtension | undefined;
@@ -31,10 +34,10 @@ let toastManager: ToastManager | undefined;
 /**
  * Get needed data then add it to the Chart
  */
-const startLoopGetData = () => {
+const startLoopGetData = async () => {
     const duration: string | undefined = getDuration(document);
     const nbViewer: number = getNbViewer(document);
-    const game: string = getGameName(document);
+    const game: string = await getGameName(document);
     let messageAmount: number = 0;
 
     if (chartExtension && duration && nbViewer) {
@@ -110,17 +113,13 @@ const onChangeRefreshValue: OnChangeRefreshValueHandler = async (refreshValue: n
 
 const downLoadCallbacks: ChartDownLoadCallbacks = {
     loadstart: (progress) => {
-        if (accordionComponent) {
-            accordionComponent.setProgressBarWidth(progress.loaded);
-        }
+        if (accordionComponent) accordionComponent.setProgressBarWidth(progress.loaded);
     },
     progress: (progress) => {
         if (accordionComponent) accordionComponent.setProgressBarWidth((progress.loaded/progress.total)*100);
     },
     loadend: () => {
-        if (accordionComponent) {
-            accordionComponent.setProgressBarWidth(0);
-        }
+        if (accordionComponent) accordionComponent.setProgressBarWidth(0);
     },
     error: () => {
         toastManager?.addToQueue('error', ToastMessage.downloadError);
@@ -190,6 +189,7 @@ const initStorage = async (): Promise<void> => {
  */
 const initChartInDOM = async () => {
     console.log('initChartInDOM');
+
     isExtensionInitialized = true;
     const informationContainer = await waitForElm('#live-channel-stream-information');
     const chartContainer = await waitForElm('.chat-line__message');
@@ -213,14 +213,35 @@ const initChartInDOM = async () => {
         accordionComponent.setProgressBarWidth(20);
     }
     if (accordionElement && typeof chartExtension == 'undefined') {
+
         const chartTitle: string = formatChartTitle(window.location.pathname);
         const textColor: string = document.documentElement.className.includes('dark') ? '#ffffff' : '#000000';
         const { language } = await getStorage(["language"])
         chartExtension = new ChartExtension(accordionElement, chartTitle, textColor, language);
-        accordionComponent?.setProgressBarWidth(70);
+        accordionComponent?.setProgressBarWidth(60);
         backGroundThemeObserver(document, updateDefaultColor);
         updateDefaultColor(isDarkModeActivated() ? 'dark' : 'light');
         toastManager = new ToastManager(accordionComponent!.toastContainer);
+
+        const { streamersList }: { streamersList?: StorageStreamerListType[] } = await getStorage(['streamersList']);
+
+
+        const streamerName = await getStreamerName(document);
+        accordionComponent?.setProgressBarWidth(70);
+        const streamerImage = await getStreamerImage(document, streamerName);
+        accordionComponent?.setProgressBarWidth(80);
+        const streamerGame = await getGameName(document)
+        accordionComponent?.setProgressBarWidth(90);
+
+        const tabId = await getCurrentTabId();
+
+        if (streamersList) {
+            const newList = addStreamersListStorage(streamersList as StorageStreamerListType[], { streamerName, streamerImage, streamerGame, status: 'Active', tabId: tabId })
+            await setStorage({ 'streamersList': newList });
+        } else {
+            await setStorage({ 'streamersList': [{ streamerName, streamerImage, streamerGame, status: 'Active', tabId: tabId }] as StorageStreamerListType[]});
+        }
+
         await wait(100);
         accordionComponent?.setProgressBarWidth(100);
         await wait(70);
@@ -231,7 +252,7 @@ const initChartInDOM = async () => {
 chrome.storage.onChanged.addListener((changes) => {
     for (let [key, { newValue }] of Object.entries(changes)) {
       if (key === "language" && chartExtension) {
-        chartExtension.language = newValue;
+        chartExtension.language = newValue; // Update chart's language
       }
     }
 });
@@ -239,7 +260,7 @@ chrome.storage.onChanged.addListener((changes) => {
 chrome.runtime.onMessage.addListener((request, _sender) => { // When user goes from a Twitch URL to another Twitch URL
     console.log("Message received in contentScript:", request);
 
-    if (isURLTwitch(request.url)) {
+    if (request?.url && isURLTwitch(request.url)) {
 
         if (chartExtension && formatChartTitle(window.location.pathname).includes(chartExtension.chartTitle.replace("'s viewers", ""))) return; // if page reloaded but still on same page, do not init another Chart
 

@@ -23,6 +23,14 @@ export type DownLoadCallbacks = {
     loadend?: (((ev: ProgressEvent) => any) | null) | (() => any),
 };
 
+const getCurrentTabId = async (): Promise<number> => {
+
+    return new Promise((resolve) => {
+        chrome.runtime.sendMessage({ text: 'what is my tabId?' }, ({ tab }: { tab: number }) => {
+            resolve(tab);
+         });
+    });
+};
 
 /**
  * Delete continuous value in array
@@ -129,19 +137,19 @@ const findPeaks = (data: ChartExtensionData, threshold: number) => {
         //@ts-ignore
         if (data.at(i + 1)?.nbViewer && data.at(i)!.nbViewer  > data.at(i - 1)!.nbViewer && data.at(i)!.nbViewer  > data.at(i + 1)?.nbViewer ) { // Check if data[i] is supp to data[i-1] AND if data[i] supp to data[i+1]
             let temp1 = i;
-//@ts-ignore
+            //@ts-ignore
             while (data.at(temp1 - 1)!.nbViewer >= data.at(temp1 - 2)!.nbViewer) temp1--;
-//@ts-ignore
+            //@ts-ignore
             addPeak({ endIndex: i, endValue: data.at(i)!.nbViewer, startIndex: temp1, startValue: data.at(temp1)!.nbViewer });
-//@ts-ignore
+            //@ts-ignore
         } else if (data.at(i + 1)?.nbViewer && data.at(i + 2)?.nbViewer && data.at(i)!.nbViewer === data.at(i + 1)!.nbViewer && data.at(i + 1)!.nbViewer > data.at(i + 2)!.nbViewer) {
             let temp2 = i;
             let temp3 = i;
-//@ts-ignore
+            //@ts-ignore
             while (data.at(temp2)!.nbViewer == data.at(temp2 + 1)!.nbViewer) temp2++;
             //@ts-ignore
             while (data.at(temp3 - 1)!.nbViewer >= data.at(temp3 - 2)!.nbViewer) temp3--;
-//@ts-ignore
+            //@ts-ignore
             if (data.at(i)?.nbViewer && data.at(temp2)!.nbViewer > data.at(temp2 + 1)!.nbViewer) {
                 //@ts-ignore
                 addPeak({ endIndex: temp2, endValue: data.at(temp2)!.nbViewer, startIndex: temp3, startValue: data.at(temp3)!.nbViewer });
@@ -199,7 +207,7 @@ const detectPeaks = (arr: ChartExtensionData) => {
 const computedDataLabel = (data: ChartExtensionData, nbViewer: number): Peak[] | undefined => {
 
     if (data && data.length === 0) return;
-//@ts-ignore
+    //@ts-ignore
     const diff = nbViewer - data.at(-1)!.nbViewer;
     
     if (diff === 0) return;
@@ -244,27 +252,61 @@ const getChatContainer = (document: Document): ChatContainer => {
 /**
  * 
  * @param { Document } document 
- * @returns Return streamer's name, above title
+ * @returns { Promise<string> } Return streamer's name, above title
  */
-const getStreamerName = (document: Document): string => {
+const getStreamerName = (document: Document): Promise<string> => {
 
-    const getHTMLElementByClass = document.getElementsByClassName("CoreText-sc-1txzju1-0 ScTitleText-sc-d9mj2s-0 AAWwv bzDGwQ InjectLayout-sc-1i43xsx-0 dhkijX tw-title")[0]?.innerHTML;
-    const getHTMLElementByClassContaining = Array.from(document.getElementsByClassName("tw-title")).filter((element: Element) => element.localName === "h1")[0]?.innerHTML;
+    return new Promise((resolve) => {
+        const interval = setInterval(() => {
+            const getHTMLElementByClass = document.getElementsByClassName("CoreText-sc-1txzju1-0 ScTitleText-sc-d9mj2s-0 AAWwv bzDGwQ InjectLayout-sc-1i43xsx-0 dhkijX tw-title")[0]?.innerHTML;
+            const getHTMLElementByClassContaining = Array.from(document.getElementsByClassName("tw-title")).filter((element: Element) => element.localName === "h1")[0]?.innerHTML;
 
-    return getHTMLElementByClass ?? getHTMLElementByClassContaining;
+            if (getHTMLElementByClass || getHTMLElementByClassContaining) {
+                resolve(getHTMLElementByClass ?? getHTMLElementByClassContaining);
+                clearInterval(interval);
+            }
+        }, 500);
+    });
+};
+
+/**
+ * 
+ * @param { Document } document  
+ * @param { string } streamerName 
+ * @returns { Promise<string> }
+ */
+const getStreamerImage = (document: Document, streamerName: string): Promise<string> => {
+
+    return new Promise((resolve) => {
+        const interval = setInterval(() => {
+            //@ts-ignore
+            const getHTMLElementByClassContaining: string = Array.from(document.getElementsByClassName("tw-image-avatar")).filter((element: Element) => element.alt === streamerName)[0]?.src;
+
+            if (getHTMLElementByClassContaining) {
+                resolve(getHTMLElementByClassContaining);
+                clearInterval(interval);
+            }
+        }, 500);
+    });
 };
 
 /**
  * @param { Document } document
- * @returns { string } Game name
+ * @returns { Promise<string> } Game name
  */
-const getGameName = (document: Document): string => {
-    const selector = document.querySelectorAll<HTMLElement>('[data-a-target="stream-game-link"]');
+const getGameName = (document: Document): Promise<string> => {
 
-    const getHTMLElementByData = (selector.length > 1) ? selector[1]?.innerText : selector[0]?.innerText; // If is streaming together
-    const getHTMLElementByClass = document.getElementsByClassName("CoreText-sc-1txzju1-0 dLeJdh")[0]?.innerHTML
+    return new Promise((resolve) => {
+        const interval = setInterval(() => {
+            const selector = document.querySelectorAll<HTMLElement>('[data-a-target="stream-game-link"]');
 
-    return getHTMLElementByData ?? getHTMLElementByClass;
+            const getHTMLElementByData = (selector.length > 1) ? selector[1]?.innerText : selector[0]?.innerText; // If is streaming together
+            const getHTMLElementByClass = document.getElementsByClassName("CoreText-sc-1txzju1-0 dLeJdh")[0]?.innerHTML
+
+            resolve(getHTMLElementByData ?? getHTMLElementByClass);
+            clearInterval(interval);
+        }, 500);
+    });
 };
 
 /**
@@ -559,4 +601,4 @@ const timeAgo = (date: Date): string => {
     return formatTimeString(years, singular.year, plural.year, ago);
 };
 
-export { timeAgo, isURLTwitch, getNbViewer, waitForElm, wait, getDuration, removeSpaceInString, formatChartTitle, getGameName, computedDataLabel, backGroundThemeObserver, detectPeaks, findPeaks, getPercentageOf, getStreamerName, getChatContainer, deleteSequenceSameNumber, downloadJSON, extractDataFromJSON, isArrayOfStrings, isArray, isString, isDarkModeActivated, generateRandomId, downloadImage };
+export { getCurrentTabId, getStreamerImage, timeAgo, isURLTwitch, getNbViewer, waitForElm, wait, getDuration, removeSpaceInString, formatChartTitle, getGameName, computedDataLabel, backGroundThemeObserver, detectPeaks, findPeaks, getPercentageOf, getStreamerName, getChatContainer, deleteSequenceSameNumber, downloadJSON, extractDataFromJSON, isArrayOfStrings, isArray, isString, isDarkModeActivated, generateRandomId, downloadImage };

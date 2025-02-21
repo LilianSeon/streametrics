@@ -1,7 +1,16 @@
+import { StorageStreamerListType } from "../../../../typings/StorageType";
 
 export type CallbackGetStorage = (items: {
     [key: string]: any;
 }) => void;
+
+const addStreamersListStorage = (streamersList: StorageStreamerListType[], newObj: StorageStreamerListType): StorageStreamerListType[] => {
+    if (!streamersList.some(item => item.streamerName === newObj.streamerName)) {
+        streamersList.push(newObj); // Push only if the streamerName is unique
+    }
+
+    return streamersList;
+};
 
 /**
  * 
@@ -23,4 +32,4 @@ const setStorage = async (items: { [key: string]: any}): Promise<void> => {
     }
 };
 
-export { getStorage, setStorage }
+export { getStorage, setStorage, addStreamersListStorage }

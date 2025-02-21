@@ -1,5 +1,8 @@
 /// <reference types="chrome"/>
 
+import { MessageEnum } from "./typings/MessageType";
+import { StorageStreamerListType } from "./typings/StorageType";
+
 let tabToUrl: any = {};
 
 chrome.runtime.onInstalled.addListener(async (details: chrome.runtime.InstalledDetails) => {
@@ -13,9 +16,10 @@ chrome.runtime.onInstalled.addListener(async (details: chrome.runtime.InstalledD
     }
 });
 
-chrome.runtime.onMessage.addListener((request, _sender) => {
-    console.log("Message received in background script:", request);
-
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if (request.text === MessageEnum.tabId && sender?.tab) { // Asking for tabId
+        sendResponse({tab: sender.tab.id});
+    }
 });
 
 chrome.tabs.onUpdated.addListener((tabId, _changeInfo, tab) => {
@@ -40,11 +44,16 @@ chrome.tabs.onCreated.addListener((tab) => {
 
 
 
-chrome.tabs.onRemoved.addListener((tabId: number) => {
-    if (tabToUrl[tabId]!.startsWith("https://www.twitch.tv/")) {
+chrome.tabs.onRemoved.addListener(async (tabId: number) => {
+    if (tabToUrl.hasOwnProperty(tabId) && tabToUrl[tabId]!.startsWith("https://www.twitch.tv/")) {
         chrome.tabs.sendMessage(tabId, { closed: true}, (response) => { // Delete setInterval when closed
             console.log("Response from content script:", response);
         });
+
+        // Delete streamer in streamerList storage
+        const { streamersList } = await chrome.storage.local.get('streamersList');
+        const streamerToDelete: StorageStreamerListType[] = streamersList.filter((streamer: StorageStreamerListType) => streamer.tabId !== tabId);
+        await chrome.storage.local.set({ 'streamersList': streamerToDelete });
     }
 });
 
