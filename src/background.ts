@@ -26,12 +26,14 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     }
 });
 
-chrome.tabs.onUpdated.addListener((tabId, _changeInfo, tab) => {
+chrome.tabs.onUpdated.addListener(async (tabId, _changeInfo, tab) => {
     if (tab.url!.startsWith("https://www.twitch.tv/") && tab.status === 'complete') {
         console.log("onUpdated", tabId)
-        chrome.tabs.sendMessage(tabId, { url: tab.url, event: "onUpdate" }, (response) => {
-            console.log("Response from content script:", response);
-        });
+        const { streamersList } = await chrome.storage.local.get('streamersList');
+        const streamerToDelete: StorageStreamerListType[] = streamersList.filter((streamer: StorageStreamerListType) => streamer.windowId !== tab.windowId && streamer.tabId !== tabId);
+        await chrome.storage.local.set({ 'streamersList': streamerToDelete });
+
+        chrome.tabs.sendMessage(tabId, { url: tab.url, event: "onUpdate" });
         tabToUrl[tabId] = tab.url;
     }
 });
