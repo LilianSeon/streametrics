@@ -3,7 +3,8 @@ export type StorageStreamerListType = {
     streamerImage: string,
     streamerGame: string,
     status: StorageStatusType,
-    tabId: number
+    tabId: number,
+    windowId: number
 }
 
 export type StorageStatusType = 'Active' | 'Inactive' | 'Idle'

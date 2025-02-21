@@ -1,7 +1,7 @@
 /// <reference types="chrome"/>
 
 // Utils
-import { getStreamerImage, isURLTwitch, getNbViewer, waitForElm, getDuration, formatChartTitle, getGameName, backGroundThemeObserver, ThemeBackgroundColor, extractDataFromJSON, getChatContainer, downloadJSON, downloadImage, getStreamerName, isDarkModeActivated, wait, getCurrentTabId } from './components/Chart/src/utils/utils';
+import { getStreamerImage, isURLTwitch, getNbViewer, waitForElm, getDuration, formatChartTitle, getGameName, backGroundThemeObserver, ThemeBackgroundColor, extractDataFromJSON, getChatContainer, downloadJSON, downloadImage, getStreamerName, isDarkModeActivated, wait, getCurrentTabId, getCurrentWindowId } from './components/Chart/src/utils/utils';
 import { addStreamersListStorage, getStorage, setStorage } from './components/Chart/src/utils/utilsStorage';
 import IntervalManager from './components/Chart/src/js/intervalManager';
 
@@ -234,12 +234,13 @@ const initChartInDOM = async () => {
         accordionComponent?.setProgressBarWidth(90);
 
         const tabId = await getCurrentTabId();
+        const windowId = await getCurrentWindowId();
 
-        if (streamersList) {
-            const newList = addStreamersListStorage(streamersList as StorageStreamerListType[], { streamerName, streamerImage, streamerGame, status: 'Active', tabId: tabId })
+        if (streamersList && windowId) {
+            const newList = addStreamersListStorage(streamersList as StorageStreamerListType[], { streamerName, streamerImage, streamerGame, status: 'Active', tabId: tabId, windowId })
             await setStorage({ 'streamersList': newList });
-        } else {
-            await setStorage({ 'streamersList': [{ streamerName, streamerImage, streamerGame, status: 'Active', tabId: tabId }] as StorageStreamerListType[]});
+        } else if(windowId) {
+            await setStorage({ 'streamersList': [{ streamerName, streamerImage, streamerGame, status: 'Active', tabId: tabId, windowId }] as StorageStreamerListType[]});
         }
 
         await wait(100);

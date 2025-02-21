@@ -20,6 +20,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.text === MessageEnum.tabId && sender?.tab) { // Asking for tabId
         sendResponse({tab: sender.tab.id});
     }
+
+    if (request.text === MessageEnum.windowId && sender?.tab?.windowId) { // Asking for windowId
+        sendResponse({ windowId: sender.tab.windowId });
+    }
 });
 
 chrome.tabs.onUpdated.addListener((tabId, _changeInfo, tab) => {
@@ -42,7 +46,12 @@ chrome.tabs.onCreated.addListener((tab) => {
     }
 });
 
-
+chrome.windows.onRemoved.addListener(async (windowId) => {
+    // Delete streamer in closing window streamerList storage
+    const { streamersList } = await chrome.storage.local.get('streamersList');
+    const streamerToDelete: StorageStreamerListType[] = streamersList.filter((streamer: StorageStreamerListType) => streamer.windowId !== windowId);
+    await chrome.storage.local.set({ 'streamersList': streamerToDelete });
+});
 
 chrome.tabs.onRemoved.addListener(async (tabId: number) => {
     if (tabToUrl.hasOwnProperty(tabId) && tabToUrl[tabId]!.startsWith("https://www.twitch.tv/")) {

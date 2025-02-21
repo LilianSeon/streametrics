@@ -23,6 +23,16 @@ export type DownLoadCallbacks = {
     loadend?: (((ev: ProgressEvent) => any) | null) | (() => any),
 };
 
+const getCurrentWindowId = async (): Promise<number | undefined> => {
+
+    return new Promise((resolve) => {
+        chrome.runtime.sendMessage({ text: 'what is my windowId?' }, ({ windowId }: { windowId: number }) => {
+            resolve(windowId);
+         });
+    });
+};
+
+
 const getCurrentTabId = async (): Promise<number> => {
 
     return new Promise((resolve) => {
@@ -601,4 +611,4 @@ const timeAgo = (date: Date): string => {
     return formatTimeString(years, singular.year, plural.year, ago);
 };
 
-export { getCurrentTabId, getStreamerImage, timeAgo, isURLTwitch, getNbViewer, waitForElm, wait, getDuration, removeSpaceInString, formatChartTitle, getGameName, computedDataLabel, backGroundThemeObserver, detectPeaks, findPeaks, getPercentageOf, getStreamerName, getChatContainer, deleteSequenceSameNumber, downloadJSON, extractDataFromJSON, isArrayOfStrings, isArray, isString, isDarkModeActivated, generateRandomId, downloadImage };
+export { getCurrentWindowId, getCurrentTabId, getStreamerImage, timeAgo, isURLTwitch, getNbViewer, waitForElm, wait, getDuration, removeSpaceInString, formatChartTitle, getGameName, computedDataLabel, backGroundThemeObserver, detectPeaks, findPeaks, getPercentageOf, getStreamerName, getChatContainer, deleteSequenceSameNumber, downloadJSON, extractDataFromJSON, isArrayOfStrings, isArray, isString, isDarkModeActivated, generateRandomId, downloadImage };
