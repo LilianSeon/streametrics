@@ -1,4 +1,5 @@
 import { Dispatch, FC, SetStateAction, useEffect, useMemo, useState } from "react";
+import { Toggle } from "./Toggle";
 
 type LangList = {
     language: string,
@@ -50,13 +51,15 @@ const Navbar: FC<NavbarProps> = ({ isDisplayListLang, setIsDisplayListLang }: Na
 
     return(
         <nav className="bg-gray-900">
-            <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
+            <div className="max-w-screen-xl flex flex-wrap items-center mx-auto p-4">
                 <div className="flex items-center">
                     <img className="my-auto h-8 rounded-full inline-block" src={ imgSrc } alt="logo" />
                     <span className="ml-2 self-center text-xl font-semibold whitespace-nowrap text-white tracking-wide">StreaMetrics</span>
                 </div>
-                <div className="flex flex-col items-center md:order-2 space-x-1 md:space-x-0">
-                    <button type="button" onClick={() => setIsDisplayListLang(!isDisplayListLang) } className="inline-flex items-center font-medium justify-center px-4 py-2 text-sm text-white rounded-lg cursor-pointer hover:bg-gray-100 hover:text-black">
+                <div className="grow"></div>
+                <Toggle />
+                <div className="flex flex-col items-center space-x-1">
+                    <button type="button" onClick={() => setIsDisplayListLang(!isDisplayListLang) } className="inline-flex items-center font-medium justify-center px-2 py-2 text-sm text-white rounded-lg cursor-pointer hover:bg-gray-100 hover:text-black">
                         <img className="mr-2" height={ 20 } width={ 20 } src={ langList.find(({ isSelected }) => isSelected)?.flag }/> ({ langList.find(({ isSelected }) => isSelected)?.languageShort.toUpperCase() })
                     </button>
                     <div className={`mt-10 z-50 ${ isDisplayListLang ? 'block' : 'hidden'} absolute my-4 text-base list-none bg-white divide-y divide-gray-100 rounded-lg shadow-sm dark:bg-gray-700`} id="language-dropdown-menu">
