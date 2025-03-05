@@ -5,8 +5,8 @@ export type CallbackGetStorage = (items: {
 }) => void;
 
 const addStreamersListStorage = (streamersList: StorageStreamerListType[], newObj: StorageStreamerListType): StorageStreamerListType[] => {
-    if (!streamersList.some(item => item.streamerName === newObj.streamerName)) {
-        streamersList.push(newObj); // Push only if the streamerName is unique
+    if (!streamersList.some(item => item.tabId === newObj.tabId)) {
+        streamersList.push(newObj); // Push only if the tabId is unique
     }
 
     return streamersList;

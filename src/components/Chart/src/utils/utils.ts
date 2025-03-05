@@ -350,7 +350,7 @@ const getDuration = (document: Document): string | undefined => {
 const removeSpaceInString = (value?: string): string => value ? value.replace(/\s+/g, '') : '';
 
 /**
- * Wait for an HTMLElement to appears in DOM by giving a string selector.
+ * Wait for an HTMLElement to appears in DOM by giving a string selector, return null if element not found 10 secondes after function call.
  * @param { string } selector 
  * @returns { Promise<Element | null> }
  */
@@ -371,6 +371,14 @@ const waitForElm = (selector: string): Promise<Element | null> => {
             childList: true,
             subtree: true
         });
+
+        // Timeout 10 secondes
+        setTimeout(() => {
+            if (document.querySelector(selector) === null) {
+                observer.disconnect();
+                resolve(null);
+            }
+        }, 10000);
     });
 };
 

@@ -1,7 +1,9 @@
 export type StorageStreamerListType = {
+    occurrences: number,
     streamerName: string,
     streamerImage: string,
     streamerGame: string,
+    streamerURL: string,
     status: StorageStatusType,
     tabId: number,
     windowId: number

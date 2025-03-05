@@ -3,7 +3,7 @@
 import { MessageEnum } from "./typings/MessageType";
 import { StorageStreamerListType } from "./typings/StorageType";
 
-let tabToUrl: any = {};
+//let tabToUrl: any = {};
 
 chrome.runtime.onInstalled.addListener(async (details: chrome.runtime.InstalledDetails) => {
     console.log('onInstalled', details)
@@ -17,6 +17,8 @@ chrome.runtime.onInstalled.addListener(async (details: chrome.runtime.InstalledD
 });
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+
+    console.log('ONMESSAGE :', request, sender)
     if (request.text === MessageEnum.tabId && sender?.tab) { // Asking for tabId
         sendResponse({tab: sender.tab.id});
     }
@@ -26,15 +28,21 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     }
 });
 
-chrome.tabs.onUpdated.addListener(async (tabId, { url }, tab) => {
-    if (tab.url!.startsWith("https://www.twitch.tv/") && url) {
-        
-        const { streamersList } = await chrome.storage.local.get('streamersList');
-        const streamerToDelete: StorageStreamerListType[] = streamersList.filter((streamer: StorageStreamerListType) => streamer.windowId !== tab.windowId && streamer.tabId !== tabId);
-        await chrome.storage.local.set({ 'streamersList': streamerToDelete });
+const isValidTwitchURL = (url: string) => {
+    const urlPattern = /^(https):\/\/(www)\.(twitch)\.(tv)\/[-a-zA-Z0-9@:%._\+~#=]/;
+    return urlPattern.test(url);
+}
 
-        chrome.tabs.sendMessage(tabId, { url: tab.url, event: "onUpdate" });
-        tabToUrl[tabId] = tab.url;
+chrome.tabs.onUpdated.addListener(async (tabID, { url }, tab) => {
+
+    if (url && isValidTwitchURL(url)) {
+        
+        /*const { streamersList } = await chrome.storage.local.get('streamersList');
+        const streamerToDelete: StorageStreamerListType[] = streamersList.filter(({ windowId, tabId }: StorageStreamerListType) => windowId !== tab.windowId && tabId !== tabID);
+        await chrome.storage.local.set({ 'streamersList': streamerToDelete });*/
+
+        //tabToUrl[tabID] = tab.url;
+        chrome.tabs.sendMessage(tabID, { url: tab.url, event: "onUpdate" });
     }
 });
 
@@ -44,28 +52,19 @@ chrome.tabs.onCreated.addListener((tab) => {
         chrome.tabs.sendMessage(tab.id!, { url: tab.pendingUrl, event: "onCreated" }, (response) => {
             console.log("Response from content script:", response);
         });
-        tabToUrl[tab.id!] = tab.pendingUrl;
+        //tabToUrl[tab.id!] = tab.pendingUrl;
     }
 });
 
-chrome.windows.onRemoved.addListener(async (windowId) => {
-    // Delete streamer in closing window streamerList storage
+chrome.tabs.onRemoved.addListener(async (tabId: number, removeInfo: chrome.tabs.TabRemoveInfo) => {
+    console.log(tabId, removeInfo)
+
+    // Delete streamer in streamerList storage
     const { streamersList } = await chrome.storage.local.get('streamersList');
-    const streamerToDelete: StorageStreamerListType[] = streamersList.filter((streamer: StorageStreamerListType) => streamer.windowId !== windowId);
+    console.log(streamersList)
+    const streamerToDelete: StorageStreamerListType[] = streamersList.filter((streamer: StorageStreamerListType) => streamer.tabId !== tabId || streamer.windowId !== removeInfo.windowId);
     await chrome.storage.local.set({ 'streamersList': streamerToDelete });
-});
-
-chrome.tabs.onRemoved.addListener(async (tabId: number) => {
-    if (tabToUrl.hasOwnProperty(tabId) && tabToUrl[tabId]!.startsWith("https://www.twitch.tv/")) {
-        chrome.tabs.sendMessage(tabId, { closed: true}, (response) => { // Delete setInterval when closed
-            console.log("Response from content script:", response);
-        });
-
-        // Delete streamer in streamerList storage
-        const { streamersList } = await chrome.storage.local.get('streamersList');
-        const streamerToDelete: StorageStreamerListType[] = streamersList.filter((streamer: StorageStreamerListType) => streamer.tabId !== tabId);
-        await chrome.storage.local.set({ 'streamersList': streamerToDelete });
-    }
+    
 });
 
 chrome.tabs.query({ url: "https://www.twitch.tv/*" }, function(tabs) {

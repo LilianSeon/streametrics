@@ -25,9 +25,10 @@ let accordionComponent: Accordion | undefined;
 //let toastComponent: Toast | undefined;
 let accordionElement: HTMLElement | undefined;
 let isExtensionInitialized: boolean = false;
+let isExtensionInitializing: boolean = false;
 let messageCounter: MessageCounter | undefined;
 let loopCounter: number = 0;
-let intervalManager: IntervalManager| undefined;
+let intervalManager: IntervalManager | undefined;
 let hasImportedData: boolean = false;
 let toastManager: ToastManager | undefined;
 
@@ -188,66 +189,78 @@ const initStorage = async (): Promise<void> => {
  * Check if `#live-channel-stream-information` is in DOM or wait for it, then start getting datas and init chart
  */
 const initChartInDOM = async () => {
-    console.log('initChartInDOM');
 
-    isExtensionInitialized = true;
-    const informationContainer = await waitForElm('#live-channel-stream-information');
-    const chartContainer = await waitForElm('.chat-line__message');
+    try {
+        console.log("%c 🚀 StreaMetrics Chrome extension initializing... ", "color: white; background-color: #2563eb; font-size: 14px; padding: 8px; border-radius: 4px;");
+        isExtensionInitializing = true;
+        const informationContainer = await waitForElm('#live-channel-stream-information');
+        const chartContainer = await waitForElm('.chat-line__message');
 
-    if (typeof messageCounter === 'undefined' && chartContainer) {
-        messageCounter = new MessageCounter(getChatContainer(document));
-    }
-
-    await initStorage();
-
-    if (informationContainer && typeof accordionComponent == 'undefined' && typeof accordionElement == 'undefined' && document.getElementById("accordionExtension") === null) {
-        const { isAccordionExpanded } = await getStorage(['isAccordionExpanded']);
-        const { refreshValue } = await getStorage(['refreshValue']);
-
-        if (typeof intervalManager === 'undefined') {
-            intervalManager = new IntervalManager(startLoopGetData, (refreshValue ?? 5) * 1000);
+        if (typeof messageCounter === 'undefined' && chartContainer) {
+            messageCounter = new MessageCounter(getChatContainer(document));
         }
 
-        accordionComponent = new Accordion(informationContainer, refreshValue ?? 5, onClickArrowAccordionHandler, onClickExportButtonHandler, onChangeImportHandler, onClickPlayPauseButtonHandler, onClickClearHandler, onClickHideShowMessageButtonHandler, onClickHideShowViewerButtonHandler, onClickExportImageButtonHandler, onChangeRefreshValue, isAccordionExpanded);
-        accordionElement = accordionComponent.getChartContainer() as HTMLElement;
-        accordionComponent.setProgressBarWidth(20);
-    }
-    if (accordionElement && typeof chartExtension == 'undefined') {
+        await initStorage();
 
-        const chartTitle: string = formatChartTitle(window.location.pathname);
-        const textColor: string = document.documentElement.className.includes('dark') ? '#ffffff' : '#000000';
-        const { language } = await getStorage(["language"])
-        chartExtension = new ChartExtension(accordionElement, chartTitle, textColor, language);
-        accordionComponent?.setProgressBarWidth(60);
-        backGroundThemeObserver(document, updateDefaultColor);
-        updateDefaultColor(isDarkModeActivated() ? 'dark' : 'light');
-        toastManager = new ToastManager(accordionComponent!.toastContainer);
+        if (informationContainer && informationContainer.parentNode && chartContainer && typeof accordionComponent == 'undefined' && typeof accordionElement == 'undefined' && document.getElementById("accordionExtension") === null) {
+            const { isAccordionExpanded } = await getStorage(['isAccordionExpanded']);
+            const { refreshValue } = await getStorage(['refreshValue']);
 
-        const { streamersList }: { streamersList?: StorageStreamerListType[] } = await getStorage(['streamersList']);
+            if (typeof intervalManager === 'undefined') {
+                intervalManager = new IntervalManager(startLoopGetData, (refreshValue ?? 5) * 1000);
+            }
 
-
-        const streamerName = await getStreamerName(document);
-        accordionComponent?.setProgressBarWidth(70);
-        const streamerImage = await getStreamerImage(document, streamerName);
-        accordionComponent?.setProgressBarWidth(80);
-        const streamerGame = await getGameName(document)
-        accordionComponent?.setProgressBarWidth(90);
-
-        const tabId = await getCurrentTabId();
-        const windowId = await getCurrentWindowId();
-
-        if (streamersList && windowId) {
-            const newList = addStreamersListStorage(streamersList as StorageStreamerListType[], { streamerName, streamerImage, streamerGame, status: 'Active', tabId: tabId, windowId })
-            await setStorage({ 'streamersList': newList });
-        } else if(windowId) {
-            await setStorage({ 'streamersList': [{ streamerName, streamerImage, streamerGame, status: 'Active', tabId: tabId, windowId }] as StorageStreamerListType[]});
+            accordionComponent = new Accordion(informationContainer, refreshValue ?? 5, onClickArrowAccordionHandler, onClickExportButtonHandler, onChangeImportHandler, onClickPlayPauseButtonHandler, onClickClearHandler, onClickHideShowMessageButtonHandler, onClickHideShowViewerButtonHandler, onClickExportImageButtonHandler, onChangeRefreshValue, isAccordionExpanded);
+            accordionElement = accordionComponent.getChartContainer() as HTMLElement;
+            accordionComponent.setProgressBarWidth(20);
         }
+        
+        if (accordionElement && typeof chartExtension == 'undefined') {
 
-        await wait(100);
-        accordionComponent?.setProgressBarWidth(100);
-        await wait(70);
-        accordionComponent?.setProgressBarWidth(0);
+            const chartTitle: string = formatChartTitle(window.location.pathname);
+            const textColor: string = document.documentElement.className.includes('dark') ? '#ffffff' : '#000000';
+            const { language } = await getStorage(["language"]);
+            chartExtension = new ChartExtension(accordionElement, chartTitle, textColor, language);
+            isExtensionInitializing = false;
+            isExtensionInitialized = true;
+            accordionComponent?.setProgressBarWidth(60);
+            backGroundThemeObserver(document, updateDefaultColor);
+            updateDefaultColor(isDarkModeActivated() ? 'dark' : 'light');
+            toastManager = new ToastManager(accordionComponent!.toastContainer);
+
+            const { streamersList }: { streamersList?: StorageStreamerListType[] } = await getStorage(['streamersList']);
+
+
+            const streamerName = await getStreamerName(document);
+            accordionComponent?.setProgressBarWidth(70);
+            const streamerImage = await getStreamerImage(document, streamerName);
+            accordionComponent?.setProgressBarWidth(80);
+            const streamerGame = await getGameName(document);
+            accordionComponent?.setProgressBarWidth(90);
+            const occurrences = streamersList?.filter((streamer) => streamer.streamerName === streamerName).length || 0;
+
+            const tabId = await getCurrentTabId();
+            const windowId = await getCurrentWindowId();
+
+            if (streamersList && windowId) {
+                const newList = addStreamersListStorage(streamersList as StorageStreamerListType[], { occurrences, streamerName, streamerImage, streamerGame, status: 'Active', tabId: tabId, windowId, streamerURL: document.URL })
+                //streamersList.push({ streamerName, streamerImage, streamerGame, status: 'Active', tabId: tabId, windowId, streamerURL: document.URL });
+                await setStorage({ 'streamersList': newList });
+            } else if(windowId) {
+                await setStorage({ 'streamersList': [{ streamerName, streamerImage, streamerGame, status: 'Active', tabId: tabId, windowId, streamerURL: document.URL }] as StorageStreamerListType[]});
+            }
+
+            await wait(100);
+            accordionComponent?.setProgressBarWidth(100);
+            await wait(70);
+            accordionComponent?.setProgressBarWidth(0);
+        }
+    } catch (error) {
+        isExtensionInitializing = false;
+        isExtensionInitialized = false;
     }
+    
+    isExtensionInitializing = false;
 };
 
 chrome.storage.onChanged.addListener((changes) => {
@@ -258,16 +271,24 @@ chrome.storage.onChanged.addListener((changes) => {
     }
 });
 
-chrome.runtime.onMessage.addListener((request, _sender) => { // When user goes from a Twitch URL to another Twitch URL
+chrome.runtime.onMessage.addListener(async (request, _sender) => { // When user goes from a Twitch URL to another Twitch URL
     console.log("Message received in contentScript:", request);
 
     if (request?.url && isURLTwitch(request.url)) {
 
-        if (chartExtension && formatChartTitle(window.location.pathname).includes(chartExtension.chartTitle.replace("'s viewers", ""))) return; // if page reloaded but still on same page, do not init another Chart
+        // if page reloaded but still on same page, do not init another Chart
+        if (chartExtension && formatChartTitle(window.location.pathname).includes(chartExtension.chartTitle.replace("'s viewers", ""))) return;
 
-        if (chartExtension instanceof ChartExtension && accordionComponent instanceof Accordion && typeof accordionElement !== 'undefined' && messageCounter && intervalManager instanceof IntervalManager) { // If Chart already exists in DOM
-            chartExtension.destroy();
-            accordionComponent.destroy();
+        // If Chart already exists in DOM
+        if (chartExtension && chartExtension instanceof ChartExtension && accordionComponent instanceof Accordion && typeof accordionElement !== 'undefined' && messageCounter && intervalManager instanceof IntervalManager) {
+            
+            const { streamersList }: { streamersList?: StorageStreamerListType[] } = await getStorage(['streamersList']);
+            const tabId = await getCurrentTabId();
+            const streamerToDelete: StorageStreamerListType[] | undefined = streamersList?.filter((streamer: StorageStreamerListType) => streamer.tabId !== tabId && streamer.streamerURL !== request.url);
+            await setStorage({'streamersList': streamerToDelete});
+
+            chartExtension?.destroy();
+            accordionComponent?.destroy();
             messageCounter.destroy();
             intervalManager.clear();
             intervalManager = undefined;
@@ -276,10 +297,10 @@ chrome.runtime.onMessage.addListener((request, _sender) => { // When user goes f
             accordionComponent = undefined;
             accordionElement = undefined;
             isExtensionInitialized = false;
-        } else {
-            if (document.getElementById('accordionExtension') === null && document.getElementById('extensionChartContainer') === null && !isExtensionInitialized) {
-                initChartInDOM();
-            }
+        }
+
+        if (document.getElementById('accordionExtension') === null && document.getElementById('extensionChartContainer') === null && !isExtensionInitialized && !isExtensionInitializing) {
+            initChartInDOM();
         }
     }
 });

@@ -30,7 +30,7 @@ const App: FC = () => {
     const getStorage = async (keys: string | string[]) => {
       try {
         const { streamersList } = await chrome.storage.local.get(keys);
-        setStreamerList(streamersList);
+        setStreamerList(streamersList ?? []);
       } catch (error) {
         console.error("Error fetching local storage:", error);
       }

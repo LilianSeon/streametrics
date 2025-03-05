@@ -33,7 +33,7 @@ const Pagination: FC<PaginationProps> = ({ totalItems, itemsPerPage = 3, current
                     </li>
                     <li>
                         <a href="#" className="flex items-center justify-center text-sm py-2 px-2 leading-tight bg-gray-800 border border-gray-700 text-gray-400 hover:bg-gray-700 hover:text-white">
-                            <span className="mr-1 font-semibold text-white">{ currentPage }</span>
+                            <span className="mr-1 font-semibold text-white">{ totalItems === 0 ? '0' : currentPage }</span>
                             of
                             <span className="ml-1 font-semibold text-white">{ totalPages }</span>
                         </a>
