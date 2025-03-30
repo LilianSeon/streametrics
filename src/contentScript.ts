@@ -2,7 +2,7 @@
 
 // Utils
 import { getStreamerImage, isURLTwitch, getNbViewer, waitForElm, getDuration, formatChartTitle, getGameName, backGroundThemeObserver, ThemeBackgroundColor, extractDataFromJSON, getChatContainer, downloadJSON, downloadImage, getStreamerName, isDarkModeActivated, wait, getCurrentTabId, getCurrentWindowId } from './components/Chart/src/utils/utils';
-import { addStreamersListStorage, getStorage, setStorage } from './components/Chart/src/utils/utilsStorage';
+import { addStreamersListStorage, getStorage, setStorage, updateStreamersListStorage } from './components/Chart/src/utils/utilsStorage';
 import IntervalManager from './components/Chart/src/js/intervalManager';
 
 // Components
@@ -17,6 +17,8 @@ import './components/Chart/src/assets/css/index.css'; // Font
 
 // Typing
 import { StorageStreamerListType } from './typings/StorageType';
+
+let tabId: number | undefined;
 
 
 let chartExtension: ChartExtension | undefined;
@@ -157,9 +159,14 @@ const onClickHideShowMessageButtonHandler : OnClickHideShowMessageButtonHandler 
     }
 };
 
-const onClickPlayPauseButtonHandler: OnClickPlayPauseButtonHandler = (isPlaying: boolean): void => {
+const onClickPlayPauseButtonHandler: OnClickPlayPauseButtonHandler = async (isPlaying: boolean): Promise<void> => {
+    const { streamersList }: { streamersList?: StorageStreamerListType[] } = await getStorage(['streamersList']);
+
     if (isPlaying) {
         intervalManager?.pause();
+
+        if (streamersList && tabId) await setStorage({ 'streamersList': updateStreamersListStorage(streamersList, tabId, { status: 'Pause'}) });
+
     } else {
         if (hasImportedData && chartExtension) {
             chartExtension.clearData();
@@ -167,6 +174,8 @@ const onClickPlayPauseButtonHandler: OnClickPlayPauseButtonHandler = (isPlaying:
         }
         intervalManager?.resume();
         hasImportedData = false;
+
+        if (streamersList && tabId) await setStorage({ 'streamersList': updateStreamersListStorage(streamersList, tabId, { status: 'Active'}) });
     }
 
     if (accordionComponent) accordionComponent.isPlaying = !isPlaying;
@@ -192,6 +201,7 @@ const initChartInDOM = async () => {
 
     try {
         console.log("%c 🚀 StreaMetrics Chrome extension initializing... ", "color: white; background-color: #2563eb; font-size: 14px; padding: 8px; border-radius: 4px;");
+        tabId = await getCurrentTabId();
         isExtensionInitializing = true;
         const informationContainer = await waitForElm('#live-channel-stream-information');
         const chartContainer = await waitForElm('.chat-line__message');
@@ -239,7 +249,7 @@ const initChartInDOM = async () => {
             accordionComponent?.setProgressBarWidth(90);
             const occurrences = streamersList?.filter((streamer) => streamer.streamerName === streamerName).length || 0;
 
-            const tabId = await getCurrentTabId();
+            
             const windowId = await getCurrentWindowId();
 
             if (streamersList && windowId) {
@@ -271,8 +281,13 @@ chrome.storage.onChanged.addListener((changes) => {
     }
 });
 
-chrome.runtime.onMessage.addListener(async (request, _sender) => { // When user goes from a Twitch URL to another Twitch URL
+chrome.runtime.onMessage.addListener(async (request, _sender, sendResponse) => { // When user goes from a Twitch URL to another Twitch URL
     console.log("Message received in contentScript:", request);
+
+    if (request.event === 'check_status') {
+        sendResponse(tabId);
+        return
+    }
 
     if (request?.url && isURLTwitch(request.url)) {
 
@@ -304,6 +319,10 @@ chrome.runtime.onMessage.addListener(async (request, _sender) => { // When user 
         }
     }
 });
+
+/*const checkStatus = async () => {
+    return await getCurrentTabId();
+};*/
 
 const updateDefaultColor = (theme: ThemeBackgroundColor): void => {
     if (chartExtension instanceof ChartExtension) {

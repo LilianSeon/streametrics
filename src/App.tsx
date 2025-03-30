@@ -31,12 +31,47 @@ const App: FC = () => {
       try {
         const { streamersList } = await chrome.storage.local.get(keys);
         setStreamerList(streamersList ?? []);
+
+        return streamersList ?? [];
       } catch (error) {
         console.error("Error fetching local storage:", error);
+        return [];
       }
     };
 
-    getStorage('streamersList');
+    const setStorage = async (value: StorageStreamerListType[]) => {
+      try {
+       await chrome.storage.local.set({ streamersList: value });
+      } catch (error) {
+        console.error("Error setting local storage:", error);
+      }
+    };
+
+    getStorage('streamersList').then(async () => {
+      const { streamersList } = await chrome.storage.local.get('streamersList');
+      const allStreamerTabId: number[] = [];
+      let checkStatusNoResponse: number = 0;
+
+      streamersList.forEach((streamer: StorageStreamerListType) => {
+        chrome.tabs.sendMessage(streamer.tabId, { event: "check_status" }, function (response: number) {
+          if (chrome.runtime.lastError) {
+              console.log("Le script de contenu n'est pas chargé sur cet onglet.");
+          } else {
+            checkStatusNoResponse++;
+            allStreamerTabId.push(response);
+            const filteredStreamerList = streamersList.filter(({ tabId }: StorageStreamerListType) => allStreamerTabId.includes(tabId));
+            console.log(streamersList, filteredStreamerList, allStreamerTabId)
+            setStorage(filteredStreamerList);
+          }
+
+          if (checkStatusNoResponse === 0) setStreamerList([]); // If only get error response clear streamerlist
+        });
+      });
+
+      
+
+      
+    });
 
   }, []);
 

@@ -9,7 +9,7 @@ export type StorageStreamerListType = {
     windowId: number
 }
 
-export type StorageStatusType = 'Active' | 'Inactive' | 'Idle'
+export type StorageStatusType = 'Active' | 'Inactive' | 'Idle' | 'Pause'
 
 export enum StorageNameType { 
     streamersList = 'streamersList'

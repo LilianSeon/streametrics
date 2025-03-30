@@ -24,7 +24,7 @@ const TableRows: FC<TableRowsProps> = ({ streamersList, currentPage = 1 }: Table
                     const displayedName = occurrences > 0 ? `${streamerName} (${occurrences})` : `${streamerName}`;
 
                     return(
-                        <tr className={`${index !== streamersList.length-1 ? 'border-b' : ''} border-gray-700 bg-gray-900 hover:bg-gray-600`}>
+                        <tr className={`${index !== streamersList.length-1 ? 'border-b' : ''} border-gray-700 bg-gray-900 hover:bg-gray-600 group`}>
                             <th scope="row" className="flex flex-row pl-2 pr-1 py-3 font-medium text-white whitespace-nowrap">
                                 <img className="w-5 h-5 mr-2 rounded-full" src={ streamerImage } alt="Streamer avatar" />
                                 <div className="overflow-hidden text-ellipsis whitespace-nowrap w-[120px]" title={ streamerName }>
@@ -32,11 +32,11 @@ const TableRows: FC<TableRowsProps> = ({ streamersList, currentPage = 1 }: Table
                                 </div>
                             </th>
                             <td className="pl-3 pr-1 py-3">
-                                <div className="w-2 h-2 bg-green-400 rounded-full inline-block mr-1"></div>
+                                <div className="w-2 h-2 bg-green-400 rounded-full inline-block mr-1 group-hover:text-white"></div>
                                 { status }
                             </td>
                             <td className="pl-4 py-3">
-                                <div className="overflow-hidden text-ellipsis whitespace-nowrap w-[125px]" title={ streamerGame }>
+                                <div className="overflow-hidden text-ellipsis whitespace-nowrap w-[125px] group-hover:text-white" title={ streamerGame }>
                                 { streamerGame }
                                 </div>
                             </td>
