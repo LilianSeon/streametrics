@@ -34,7 +34,7 @@ const Table: FC<TableProps> = ({ streamerList }: TableProps) => {
                 <Pagination totalItems={ streamerList.length } currentPage={ currentPage } setCurrentPage={ setCurrentPage } />
             </div>
             <div className="rounded-lg overflow-hidden">
-                <table className="w-full text-sm text-left text-gray-400 table-auto">
+                <table className="w-full text-sm text-left text-gray-400 table-auto overflow-visible">
                     <thead className="text-xs uppercase bg-gray-700 text-gray-300">
                         <tr>
                             <th scope="col" className="w-35 px-4 py-3">Streamer</th>
@@ -45,7 +45,7 @@ const Table: FC<TableProps> = ({ streamerList }: TableProps) => {
                             </th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody className="">
                         <TableRows streamersList={ streamerList } currentPage={ currentPage } />
                     </tbody>
                 </table>

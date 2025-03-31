@@ -5,6 +5,7 @@ export type StorageStreamerListType = {
     streamerGame: string,
     streamerURL: string,
     status: StorageStatusType,
+    isEnable: boolean,
     tabId: number,
     windowId: number
 }

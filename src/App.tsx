@@ -54,9 +54,9 @@ const App: FC = () => {
 
       streamersList.forEach((streamer: StorageStreamerListType) => {
         chrome.tabs.sendMessage(streamer.tabId, { event: "check_status" }, function (response: number) {
-          if (chrome.runtime.lastError) {
+          if (typeof response === 'undefined' || chrome.runtime.lastError) {
               console.log("Le script de contenu n'est pas chargé sur cet onglet.");
-          } else {
+          } else if(response) {
             checkStatusNoResponse++;
             allStreamerTabId.push(response);
             const filteredStreamerList = streamersList.filter(({ tabId }: StorageStreamerListType) => allStreamerTabId.includes(tabId));
