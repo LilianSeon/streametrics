@@ -41,6 +41,35 @@ const TableRows: FC<TableRowsProps> = ({ streamersList, currentPage = 1 }: Table
         }
     };
 
+    const getPillColor = (status: StorageStreamerListType['status']): string => {
+
+        let colorClass = '';
+
+        switch (status) {
+            case 'Active':
+                colorClass = 'bg-gradient-to-r from-green-400 via-green-500 to-green-600';
+                break;
+
+            case 'Inactive':
+                colorClass = 'bg-gradient-to-r from-red-400 via-red-500 to-red-600';
+                break;
+            
+            case 'Idle':
+                colorClass = 'bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600';
+                break;
+
+            case 'Pause':
+                colorClass = 'bg-gradient-to-r from-orange-400 via-orange-500 to-orange-600'
+                break;
+        
+            default:
+                colorClass = 'bg-gradient-to-r from-green-400 via-green-500 to-green-600';
+                break;
+        }
+
+        return colorClass;
+    };
+
     return(
         <>
             { 
@@ -58,7 +87,7 @@ const TableRows: FC<TableRowsProps> = ({ streamersList, currentPage = 1 }: Table
                                 </div>
                             </th>
                             <td className="pl-1 pr-1 py-3">
-                                <div className="w-2 h-2 bg-green-400 rounded-full inline-block mr-2"></div>
+                                <div className={`${ getPillColor(status) } w-2 h-2 rounded-full inline-block mr-1`}></div>
                                 <div className="group-hover:text-white inline-block">{ status }</div>
                             </td>
                             <td className="pl-4 py-3">

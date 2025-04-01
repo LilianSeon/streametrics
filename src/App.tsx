@@ -53,8 +53,8 @@ const App: FC = () => {
       let checkStatusNoResponse: number = 0;
 
       streamersList.forEach((streamer: StorageStreamerListType) => {
-        chrome.tabs.sendMessage(streamer.tabId, { event: "check_status" }, function (response: number) {
-          if (typeof response === 'undefined' || chrome.runtime.lastError) {
+        chrome.tabs.sendMessage(streamer.tabId, { event: "check_status" }, function (response?: number) {
+          if (typeof response === 'undefined' || chrome.runtime?.lastError) {
               console.log("Le script de contenu n'est pas chargé sur cet onglet.");
           } else if(response) {
             checkStatusNoResponse++;
@@ -64,7 +64,7 @@ const App: FC = () => {
             setStorage(filteredStreamerList);
           }
 
-          if (checkStatusNoResponse === 0) setStreamerList([]); // If only get error response clear streamerlist
+          if (checkStatusNoResponse === 0) setStorage([]); // If only get error response clear streamerlist
         });
       });
 
