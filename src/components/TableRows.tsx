@@ -95,23 +95,21 @@ const TableRows: FC<TableRowsProps> = ({ streamersList, currentPage = 1 }: Table
                                 { streamerGame }
                                 </div>
                             </td>
-                            <td className="px-2 py-3 flex items-center justify-center">
-                                <div className="group relative">
-                                    <button className="inline-flex items-center p-0.5 text-sm font-medium text-center text-gray-500 hover:text-gray-800 rounded-lg focus:outline-none dark:text-gray-400 dark:hover:text-gray-100 group-hover:text-white" type="button">
-                                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                            <path d="M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM16 12a2 2 0 100-4 2 2 0 000 4z" />
-                                        </svg>
-                                    </button>
-                                    <div className="hidden absolute z-10 w-20 right-7 top-[-35px] opacity-90 bg-gray-500 border-gray-900 rounded divide-y divide-gray-100 shadow-sm group-hover:block">
-                                        <ul className=" text-sm text-white">
-                                            <li onClick={ () => onClickFocusHandler(tabId, windowId) } className="hover:bg-gray-400 hover:rounded">
-                                                <a href="" className="block py-1 px-2">Focus</a>
-                                            </li>
-                                            <li onClick={ () => onClickDisableHanlder(tabId, isEnable) } className="hover:bg-gray-400 hover:rounded">
-                                                <a href="#" className="block py-1 px-2">{ isEnable ? 'Disable': 'Enable' }</a>
-                                            </li>
-                                        </ul>
-                                    </div>
+                            <td className="px-2 py-3 flex items-center justify-center group/dropdown relative">
+                                <button className="inline-flex items-center p-0.5 text-sm font-medium text-center text-gray-500 hover:text-gray-800 rounded-lg focus:outline-none dark:text-gray-400 dark:hover:text-gray-100 group-hover:text-white" type="button">
+                                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM16 12a2 2 0 100-4 2 2 0 000 4z" />
+                                    </svg>
+                                </button>
+                                <div className="hidden absolute z-10 w-20 top-[-4px] right-[37px] opacity-90 bg-gray-500 border-gray-900 rounded divide-y divide-gray-100 shadow-sm group-hover/dropdown:block">
+                                    <ul className=" text-sm text-white">
+                                        <li onClick={ () => onClickFocusHandler(tabId, windowId) } className="hover:bg-gray-400 hover:rounded">
+                                            <a href="" className="block py-1 px-2">Focus</a>
+                                        </li>
+                                        <li onClick={ () => onClickDisableHanlder(tabId, isEnable) } className="hover:bg-gray-400 hover:rounded">
+                                            <a href="#" className="block py-1 px-2">{ isEnable ? 'Disable': 'Enable' }</a>
+                                        </li>
+                                    </ul>
                                 </div>
                             </td>
                         </tr>
