@@ -15,7 +15,7 @@ const Table: FC<TableProps> = ({ streamerList }: TableProps) => {
     const [currentPage, setCurrentPage] = useState(1);
 
     return(
-        <div className="h-[246px] mx-2 p-2 bg-gray-800 rounded-lg">
+        <div className="h-[260px] mx-2 p-2 bg-gray-800 rounded-lg">
             <div className="flex flex-row items-center mb-2">
                 <div className="flex flex-col">
                     <form className="flex items-center mb-0">
@@ -33,19 +33,19 @@ const Table: FC<TableProps> = ({ streamerList }: TableProps) => {
                 <div className="grow"></div>
                 <Pagination totalItems={ streamerList.length } currentPage={ currentPage } setCurrentPage={ setCurrentPage } />
             </div>
-            <div className="rounded-lg overflow-hidden">
-                <table className="w-full text-sm text-left text-gray-400 table-auto overflow-visible">
+            <div className="rounded-lg overflow-visible">
+                <table className="rounded-lg w-full text-sm text-left text-gray-400 table-auto overflow-visible">
                     <thead className="text-xs uppercase bg-gray-700 text-gray-300">
                         <tr>
-                            <th scope="col" className="w-35 px-4 py-3">Streamer</th>
+                            <th scope="col" className="rounded-tl-lg w-35 px-4 py-3">Streamer</th>
                             <th scope="col" className="w-20 px-4 py-3">Status</th>
                             <th scope="col" className="w-40 pl-4 py-3">Game</th>
-                            <th scope="col" className="w-5 pr-2 py-3">
+                            <th scope="col" className="rounded-tr-lg w-5 pr-2 py-3">
                                 <span className="sr-only">Actions</span>
                             </th>
                         </tr>
                     </thead>
-                    <tbody className="">
+                    <tbody className="rounded-b-lg">
                         <TableRows streamersList={ streamerList } currentPage={ currentPage } />
                     </tbody>
                 </table>
