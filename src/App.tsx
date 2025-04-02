@@ -67,10 +67,6 @@ const App: FC = () => {
           if (checkStatusNoResponse === 0) setStorage([]); // If only get error response clear streamerlist
         });
       });
-
-      
-
-      
     });
 
   }, []);
@@ -78,7 +74,7 @@ const App: FC = () => {
   return (
     <div onClick={ onClickBody } style={{ width: '440px', height: '380px'}} className='bg-gray-900'>
       <Navbar isDisplayListLang={ isDisplayListLang } setIsDisplayListLang={ setIsDisplayListLang } />
-      <Table streamerList={ streamerList } />
+      <Table streamersList={ streamerList } />
     </div>
   )
 };

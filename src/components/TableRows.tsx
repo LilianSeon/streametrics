@@ -2,25 +2,35 @@ import { FC } from "react";
 import { StorageStreamerListType } from "../typings/StorageType";
 
 export type TableRowsProps = {
+    searchTextValue?: string,
     streamersList: StorageStreamerListType[],
     currentPage?: number
 }
 
 const itemsPerPage = 3;
 
-const TableRows: FC<TableRowsProps> = ({ streamersList, currentPage = 1 }: TableRowsProps) => {
+const highlightMatch = (text: string, search: string) => {
+    if (!search) return text;
+    const regex = new RegExp(`(${search})`, 'gi'); // g: Finds all matches in the text + i: Makes the search case-insensitive.
+    const parts = text.split(regex);
+    return parts.map((part, index) =>
+        regex.test(part) ? <span key={index} className="bg-yellow-300 text-gray-900">{part}</span> : part
+    );
+};
+
+const scrollToAnchor = () => {
+    let anchor = document.querySelector("#accordionExtension");
+    if (anchor) {
+        anchor.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+};
+
+const TableRows: FC<TableRowsProps> = ({ streamersList, currentPage = 1, searchTextValue = '' }: TableRowsProps) => {
 
     const currentItems = streamersList.slice(
         (currentPage - 1) * itemsPerPage,
         currentPage * itemsPerPage
     );
-
-    const scrollToAnchor = () => {
-        let anchor = document.querySelector("#accordionExtension");
-        if (anchor) {
-            anchor.scrollIntoView({ behavior: "smooth", block: "start" });
-        }
-    };
 
     const onClickDisableHanlder = (tabId: StorageStreamerListType['tabId'], isEnable: StorageStreamerListType['isEnable']) => {
         chrome.tabs.sendMessage(tabId, { event: isEnable ? "disable_chart" : "enable_chart" });
@@ -42,32 +52,13 @@ const TableRows: FC<TableRowsProps> = ({ streamersList, currentPage = 1 }: Table
     };
 
     const getPillColor = (status: StorageStreamerListType['status']): string => {
-
-        let colorClass = '';
-
         switch (status) {
-            case 'Active':
-                colorClass = 'bg-gradient-to-r from-green-400 via-green-500 to-green-600';
-                break;
-
-            case 'Inactive':
-                colorClass = 'bg-gradient-to-r from-red-400 via-red-500 to-red-600';
-                break;
-            
-            case 'Idle':
-                colorClass = 'bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600';
-                break;
-
-            case 'Pause':
-                colorClass = 'bg-gradient-to-r from-orange-400 via-orange-500 to-orange-600'
-                break;
-        
-            default:
-                colorClass = 'bg-gradient-to-r from-green-400 via-green-500 to-green-600';
-                break;
+            case 'Active': return 'bg-gradient-to-r from-green-400 via-green-500 to-green-600';
+            case 'Inactive': return 'bg-gradient-to-r from-red-400 via-red-500 to-red-600';
+            case 'Idle': return 'bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600';
+            case 'Pause': return 'bg-gradient-to-r from-orange-400 via-orange-500 to-orange-600';
+            default: return 'bg-gradient-to-r from-green-400 via-green-500 to-green-600';
         }
-
-        return colorClass;
     };
 
     return(
@@ -82,11 +73,11 @@ const TableRows: FC<TableRowsProps> = ({ streamersList, currentPage = 1 }: Table
                     const shouldApplyRoundedClass = index % 3 === 2 || isLastItem;
 
                     return(
-                        <tr className={`${index !== streamersList.length-1 ? 'border-b' : ''} border-gray-700 group rounded-br-lg`}>
+                        <tr key={ index }className={`${index !== streamersList.length-1 ? 'border-b' : ''} border-gray-700 group rounded-br-lg`}>
                             <th scope="row" className={`${shouldApplyRoundedClass ? 'rounded-bl-lg' : ''} bg-gray-900 flex flex-row pl-2 pr-1 py-4 font-medium text-white whitespace-nowrap`}>
                                 <img className="mr-2 rounded-full" src={ streamerImage } alt="Streamer avatar" width={ 20 } height={ 20 }/>
                                 <div className="overflow-hidden text-ellipsis whitespace-nowrap w-[120px]" title={ streamerName }>
-                                    { displayedName }
+                                 { highlightMatch(displayedName, searchTextValue) }
                                 </div>
                             </th>
                             <td className="bg-gray-900 pl-1 pr-1 py-3">
@@ -95,7 +86,7 @@ const TableRows: FC<TableRowsProps> = ({ streamersList, currentPage = 1 }: Table
                             </td>
                             <td className="bg-gray-900 pl-4 py-3">
                                 <div className="overflow-hidden text-ellipsis whitespace-nowrap w-[125px] group-hover:text-white" title={ streamerGame }>
-                                { streamerGame }
+                                 { highlightMatch(streamerGame, searchTextValue) }
                                 </div>
                             </td>
                             <td className={`${shouldApplyRoundedClass ? 'rounded-br-lg' : '' } bg-gray-900 px-2 py-3 items-center justify-center group/dropdown relative`}>

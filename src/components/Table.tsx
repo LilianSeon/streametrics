@@ -6,13 +6,19 @@ import { Pagination } from "./Pagination";
 import { TableRows } from "./TableRows";
 
 export type TableProps = {
-    streamerList: StorageStreamerListType[],
+    streamersList: StorageStreamerListType[],
     currentPage?: number;
 };
 
-const Table: FC<TableProps> = ({ streamerList }: TableProps) => {
+const Table: FC<TableProps> = ({ streamersList }: TableProps) => {
 
     const [currentPage, setCurrentPage] = useState(1);
+    const [searchTextValue, setSearchTextValue] = useState('');
+
+    const filteredStreamers = streamersList.filter(({ streamerName, streamerGame }) =>
+        streamerName.toLowerCase().includes(searchTextValue.toLowerCase()) ||
+        streamerGame.toLowerCase().includes(searchTextValue.toLowerCase())
+    );
 
     return(
         <div className="h-[260px] mx-2 p-2 bg-gray-800 rounded-lg">
@@ -26,12 +32,12 @@ const Table: FC<TableProps> = ({ streamerList }: TableProps) => {
                                     <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"></path>
                                 </svg>
                             </div>
-                            <input type="text" id="search" className="border text-sm rounded-lg block w-44 pl-10 p-2 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-primary-500 focus:border-primary-500" placeholder="Search" />
+                            <input value={ searchTextValue } onChange={ e => setSearchTextValue(e.target.value) } type="text" className="border text-sm rounded-lg block w-44 pl-10 p-2 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-primary-500 focus:border-primary-500" placeholder="Search" />
                         </div>
                     </form>
                 </div>
                 <div className="grow"></div>
-                <Pagination totalItems={ streamerList.length } currentPage={ currentPage } setCurrentPage={ setCurrentPage } />
+                <Pagination totalItems={ filteredStreamers.length } currentPage={ currentPage } setCurrentPage={ setCurrentPage } />
             </div>
             <div className="rounded-lg overflow-visible">
                 <table className="rounded-lg w-full text-sm text-left text-gray-400 table-auto overflow-visible">
@@ -46,7 +52,7 @@ const Table: FC<TableProps> = ({ streamerList }: TableProps) => {
                         </tr>
                     </thead>
                     <tbody className="rounded-b-lg">
-                        <TableRows streamersList={ streamerList } currentPage={ currentPage } />
+                        <TableRows streamersList={ filteredStreamers } currentPage={ currentPage } searchTextValue={ searchTextValue }/>
                     </tbody>
                 </table>
             </div>
