@@ -21,10 +21,9 @@ const App: FC = () => {
   useEffect(() => {
 
     chrome.storage.onChanged.addListener(({ streamersList }) => {
-      if (streamersList.newValue) {
+      if (streamersList?.newValue) {
         setStreamerList(streamersList.newValue as StorageStreamerListType[]);
       }
-      console.log('onChanged.addListener :', streamersList.newValue)
     });
 
     const getStorage = async (keys: string | string[]) => {
@@ -51,22 +50,31 @@ const App: FC = () => {
       const { streamersList } = await chrome.storage.local.get('streamersList');
       const allStreamerTabId: number[] = [];
       let checkStatusNoResponse: number = 0;
+      let nbTab: number = 0;
 
-      streamersList.forEach((streamer: StorageStreamerListType) => {
-        chrome.tabs.sendMessage(streamer.tabId, { event: "check_status" }, function (response?: number) {
-          if (typeof response === 'undefined' || chrome.runtime?.lastError) {
-              console.log("Le script de contenu n'est pas chargé sur cet onglet.");
-          } else if(response) {
-            checkStatusNoResponse++;
-            allStreamerTabId.push(response);
-            const filteredStreamerList = streamersList.filter(({ tabId }: StorageStreamerListType) => allStreamerTabId.includes(tabId));
-            console.log(streamersList, filteredStreamerList, allStreamerTabId)
-            setStorage(filteredStreamerList);
-          }
+      return new Promise<boolean>((resolve) => {
+        streamersList?.forEach((streamer: StorageStreamerListType) => {
+          chrome.tabs.sendMessage(streamer.tabId, { event: "check_status" }, function (response?: number) {
+            nbTab++;
+            if (typeof response === 'undefined' || chrome.runtime?.lastError) {
+                console.log("Le script de contenu n'est pas chargé sur cet onglet.");
+            } else if(response) {
+              checkStatusNoResponse++;
+              allStreamerTabId.push(response);
+            }
 
-          if (checkStatusNoResponse === 0) setStorage([]); // If only get error response clear streamerlist
-        });
+            if (nbTab === streamersList.length) resolve(true);
+          });
+        })
+
+      }).then(() => {
+        const filteredStreamerList = streamersList.filter(({ tabId }: StorageStreamerListType) => allStreamerTabId.includes(tabId));
+        console.log(streamersList, filteredStreamerList, allStreamerTabId)
+        setStorage(filteredStreamerList);
+
+        if (checkStatusNoResponse === 0) setStorage([]); // If only get error response clear streamerlist
       });
+      
     });
 
   }, []);

@@ -310,7 +310,7 @@ chrome.runtime.onMessage.addListener(async (request, _sender, sendResponse) => {
 
         if (streamersList && tabId) await setStorage({ 'streamersList': updateStreamersListStorage(streamersList, tabId, { streamerName, streamerGame, status: 'Active', tabId: tabId, windowId, streamerURL: document.URL }) });
         
-        return
+        return Promise.resolve(tabId);
     }
 
     if (request?.url && isURLTwitch(request.url)) {
