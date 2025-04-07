@@ -54,7 +54,7 @@ const App: FC = () => {
 
       return new Promise<boolean>((resolve) => {
         streamersList?.forEach((streamer: StorageStreamerListType) => {
-          chrome.tabs.sendMessage(streamer.tabId, { event: "check_status" }, function (response?: number) {
+          chrome.tabs.sendMessage(streamer.tabId, { event: "check_status" }).then((response) => {
             nbTab++;
             if (typeof response === 'undefined' || chrome.runtime?.lastError) {
                 console.log("Le script de contenu n'est pas chargé sur cet onglet.");
@@ -64,7 +64,8 @@ const App: FC = () => {
             }
 
             if (nbTab === streamersList.length) resolve(true);
-          });
+          })
+
         })
 
       }).then(() => {

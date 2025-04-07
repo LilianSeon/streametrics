@@ -2,7 +2,7 @@
 
 // Utils
 import { getStreamerImage, isURLTwitch, getNbViewer, waitForElm, getDuration, formatChartTitle, getGameName, backGroundThemeObserver, ThemeBackgroundColor, extractDataFromJSON, getChatContainer, downloadJSON, downloadImage, getStreamerName, isDarkModeActivated, getCurrentTabId, getCurrentWindowId } from './components/Chart/src/utils/utils';
-import { addStreamersListStorage, getStorage, setStorage, updateStreamersListStorage } from './components/Chart/src/utils/utilsStorage';
+import { getStorage, setStorage, updateStreamersListStorage } from './components/Chart/src/utils/utilsStorage';
 import IntervalManager from './components/Chart/src/js/intervalManager';
 
 // Components
@@ -200,6 +200,11 @@ const initStorage = async (): Promise<void> => {
 const initChartInDOM = async () => {
 
     try {
+        const { isEnableExtension } = await getStorage(['isEnableExtension']);
+
+        // Do not init if isEnableExtension storage variable is false. 
+        if (typeof isEnableExtension !== 'undefined' && isEnableExtension === false) return;
+        
         console.log("%c 🚀 StreaMetrics Chrome extension initializing... ", "color: white; background-color: #2563eb; font-size: 14px; padding: 8px; border-radius: 4px;");
         tabId = await getCurrentTabId();
         isExtensionInitializing = true;
@@ -249,13 +254,8 @@ const initChartInDOM = async () => {
             const occurrences = streamersList?.filter((streamer) => streamer.streamerName === streamerName).length || 0;
             const windowId = await getCurrentWindowId();
 
-            if (streamersList && windowId) {
-                const newList = addStreamersListStorage(streamersList as StorageStreamerListType[], { occurrences, streamerName, streamerImage, streamerGame, status: 'Active', tabId: tabId, windowId, streamerURL: document.URL, isEnable: true })
-                //streamersList.push({ streamerName, streamerImage, streamerGame, status: 'Active', tabId: tabId, windowId, streamerURL: document.URL });
-                await setStorage({ 'streamersList': newList });
-            } else if(windowId) {
-                await setStorage({ 'streamersList': [{ streamerName, streamerImage, streamerGame, status: 'Active', tabId: tabId, windowId, streamerURL: document.URL, isEnable: true }] as StorageStreamerListType[]});
-            }
+            if(windowId) await addOneStreamer({ occurrences, streamerName, streamerImage, streamerGame, status: 'Active', tabId: tabId, windowId, streamerURL: document.URL, isEnable: true })
+            
 
             accordionComponent?.setProgressBarWidth(100);
             accordionComponent?.setProgressBarWidth(0);
@@ -269,73 +269,101 @@ const initChartInDOM = async () => {
     isExtensionInitializing = false;
 };
 
+const addOneStreamer = async (newStreamer: StorageStreamerListType) => {
+    
+    return new Promise(async (resolve) => {
+        chrome.runtime.sendMessage({ text: 'add one streamer', payload: newStreamer }, (isDone) => {
+            resolve(isDone);
+        });
+    });
+}
+
 chrome.storage.onChanged.addListener((changes) => {
     for (let [key, { newValue }] of Object.entries(changes)) {
       if (key === "language" && chartExtension) {
         chartExtension.language = newValue; // Update chart's language
       }
-    }
-});
 
-chrome.runtime.onMessage.addListener(async (request, _sender, sendResponse) => { // When user goes from a Twitch URL to another Twitch URL
-    console.log("Message received in contentScript:", request);
-
-    if (request.event === 'disable_chart') {
-        destroy();
-
-        const { streamersList }: { streamersList?: StorageStreamerListType[] } = await getStorage(['streamersList']);
-        if (streamersList && tabId) await setStorage({ 'streamersList': updateStreamersListStorage(streamersList, tabId, { isEnable: false, status: 'Inactive' }) });
-
-        return;
-    }
-
-    if (request.event === 'enable_chart') {
-        initChartInDOM();
-
-        const { streamersList }: { streamersList?: StorageStreamerListType[] } = await getStorage(['streamersList']);
-        if (streamersList && tabId) await setStorage({ 'streamersList': updateStreamersListStorage(streamersList, tabId, { isEnable: true, status: 'Active' }) });
-
-        return;
-    }
-
-    if (request.event === 'check_status') {
-        sendResponse(tabId);
-
-        const { streamersList }: { streamersList?: StorageStreamerListType[] } = await getStorage(['streamersList']);
-       
-        tabId = await getCurrentTabId();
-        const streamerName = await getStreamerName(document);
-        const streamerGame = await getGameName(document);
-        const windowId = await getCurrentWindowId();
-
-        if (streamersList && tabId) await setStorage({ 'streamersList': updateStreamersListStorage(streamersList, tabId, { streamerName, streamerGame, status: 'Active', tabId: tabId, windowId, streamerURL: document.URL }) });
-        
-        return Promise.resolve(tabId);
-    }
-
-    if (request?.url && isURLTwitch(request.url)) {
-
-        // if page reloaded but still on same page, do not init another Chart
-        if (chartExtension && formatChartTitle(window.location.pathname).includes(chartExtension.chartTitle.replace("'s viewers", ""))) return;
-
-        // If Chart already exists in DOM
-        if (chartExtension && chartExtension instanceof ChartExtension && accordionComponent instanceof Accordion && typeof accordionElement !== 'undefined' && messageCounter && intervalManager instanceof IntervalManager) {
-            
-            const { streamersList }: { streamersList?: StorageStreamerListType[] } = await getStorage(['streamersList']);
-            const tabId = await getCurrentTabId();
-            const streamerToDelete: StorageStreamerListType[] | undefined = streamersList?.filter((streamer: StorageStreamerListType) => streamer.tabId !== tabId && streamer.streamerURL !== request.url);
-            await setStorage({'streamersList': streamerToDelete});
-
+      if (key === "isEnableExtension") {
+        if(newValue === false) { //TODO: Action Destroy from background.js
             destroy();
         }
-
-        if (document.getElementById('accordionExtension') === null && document.getElementById('extensionChartContainer') === null && !isExtensionInitialized && !isExtensionInitializing) {
-            initChartInDOM();
-        }
+      }
     }
 });
 
-const destroy = async () => {
+chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => { // When user goes from a Twitch URL to another Twitch URL
+    (async () => {
+        const { isEnableExtension } = await getStorage(['isEnableExtension']);
+
+        // Do not init if isEnableExtension storage variable is false. 
+        if (typeof isEnableExtension !== 'undefined' && isEnableExtension === false) return true;
+    
+        console.log("Message received in contentScript:", request);
+    
+        if (request.event === 'disable_chart') {
+            destroy();
+    
+            const { streamersList }: { streamersList?: StorageStreamerListType[] } = await getStorage(['streamersList']);
+            if (streamersList && tabId) await setStorage({ 'streamersList': updateStreamersListStorage(streamersList, tabId, { isEnable: false, status: 'Inactive' }) });
+    
+            return true;
+        }
+    
+        if (request.event === 'enable_chart') {
+            initChartInDOM();
+    
+            const { streamersList }: { streamersList?: StorageStreamerListType[] } = await getStorage(['streamersList']);
+            if (streamersList && tabId) await setStorage({ 'streamersList': updateStreamersListStorage(streamersList, tabId, { isEnable: true, status: 'Active' }) });
+    
+            return true;
+        }
+    
+        if (request.event === 'check_status') {
+            sendResponse(tabId);
+    
+            const { streamersList }: { streamersList?: StorageStreamerListType[] } = await getStorage(['streamersList']);
+           
+            tabId = await getCurrentTabId();
+            const streamerName = await getStreamerName(document);
+            const streamerGame = await getGameName(document);
+            const windowId = await getCurrentWindowId();
+    
+            if (streamersList && tabId) await setStorage({ 'streamersList': updateStreamersListStorage(streamersList, tabId, { streamerName, streamerGame, status: 'Active', tabId: tabId, windowId, streamerURL: document.URL }) });
+            
+            return true;
+        }
+    
+        if (request?.url && isURLTwitch(request.url)) {
+    
+            // if page reloaded but still on same page, do not init another Chart
+            if (chartExtension && formatChartTitle(window.location.pathname).includes(chartExtension.chartTitle.replace("'s viewers", ""))) return true;
+    
+            // If Chart already exists in DOM
+            if (chartExtension && chartExtension instanceof ChartExtension && accordionComponent instanceof Accordion && typeof accordionElement !== 'undefined' && messageCounter && intervalManager instanceof IntervalManager) {
+                
+                deleteStreamersListStorage(request.url);
+                destroy();
+            }
+    
+            if (document.getElementById('accordionExtension') === null && document.getElementById('extensionChartContainer') === null && !isExtensionInitialized && !isExtensionInitializing) {
+                initChartInDOM();
+            }
+            
+            return true;
+        }
+    })();
+    return true;
+});
+
+const deleteStreamersListStorage = async (url: StorageStreamerListType['streamerURL']) => {
+    const { streamersList }: { streamersList?: StorageStreamerListType[] } = await getStorage(['streamersList']);
+    const tabId = await getCurrentTabId();
+    const streamerToDelete: StorageStreamerListType[] | undefined = streamersList?.filter((streamer: StorageStreamerListType) => streamer.tabId !== tabId && streamer.streamerURL !== url);
+    await setStorage({'streamersList': streamerToDelete});
+};
+
+const destroy = () => {
     chartExtension?.destroy();
     accordionComponent?.destroy();
     messageCounter?.destroy();

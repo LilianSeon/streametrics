@@ -21,11 +21,37 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     console.log('ONMESSAGE :', request, sender)
     if (request.text === MessageEnum.tabId && sender?.tab) { // Asking for tabId
         sendResponse({tab: sender.tab.id});
+        return true;
     }
 
     if (request.text === MessageEnum.windowId && sender?.tab?.windowId) { // Asking for windowId
         sendResponse({ windowId: sender.tab.windowId });
+        return true;
     }
+
+    if (request.text === MessageEnum.deleteAllStreamers) { // Delete all streamer from streamersList
+        chrome.storage.local.set({ streamersList: [] });
+        sendResponse(true);
+        return true;
+    }
+
+    if (request.text === MessageEnum.addOneStreamer && request?.payload) { // Delete one streamer from streamersList
+        chrome.storage.local.get(['streamersList']).then(({ streamersList }: { streamersList?: StorageStreamerListType[] }) => {
+            if (streamersList && !streamersList.some(item => item.tabId === request.payload.tabId)) {
+                streamersList.push(request.payload); 
+                chrome.storage.local.set({ streamersList: streamersList }).then(() => {
+                    sendResponse(true);
+                });
+            } else {
+                sendResponse(true);
+            }
+        });
+
+        return true;
+    }
+
+    return false;
+    
 });
 
 const isValidTwitchURL = (url: string) => {

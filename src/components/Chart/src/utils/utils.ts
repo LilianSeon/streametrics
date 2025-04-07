@@ -42,6 +42,15 @@ const getCurrentTabId = async (): Promise<number> => {
     });
 };
 
+const deleteStreamerById = async (tabId: number): Promise<boolean> => {
+
+    return new Promise((resolve) => {
+        chrome.runtime.sendMessage({ text: 'delete a stream by tabId', tabId }, (isDone) => {
+            resolve(isDone);
+         });
+    });
+};
+
 /**
  * Delete continuous value in array
  * @param { ChartDataViewer } arr 
@@ -619,4 +628,4 @@ const timeAgo = (date: Date): string => {
     return formatTimeString(years, singular.year, plural.year, ago);
 };
 
-export { getCurrentWindowId, getCurrentTabId, getStreamerImage, timeAgo, isURLTwitch, getNbViewer, waitForElm, wait, getDuration, removeSpaceInString, formatChartTitle, getGameName, computedDataLabel, backGroundThemeObserver, detectPeaks, findPeaks, getPercentageOf, getStreamerName, getChatContainer, deleteSequenceSameNumber, downloadJSON, extractDataFromJSON, isArrayOfStrings, isArray, isString, isDarkModeActivated, generateRandomId, downloadImage };
+export { deleteStreamerById, getCurrentWindowId, getCurrentTabId, getStreamerImage, timeAgo, isURLTwitch, getNbViewer, waitForElm, wait, getDuration, removeSpaceInString, formatChartTitle, getGameName, computedDataLabel, backGroundThemeObserver, detectPeaks, findPeaks, getPercentageOf, getStreamerName, getChatContainer, deleteSequenceSameNumber, downloadJSON, extractDataFromJSON, isArrayOfStrings, isArray, isString, isDarkModeActivated, generateRandomId, downloadImage };

@@ -5,6 +5,18 @@ const setIsEnableExtension = async (value: boolean) => {
     await chrome.storage.local.set({ isEnableExtension: value });
 };
 
+const deleteAllStreamers = async () => {
+    
+    return new Promise(async (resolve) => {
+        const { streamersList } = await chrome.storage.local.get(['streamersList']);
+        if (streamersList) {
+            chrome.runtime.sendMessage({ text: 'delete all streamers in storage' }, (isDone) => {
+                resolve(isDone);
+            });
+        }
+    });
+}
+
 type LangList = {
     language: string,
     languageShort: string,
@@ -64,6 +76,15 @@ const Navbar: FC<NavbarProps> = ({ isDisplayListLang, setIsDisplayListLang }: Na
 
     const onChangeCheckbox: ChangeEventHandler<HTMLInputElement> = (event) => {
         setIsEnableExtension(event.target.checked);
+        if (event.target.checked) {
+            chrome.tabs.query({}).then(async (tabs) => {
+                for (const tab of tabs) {
+                    chrome.tabs.sendMessage(tab.id!, { event: "enable_chart" });
+                }
+            })
+        } else if(!event.target.checked) {
+            deleteAllStreamers();
+        }
     };
 
     return(
