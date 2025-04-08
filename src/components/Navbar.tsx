@@ -79,7 +79,9 @@ const Navbar: FC<NavbarProps> = ({ isDisplayListLang, setIsDisplayListLang }: Na
         if (event.target.checked) {
             chrome.tabs.query({}).then(async (tabs) => {
                 for (const tab of tabs) {
-                    chrome.tabs.sendMessage(tab.id!, { event: "enable_chart" });
+                    chrome.tabs.sendMessage(tab.id!, { event: "enable_chart" }).catch((error) => {
+                        console.log(error)
+                    });
                 }
             })
         } else if(!event.target.checked) {

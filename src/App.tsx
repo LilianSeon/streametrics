@@ -22,6 +22,7 @@ const App: FC = () => {
 
     chrome.storage.onChanged.addListener(({ streamersList }) => {
       if (streamersList?.newValue) {
+        console.log('onChanged.addListener streamersList :', streamersList?.newValue)
         setStreamerList(streamersList.newValue as StorageStreamerListType[]);
       }
     });
@@ -56,24 +57,23 @@ const App: FC = () => {
         streamersList?.forEach((streamer: StorageStreamerListType) => {
           chrome.tabs.sendMessage(streamer.tabId, { event: "check_status" }).then((response) => {
             nbTab++;
-            if (typeof response === 'undefined' || chrome.runtime?.lastError) {
-                console.log("Le script de contenu n'est pas chargé sur cet onglet.");
+            if (typeof response === 'undefined' || chrome.runtime?.lastError) { // Script didn't load on this tab.
+                checkStatusNoResponse++;
             } else if(response) {
-              checkStatusNoResponse++;
               allStreamerTabId.push(response);
             }
 
             if (nbTab === streamersList.length) resolve(true);
-          })
-
-        })
-
+          }).catch(() => {
+            checkStatusNoResponse++;
+            if (checkStatusNoResponse + allStreamerTabId.length === streamersList.length) resolve(true);
+          });
+        });
       }).then(() => {
         const filteredStreamerList = streamersList.filter(({ tabId }: StorageStreamerListType) => allStreamerTabId.includes(tabId));
-        console.log(streamersList, filteredStreamerList, allStreamerTabId)
         setStorage(filteredStreamerList);
 
-        if (checkStatusNoResponse === 0) setStorage([]); // If only get error response clear streamerlist
+        if (checkStatusNoResponse === streamersList.length) setStorage([]); // If only get error response clear streamerlist
       });
       
     });

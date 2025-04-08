@@ -254,7 +254,7 @@ const initChartInDOM = async () => {
             const occurrences = streamersList?.filter((streamer) => streamer.streamerName === streamerName).length || 0;
             const windowId = await getCurrentWindowId();
 
-            if(windowId) await addOneStreamer({ occurrences, streamerName, streamerImage, streamerGame, status: 'Active', tabId: tabId, windowId, streamerURL: document.URL, isEnable: true })
+            if(windowId) await addOneStreamer({ occurrences, streamerName, streamerImage, streamerGame, status: 'Active', tabId, windowId, streamerURL: document.URL, isEnable: true })
             
 
             accordionComponent?.setProgressBarWidth(100);
@@ -271,8 +271,11 @@ const initChartInDOM = async () => {
 
 const addOneStreamer = async (newStreamer: StorageStreamerListType) => {
     
-    return new Promise(async (resolve) => {
-        chrome.runtime.sendMessage({ text: 'add one streamer', payload: newStreamer }, (isDone) => {
+    return new Promise((resolve) => {
+        /*chrome.runtime.sendMessage({ text: 'add one streamer', payload: newStreamer }, (isDone) => {
+            resolve(isDone);
+        });*/
+        chrome.runtime.sendMessage({ action: 'addOneStreamer', payload: newStreamer }, (isDone) => {
             resolve(isDone);
         });
     });
@@ -306,7 +309,7 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => { // Wh
     
             const { streamersList }: { streamersList?: StorageStreamerListType[] } = await getStorage(['streamersList']);
             if (streamersList && tabId) await setStorage({ 'streamersList': updateStreamersListStorage(streamersList, tabId, { isEnable: false, status: 'Inactive' }) });
-    
+            sendResponse();
             return true;
         }
     
@@ -315,7 +318,7 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => { // Wh
     
             const { streamersList }: { streamersList?: StorageStreamerListType[] } = await getStorage(['streamersList']);
             if (streamersList && tabId) await setStorage({ 'streamersList': updateStreamersListStorage(streamersList, tabId, { isEnable: true, status: 'Active' }) });
-    
+            sendResponse();
             return true;
         }
     
@@ -327,9 +330,8 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => { // Wh
             tabId = await getCurrentTabId();
             const streamerName = await getStreamerName(document);
             const streamerGame = await getGameName(document);
-            const windowId = await getCurrentWindowId();
     
-            if (streamersList && tabId) await setStorage({ 'streamersList': updateStreamersListStorage(streamersList, tabId, { streamerName, streamerGame, status: 'Active', tabId: tabId, windowId, streamerURL: document.URL }) });
+            if (streamersList && tabId) await setStorage({ 'streamersList': updateStreamersListStorage(streamersList, tabId, { streamerName, streamerGame, status: 'Active' }) });
             
             return true;
         }
@@ -349,6 +351,8 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => { // Wh
             if (document.getElementById('accordionExtension') === null && document.getElementById('extensionChartContainer') === null && !isExtensionInitialized && !isExtensionInitializing) {
                 initChartInDOM();
             }
+
+            sendResponse();
             
             return true;
         }
