@@ -1,7 +1,7 @@
 /// <reference types="chrome"/>
 
 // Utils
-import { getStreamerImage, isURLTwitch, getNbViewer, waitForElm, getDuration, formatChartTitle, getGameName, backGroundThemeObserver, ThemeBackgroundColor, extractDataFromJSON, getChatContainer, downloadJSON, downloadImage, getStreamerName, isDarkModeActivated, getCurrentTabId, getCurrentWindowId } from './components/Chart/src/utils/utils';
+import { getStreamerImage, isURLTwitch, getNbViewer, waitForElm, getDuration, formatChartTitle, getGameName, backGroundThemeObserver, ThemeBackgroundColor, extractDataFromJSON, getChatContainer, downloadJSON, downloadImage, getStreamerName, isDarkModeActivated, getCurrentTabId, getCurrentWindowId, checkStreamerStatus } from './components/Chart/src/utils/utils';
 import { getStorage, setStorage, updateStreamersListStorage } from './components/Chart/src/utils/utilsStorage';
 import IntervalManager from './components/Chart/src/js/intervalManager';
 
@@ -38,35 +38,52 @@ let toastManager: ToastManager | undefined;
  * Get needed data then add it to the Chart
  */
 const startLoopGetData = async () => {
-    const duration: string | undefined = getDuration(document);
-    const nbViewer: number = getNbViewer(document);
-    const game: string = await getGameName(document);
-    let messageAmount: number = 0;
+        const duration: string | undefined = getDuration(document);
+        const nbViewer: number = getNbViewer(document);
+        const game: string = await getGameName(document);
+        let messageAmount: number = 0;
+    
+        if (chartExtension && duration && nbViewer) {
+    
+            if (typeof messageCounter !== 'undefined') {
+                messageAmount = messageCounter.getAmountOfNewMessages(messageCounter.previousMessagesCount);
+            }
+    
+            //const peaks: Peak[] = computedDataLabel(data, nbViewer) || []; // return dataLabel if needed; 
+    
+            const newData = {
+                id: loopCounter,
+                duration,
+                nbViewer,
+                game,
+                time: new Date(),
+            } as ChartDataViewer;
+    
+            // Update title if empty
+            if (chartExtension.chartTitle === '') chartExtension.setTitle(formatChartTitle(window.location.pathname), false);
+    
+            chartExtension.addData(newData, messageAmount);
+            //chartExtension.addPeaks(peaks);
+            loopCounter++;
+    
+        }
+    
+        if (isNaN(nbViewer)) {
+            intervalManager?.clear();
+            await streamDisconnected();
+        } else {
 
-    if (chartExtension && duration && nbViewer) {
-
-        if (typeof messageCounter !== 'undefined') {
-            messageAmount = messageCounter.getAmountOfNewMessages(messageCounter.previousMessagesCount);
         }
 
-        //const peaks: Peak[] = computedDataLabel(data, nbViewer) || []; // return dataLabel if needed; 
+};
 
-        const newData = {
-            id: loopCounter,
-            duration,
-            nbViewer,
-            game,
-            time: new Date(),
-        } as ChartDataViewer;
-
-        // Update title if empty
-        if (chartExtension.chartTitle === '') chartExtension.setTitle(formatChartTitle(window.location.pathname), false);
-
-        chartExtension.addData(newData, messageAmount);
-        //chartExtension.addPeaks(peaks);
-        loopCounter++;
-
-    }
+const streamDisconnected = async () => {
+    return new Promise((resolve) => {
+        chrome.runtime.sendMessage({ action: 'updateStreamersList', payload: { tabId, payload:  { isEnable: false, status: 'Inactive' }}}, (isDone) => {
+            resolve(isDone)
+        });
+    });
+    
 };
 
 const onClickArrowAccordionHandler = async (): Promise<void> => {
@@ -174,8 +191,9 @@ const onClickPlayPauseButtonHandler: OnClickPlayPauseButtonHandler = async (isPl
         }
         intervalManager?.resume();
         hasImportedData = false;
-
-        if (streamersList && tabId) await setStorage({ 'streamersList': updateStreamersListStorage(streamersList, tabId, { status: 'Active' }) });
+        
+        const isStreamLive = checkStreamerStatus(document);
+        if (streamersList && tabId) await setStorage({ 'streamersList': updateStreamersListStorage(streamersList, tabId, { status: isStreamLive ? 'Active' : 'Inactive' }) });
     }
 
     if (accordionComponent) accordionComponent.isPlaying = !isPlaying;
@@ -229,7 +247,7 @@ const initChartInDOM = async () => {
             accordionElement = accordionComponent.getChartContainer() as HTMLElement;
             accordionComponent.setProgressBarWidth(20);
         }
-        
+        console.log('INIT 20% :', accordionElement, chartExtension)
         if (accordionElement && typeof chartExtension == 'undefined') {
 
             const chartTitle: string = formatChartTitle(window.location.pathname);
@@ -314,10 +332,11 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => { // Wh
         }
     
         if (request.event === 'enable_chart') {
-            initChartInDOM();
+            await initChartInDOM();
     
             const { streamersList }: { streamersList?: StorageStreamerListType[] } = await getStorage(['streamersList']);
-            if (streamersList && tabId) await setStorage({ 'streamersList': updateStreamersListStorage(streamersList, tabId, { isEnable: true, status: 'Active' }) });
+            const isStreamLive = checkStreamerStatus(document);
+            if (streamersList && tabId) await setStorage({ 'streamersList': updateStreamersListStorage(streamersList, tabId, { isEnable: true, status: isStreamLive ? 'Active' : 'Inactive' }) });
             sendResponse();
             return true;
         }
@@ -330,8 +349,9 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => { // Wh
             tabId = await getCurrentTabId();
             const streamerName = await getStreamerName(document);
             const streamerGame = await getGameName(document);
+            const isStreamLive = checkStreamerStatus(document);
     
-            if (streamersList && tabId) await setStorage({ 'streamersList': updateStreamersListStorage(streamersList, tabId, { streamerName, streamerGame, status: 'Active' }) });
+            if (streamersList && tabId) await setStorage({ 'streamersList': updateStreamersListStorage(streamersList, tabId, { streamerName, streamerGame, status: isStreamLive ? 'Active' : 'Inactive' }) });
             
             return true;
         }
@@ -349,7 +369,7 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => { // Wh
             }
     
             if (document.getElementById('accordionExtension') === null && document.getElementById('extensionChartContainer') === null && !isExtensionInitialized && !isExtensionInitializing) {
-                initChartInDOM();
+                await initChartInDOM();
             }
 
             sendResponse();
@@ -396,8 +416,8 @@ const updateDefaultColor = (theme: ThemeBackgroundColor): void => {
 };
 
 
-window.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('DOMContentLoaded', async () => {
     if (document.getElementById('accordionExtension') === null && document.getElementById('extensionChartContainer') === null && !isExtensionInitialized) {
-        initChartInDOM();
+        await initChartInDOM();
     }
 });

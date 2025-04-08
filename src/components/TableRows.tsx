@@ -74,7 +74,7 @@ const TableRows: FC<TableRowsProps> = ({ streamersList, currentPage = 1, searchT
 
                     return(
                         <tr key={ index }className={`${index !== streamersList.length-1 ? 'border-b' : ''} border-gray-700 group rounded-br-lg`}>
-                            <th scope="row" className={`${shouldApplyRoundedClass ? 'rounded-bl-lg' : ''} bg-gray-900 flex flex-row pl-2 pr-1 py-4 font-medium text-white whitespace-nowrap`}>
+                            <th scope="row" className={`${shouldApplyRoundedClass ? 'rounded-bl-lg' : ''} bg-gray-900 flex flex-row pl-2 pr-1 py-4 font-medium text-white/90 group-hover:text-white whitespace-nowrap`}>
                                 <img className="mr-2 rounded-full" src={ streamerImage } alt="Streamer avatar" width={ 20 } height={ 20 }/>
                                 <div className="overflow-hidden text-ellipsis whitespace-nowrap w-[120px]" title={ streamerName }>
                                  { highlightMatch(displayedName, searchTextValue) }

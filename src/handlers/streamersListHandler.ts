@@ -21,4 +21,24 @@ const addOneStreamer: ActionsHandler = async (payload: StorageStreamerListType, 
     });
 };
 
-export { addOneStreamer }
+const updateStreamersList = async ({ tabId, payload }: { tabId: StorageStreamerListType['tabId'], payload: Partial<StorageStreamerListType> }, _sender: chrome.runtime.MessageSender) => {
+
+    const { streamersList }: { streamersList?: StorageStreamerListType[] } = await chrome.storage.local.get(['streamersList'])
+    return new Promise((resolve, reject) => {
+
+        if (typeof streamersList === 'undefined' || typeof tabId === 'undefined') reject();
+
+        chrome.storage.local.set({ streamersList: streamersList?.map(streamer =>
+            streamer.tabId === tabId
+                ? { ...streamer, ...payload }
+                : streamer
+        )}).then(() => {
+            resolve(true);
+        })
+        .catch((error) => {
+            reject(error);
+        });
+    });
+};
+
+export { addOneStreamer, updateStreamersList }

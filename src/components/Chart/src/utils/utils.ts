@@ -23,6 +23,10 @@ export type DownLoadCallbacks = {
     loadend?: (((ev: ProgressEvent) => any) | null) | (() => any),
 };
 
+const checkStreamerStatus = (document: Document): boolean => {
+    return !isNaN(getNbViewer(document));
+};
+
 const getCurrentWindowId = async (): Promise<number | undefined> => {
 
     return new Promise((resolve) => {
@@ -628,4 +632,4 @@ const timeAgo = (date: Date): string => {
     return formatTimeString(years, singular.year, plural.year, ago);
 };
 
-export { deleteStreamerById, getCurrentWindowId, getCurrentTabId, getStreamerImage, timeAgo, isURLTwitch, getNbViewer, waitForElm, wait, getDuration, removeSpaceInString, formatChartTitle, getGameName, computedDataLabel, backGroundThemeObserver, detectPeaks, findPeaks, getPercentageOf, getStreamerName, getChatContainer, deleteSequenceSameNumber, downloadJSON, extractDataFromJSON, isArrayOfStrings, isArray, isString, isDarkModeActivated, generateRandomId, downloadImage };
+export { checkStreamerStatus, deleteStreamerById, getCurrentWindowId, getCurrentTabId, getStreamerImage, timeAgo, isURLTwitch, getNbViewer, waitForElm, wait, getDuration, removeSpaceInString, formatChartTitle, getGameName, computedDataLabel, backGroundThemeObserver, detectPeaks, findPeaks, getPercentageOf, getStreamerName, getChatContainer, deleteSequenceSameNumber, downloadJSON, extractDataFromJSON, isArrayOfStrings, isArray, isString, isDarkModeActivated, generateRandomId, downloadImage };

@@ -1,7 +1,7 @@
 /// <reference types="chrome"/>
 
 // Handlers
-import { addOneStreamer } from "./handlers/streamersListHandler";
+import { addOneStreamer, updateStreamersList } from "./handlers/streamersListHandler";
 
 // Typing
 import { ActionsHandler, MessageEnum, MessageResquest } from "./typings/MessageType";
@@ -9,6 +9,7 @@ import { StorageStreamerListType } from "./typings/StorageType";
 
 const actionsHandler: Record<string, ActionsHandler> = {
     addOneStreamer,
+    updateStreamersList
 };
 
 
@@ -101,11 +102,11 @@ chrome.tabs.onRemoved.addListener(async (tabId: number, removeInfo: chrome.tabs.
     
 });
 
-chrome.tabs.query({ url: "https://www.twitch.tv/*" }, function(tabs) {
+/*chrome.tabs.query({ url: "https://www.twitch.tv/*" }, function(tabs) {
     for (const tab of tabs) {
         chrome.tabs.sendMessage(tab.id!, { url: tab.url, event: "query" }, (response) => {
             console.log("Response from content script:", response);
         });
       }
- } );
+ } );*/
 
