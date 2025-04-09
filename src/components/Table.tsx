@@ -4,6 +4,7 @@ import { FC, useState } from "react";
 import { StorageStreamerListType } from "../typings/StorageType";
 import { Pagination } from "./Pagination";
 import { TableRows } from "./TableRows";
+import { NotFound } from "./NotFound";
 
 export type TableProps = {
     streamersList: StorageStreamerListType[],
@@ -51,10 +52,11 @@ const Table: FC<TableProps> = ({ streamersList }: TableProps) => {
                             </th>
                         </tr>
                     </thead>
-                    <tbody className="rounded-b-lg">
-                        <TableRows streamersList={ filteredStreamers } currentPage={ currentPage } searchTextValue={ searchTextValue }/>
+                    <tbody>
+                        { filteredStreamers.length !== 0 ? <TableRows streamersList={ filteredStreamers } currentPage={ currentPage } searchTextValue={ searchTextValue }/> : <></> }
                     </tbody>
                 </table>
+                { filteredStreamers.length === 0 ? <NotFound /> : <></> }
             </div>
             
         </div>
