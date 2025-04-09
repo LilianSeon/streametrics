@@ -1,7 +1,7 @@
 /// <reference types="chrome"/>
 
 // Utils
-import { getStreamerImage, isURLTwitch, getNbViewer, waitForElm, getDuration, formatChartTitle, getGameName, backGroundThemeObserver, ThemeBackgroundColor, extractDataFromJSON, getChatContainer, downloadJSON, downloadImage, getStreamerName, isDarkModeActivated, getCurrentTabId, getCurrentWindowId, checkStreamerStatus } from './components/Chart/src/utils/utils';
+import { getStreamerImage, isURLTwitch, getNbViewer, waitForElm, getDuration, formatChartTitle, getGameName, backGroundThemeObserver, ThemeBackgroundColor, extractDataFromJSON, getChatContainer, downloadJSON, downloadImage, getStreamerName, isDarkModeActivated, getCurrentTabId, getCurrentWindowId, checkStreamerStatus, waitUntilElementLoaded } from './components/Chart/src/utils/utils';
 import { getStorage, setStorage, updateStreamersListStorage } from './components/Chart/src/utils/utilsStorage';
 import IntervalManager from './components/Chart/src/js/intervalManager';
 
@@ -70,20 +70,23 @@ const startLoopGetData = async () => {
     
         if (isNaN(nbViewer)) {
             intervalManager?.clear();
-            await streamDisconnected();
-        } else {
-
+            await updateStreamersList({ isEnable: false, status: 'Inactive' });
+            waitUntilElementLoaded('p.CoreText-sc-1txzju1-0.fiDbWi') // Wait for viewers counter
+                .then(async (element) => { // Then restart fetching data loop
+                    if (element) {
+                        intervalManager?.play();
+                        await updateStreamersList({ isEnable: true, status: 'Active' });
+                    }
+                });
         }
-
 };
 
-const streamDisconnected = async () => {
+const updateStreamersList = async (payload: Partial<StorageStreamerListType>) => {
     return new Promise((resolve) => {
-        chrome.runtime.sendMessage({ action: 'updateStreamersList', payload: { tabId, payload:  { isEnable: false, status: 'Inactive' }}}, (isDone) => {
+        chrome.runtime.sendMessage({ action: 'updateStreamersList', payload: { tabId, payload }}, (isDone) => {
             resolve(isDone)
         });
     });
-    
 };
 
 const onClickArrowAccordionHandler = async (): Promise<void> => {
@@ -324,35 +327,30 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => { // Wh
     
         if (request.event === 'disable_chart') {
             destroy();
-    
-            const { streamersList }: { streamersList?: StorageStreamerListType[] } = await getStorage(['streamersList']);
-            if (streamersList && tabId) await setStorage({ 'streamersList': updateStreamersListStorage(streamersList, tabId, { isEnable: false, status: 'Inactive' }) });
+            updateStreamersList({ isEnable: false, status: 'Inactive' });
             sendResponse();
+
             return true;
         }
     
         if (request.event === 'enable_chart') {
             await initChartInDOM();
-    
-            const { streamersList }: { streamersList?: StorageStreamerListType[] } = await getStorage(['streamersList']);
             const isStreamLive = checkStreamerStatus(document);
-            if (streamersList && tabId) await setStorage({ 'streamersList': updateStreamersListStorage(streamersList, tabId, { isEnable: true, status: isStreamLive ? 'Active' : 'Inactive' }) });
+            updateStreamersList({ isEnable: true, status: isStreamLive ? 'Active' : 'Inactive' });
             sendResponse();
+
             return true;
         }
     
         if (request.event === 'check_status') {
             sendResponse(tabId);
-    
-            const { streamersList }: { streamersList?: StorageStreamerListType[] } = await getStorage(['streamersList']);
            
             tabId = await getCurrentTabId();
             const streamerName = await getStreamerName(document);
             const streamerGame = await getGameName(document);
             const isStreamLive = checkStreamerStatus(document);
-    
-            if (streamersList && tabId) await setStorage({ 'streamersList': updateStreamersListStorage(streamersList, tabId, { streamerName, streamerGame, status: isStreamLive ? 'Active' : 'Inactive' }) });
-            
+            updateStreamersList({ streamerName, streamerGame, status: isStreamLive ? 'Active' : 'Inactive' });
+
             return true;
         }
     

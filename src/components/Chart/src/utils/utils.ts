@@ -23,6 +23,31 @@ export type DownLoadCallbacks = {
     loadend?: (((ev: ProgressEvent) => any) | null) | (() => any),
 };
 
+/**
+ * Wait for an HTMLElement to appears in DOM by giving a string selector
+ * @param { string } selector 
+ * @returns { Promise<Element | null> }
+ */
+const waitUntilElementLoaded = (selector: string): Promise<Element | null> => {
+    return new Promise(resolve => {
+        if (document.querySelector(selector)) {
+            return resolve(document.querySelector(selector));
+        }
+
+        const observer = new MutationObserver(_mutations => {
+            if (document.querySelector(selector)) {
+                observer.disconnect();
+                resolve(document.querySelector(selector));
+            }
+        });
+
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+    });
+};
+
 const checkStreamerStatus = (document: Document): boolean => {
     return !isNaN(getNbViewer(document));
 };
@@ -478,17 +503,14 @@ const startDownload = (url: string, fileName: string, callBacks: DownLoadCallbac
     };
 
     xmlHTTP.onloadstart = progress => {
-        console.log("onloadstart :", progress, (progress.loaded/progress.total)*100)
         if (callBacks.loadstart) callBacks.loadstart(progress);
     };
 
     xmlHTTP.onprogress = progress => {
-        console.log("onprogress :", progress, (progress.loaded/progress.total)*100)
         if (callBacks.progress) callBacks.progress(progress);
     };
 
     xmlHTTP.onloadend = progress => {
-        console.log("onloadend :", progress, (progress.loaded/progress.total)*100)
         const tempEl = document.createElement("a");
         document.body.appendChild(tempEl);
         //@ts-ignore
@@ -632,4 +654,4 @@ const timeAgo = (date: Date): string => {
     return formatTimeString(years, singular.year, plural.year, ago);
 };
 
-export { checkStreamerStatus, deleteStreamerById, getCurrentWindowId, getCurrentTabId, getStreamerImage, timeAgo, isURLTwitch, getNbViewer, waitForElm, wait, getDuration, removeSpaceInString, formatChartTitle, getGameName, computedDataLabel, backGroundThemeObserver, detectPeaks, findPeaks, getPercentageOf, getStreamerName, getChatContainer, deleteSequenceSameNumber, downloadJSON, extractDataFromJSON, isArrayOfStrings, isArray, isString, isDarkModeActivated, generateRandomId, downloadImage };
+export { waitUntilElementLoaded, checkStreamerStatus, deleteStreamerById, getCurrentWindowId, getCurrentTabId, getStreamerImage, timeAgo, isURLTwitch, getNbViewer, waitForElm, wait, getDuration, removeSpaceInString, formatChartTitle, getGameName, computedDataLabel, backGroundThemeObserver, detectPeaks, findPeaks, getPercentageOf, getStreamerName, getChatContainer, deleteSequenceSameNumber, downloadJSON, extractDataFromJSON, isArrayOfStrings, isArray, isString, isDarkModeActivated, generateRandomId, downloadImage };
