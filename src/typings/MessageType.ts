@@ -1,8 +1,9 @@
 export enum MessageEnum {
-    tabId = 'what is my tabId?',
-    windowId = 'what is my windowId?',
-    deleteAllStreamers = 'delete all streamers in storage',
-    addOneStreamer = 'add one streamer'
+    addOneStreamer = 'addOneStreamer',
+    updateStreamersList = 'updateStreamersList',
+    deleteAllStreamers = 'deleteAllStreamers',
+    getWindowId = 'getWindowId',
+    getTabId = 'getTabId'
 };
 
 

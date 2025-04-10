@@ -1,15 +1,19 @@
 /// <reference types="chrome"/>
 
 // Handlers
-import { addOneStreamer, updateStreamersList } from "./handlers/streamersListHandler";
+import { getWindowId, getTabId } from "./handlers/infoHandler";
+import { addOneStreamer, updateStreamersList, deleteAllStreamers } from "./handlers/streamersListHandler";
 
 // Typing
-import { ActionsHandler, MessageEnum, MessageResquest } from "./typings/MessageType";
+import { ActionsHandler, MessageResquest } from "./typings/MessageType";
 import { StorageStreamerListType } from "./typings/StorageType";
 
 const actionsHandler: Record<string, ActionsHandler> = {
     addOneStreamer,
-    updateStreamersList
+    updateStreamersList,
+    deleteAllStreamers,
+    getWindowId,
+    getTabId
 };
 
 
@@ -35,40 +39,6 @@ chrome.runtime.onMessage.addListener((request: MessageResquest, sender, sendResp
         });
 
         return true; // async response
-    }
-
-    console.log('ONMESSAGE :', request, sender)
-    //@ts-ignore
-    if (request.text === MessageEnum.tabId && sender?.tab) { // Asking for tabId
-        sendResponse({tab: sender.tab.id});
-        return true;
-    }
-    //@ts-ignore
-    if (request.text === MessageEnum.windowId && sender?.tab?.windowId) { // Asking for windowId
-        sendResponse({ windowId: sender.tab.windowId });
-        return true;
-    }
-    //@ts-ignore
-    if (request.text === MessageEnum.deleteAllStreamers) { // Delete all streamer from streamersList
-        chrome.storage.local.set({ streamersList: [] }).then(() => {
-            sendResponse(true);
-        });
-        return true;
-    }
-    //@ts-ignore
-    if (request.text === MessageEnum.addOneStreamer && request?.payload) { // Add one streamer from streamersList
-        chrome.storage.local.get(['streamersList']).then(({ streamersList }: { streamersList?: StorageStreamerListType[] }) => {
-            if (streamersList && !streamersList.some(item => item.tabId === request.payload.tabId)) {
-                streamersList.push(request.payload); 
-                chrome.storage.local.set({ streamersList: streamersList }).then(() => {
-                    sendResponse(true);
-                });
-            } else {
-                sendResponse(true);
-            }
-        });
-
-        return true;
     }
 
     return false;

@@ -32,13 +32,27 @@ const updateStreamersList = async ({ tabId, payload }: { tabId: StorageStreamerL
             streamer.tabId === tabId
                 ? { ...streamer, ...payload }
                 : streamer
-        )}).then(() => {
-            resolve(true);
-        })
-        .catch((error) => {
-            reject(error);
-        });
+            )})
+            .then(() => {
+                resolve(true);
+            })
+            .catch((error) => {
+                reject(error);
+            });
     });
 };
 
-export { addOneStreamer, updateStreamersList }
+const deleteAllStreamers = async () => {
+
+    return new Promise((resolve, reject) => {
+        chrome.storage.local.set({ streamersList: [] })
+            .then(() => {
+                resolve(true);
+            })
+            .catch((error) => {
+                reject(error);
+            });
+    });
+};
+
+export { deleteAllStreamers ,addOneStreamer, updateStreamersList }

@@ -10,7 +10,7 @@ const deleteAllStreamers = async () => {
     return new Promise(async (resolve) => {
         const { streamersList } = await chrome.storage.local.get(['streamersList']);
         if (streamersList) {
-            chrome.runtime.sendMessage({ text: 'delete all streamers in storage' }, (isDone) => {
+            chrome.runtime.sendMessage({ action: 'deleteAllStreamers' }, (isDone) => {
                 resolve(isDone);
             });
         }

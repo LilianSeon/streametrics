@@ -55,7 +55,7 @@ const checkStreamerStatus = (document: Document): boolean => {
 const getCurrentWindowId = async (): Promise<number | undefined> => {
 
     return new Promise((resolve) => {
-        chrome.runtime.sendMessage({ text: 'what is my windowId?' }, ({ windowId }: { windowId: number }) => {
+        chrome.runtime.sendMessage({ action: 'getWindowId' }, ({ windowId }: { windowId: number }) => {
             resolve(windowId);
          });
     });
@@ -65,8 +65,8 @@ const getCurrentWindowId = async (): Promise<number | undefined> => {
 const getCurrentTabId = async (): Promise<number> => {
 
     return new Promise((resolve) => {
-        chrome.runtime.sendMessage({ text: 'what is my tabId?' }, ({ tab }: { tab: number }) => {
-            resolve(tab);
+        chrome.runtime.sendMessage({ action: 'getTabId' }, ({ tabId }: { tabId: number }) => {
+            resolve(tabId);
          });
     });
 };

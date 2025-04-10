@@ -293,9 +293,6 @@ const initChartInDOM = async () => {
 const addOneStreamer = async (newStreamer: StorageStreamerListType) => {
     
     return new Promise((resolve) => {
-        /*chrome.runtime.sendMessage({ text: 'add one streamer', payload: newStreamer }, (isDone) => {
-            resolve(isDone);
-        });*/
         chrome.runtime.sendMessage({ action: 'addOneStreamer', payload: newStreamer }, (isDone) => {
             resolve(isDone);
         });
