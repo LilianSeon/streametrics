@@ -1,4 +1,4 @@
-import { ActionsHandler } from "../typings/MessageType";
+import { ActionsHandler } from "../../typings/MessageType";
 
 const getWindowId: ActionsHandler = async (_: any, sender: chrome.runtime.MessageSender) => {
     return { windowId: sender?.tab?.windowId };

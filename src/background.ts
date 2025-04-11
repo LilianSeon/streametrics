@@ -1,11 +1,11 @@
 /// <reference types="chrome"/>
 
 // Handlers
-import { getWindowId, getTabId } from "./handlers/infoHandler";
-import { addOneStreamer, updateStreamersList, deleteAllStreamers } from "./handlers/streamersListHandler";
+import { getWindowId, getTabId } from "./handlers/actions/infoHandler";
+import { addOneStreamer, updateStreamersList, deleteAllStreamers } from "./handlers/actions/streamersListHandler";
 
 // Typing
-import { ActionsHandler, MessageResquest } from "./typings/MessageType";
+import { ActionsHandler, ActionsResquest } from "./typings/MessageType";
 import { StorageStreamerListType } from "./typings/StorageType";
 
 const actionsHandler: Record<string, ActionsHandler> = {
@@ -29,7 +29,7 @@ chrome.runtime.onInstalled.addListener(async (details: chrome.runtime.InstalledD
     }
 });
 
-chrome.runtime.onMessage.addListener((request: MessageResquest, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener((request: ActionsResquest, sender, sendResponse) => {
 
     const { action, payload } = request;
 

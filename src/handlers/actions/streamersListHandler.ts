@@ -1,5 +1,5 @@
-import { ActionsHandler } from "../typings/MessageType";
-import { StorageStreamerListType } from "../typings/StorageType";
+import { ActionsHandler } from "../../typings/MessageType";
+import { StorageStreamerListType } from "../../typings/StorageType";
 
 
 const addOneStreamer: ActionsHandler = async (payload: StorageStreamerListType, _sender: chrome.runtime.MessageSender) => {

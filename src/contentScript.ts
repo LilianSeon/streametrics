@@ -17,6 +17,10 @@ import './components/Chart/src/assets/css/index.css'; // Font
 
 // Typing
 import { StorageStreamerListType } from './typings/StorageType';
+import { EventsResquest } from './typings/MessageType';
+
+// Events Handlers
+import { checkStatus } from './handlers/events/eventsHandler';
 
 let tabId: number | undefined;
 
@@ -33,6 +37,10 @@ let loopCounter: number = 0;
 let intervalManager: IntervalManager | undefined;
 let hasImportedData: boolean = false;
 let toastManager: ToastManager | undefined;
+
+const eventsHandlers: Record<string, any>  = {
+    checkStatus
+};
 
 /**
  * Get needed data then add it to the Chart
@@ -313,7 +321,7 @@ chrome.storage.onChanged.addListener((changes) => {
     }
 });
 
-chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => { // When user goes from a Twitch URL to another Twitch URL
+chrome.runtime.onMessage.addListener((request: EventsResquest, _sender, sendResponse) => { // When user goes from a Twitch URL to another Twitch URL
     (async () => {
         const { isEnableExtension } = await getStorage(['isEnableExtension']);
 
@@ -321,7 +329,18 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => { // Wh
         if (typeof isEnableExtension !== 'undefined' && isEnableExtension === false) return true;
     
         console.log("Message received in contentScript:", request);
+
+        const { event, payload } = request;
+
+        if (eventsHandlers[event]) {
+            eventsHandlers[event](payload, sendResponse).then(sendResponse).catch((err: any) => {
+              sendResponse({ error: err.message });
+            });
     
+            return true; // async response
+        }
+    
+        //@ts-ignore
         if (request.event === 'disable_chart') {
             destroy();
             updateStreamersList({ isEnable: false, status: 'Inactive' });
@@ -330,6 +349,7 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => { // Wh
             return true;
         }
     
+        //@ts-ignore
         if (request.event === 'enable_chart') {
             await initChartInDOM();
             const isStreamLive = checkStreamerStatus(document);
@@ -339,7 +359,8 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => { // Wh
             return true;
         }
     
-        if (request.event === 'check_status') {
+        //@ts-ignore
+        /*if (request.event === 'check_status') {
             sendResponse(tabId);
            
             tabId = await getCurrentTabId();
@@ -349,8 +370,9 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => { // Wh
             updateStreamersList({ streamerName, streamerGame, status: isStreamLive ? 'Active' : 'Inactive' });
 
             return true;
-        }
+        }*/
     
+        //@ts-ignore
         if (request?.url && isURLTwitch(request.url)) {
     
             // if page reloaded but still on same page, do not init another Chart
@@ -359,6 +381,7 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => { // Wh
             // If Chart already exists in DOM
             if (chartExtension && chartExtension instanceof ChartExtension && accordionComponent instanceof Accordion && typeof accordionElement !== 'undefined' && messageCounter && intervalManager instanceof IntervalManager) {
                 
+                //@ts-ignore
                 deleteStreamersListStorage(request.url);
                 destroy();
             }

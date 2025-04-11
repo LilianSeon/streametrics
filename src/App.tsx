@@ -55,7 +55,7 @@ const App: FC = () => {
 
       return new Promise<boolean>((resolve) => {
         streamersList?.forEach((streamer: StorageStreamerListType) => {
-          chrome.tabs.sendMessage(streamer.tabId, { event: "check_status" }).then((response) => {
+          chrome.tabs.sendMessage(streamer.tabId, { event: "checkStatus" }).then((response) => {
             nbTab++;
             if (typeof response === 'undefined' || chrome.runtime?.lastError) { // Script didn't load on this tab.
                 checkStatusNoResponse++;
