@@ -1,7 +1,7 @@
 /// <reference types="chrome"/>
 
 // Utils
-import { getStreamerImage, isURLTwitch, getNbViewer, waitForElm, getDuration, formatChartTitle, getGameName, backGroundThemeObserver, ThemeBackgroundColor, extractDataFromJSON, getChatContainer, downloadJSON, downloadImage, getStreamerName, isDarkModeActivated, getCurrentTabId, getCurrentWindowId, checkStreamerStatus, waitUntilElementLoaded } from './components/Chart/src/utils/utils';
+import { getStreamerImage, getNbViewer, waitForElm, getDuration, formatChartTitle, getGameName, backGroundThemeObserver, ThemeBackgroundColor, extractDataFromJSON, getChatContainer, downloadJSON, downloadImage, getStreamerName, isDarkModeActivated, getCurrentTabId, getCurrentWindowId, checkStreamerStatus, waitUntilElementLoaded } from './components/Chart/src/utils/utils';
 import { getStorage, setStorage, updateStreamersListStorage } from './components/Chart/src/utils/utilsStorage';
 import IntervalManager from './components/Chart/src/js/intervalManager';
 
@@ -37,10 +37,6 @@ let loopCounter: number = 0;
 let intervalManager: IntervalManager | undefined;
 let hasImportedData: boolean = false;
 let toastManager: ToastManager | undefined;
-
-const eventsHandlers: Record<string, any>  = {
-    checkStatus
-};
 
 /**
  * Get needed data then add it to the Chart
@@ -264,7 +260,7 @@ const initChartInDOM = async () => {
             const chartTitle: string = formatChartTitle(window.location.pathname);
             const textColor: string = document.documentElement.className.includes('dark') ? '#ffffff' : '#000000';
             const { language } = await getStorage(["language"]);
-            chartExtension = new ChartExtension(accordionElement, chartTitle, textColor, language);
+            chartExtension = new ChartExtension(accordionElement, language, chartTitle, textColor);
             isExtensionInitializing = false;
             isExtensionInitialized = true;
             accordionComponent?.setProgressBarWidth(60);
@@ -305,7 +301,42 @@ const addOneStreamer = async (newStreamer: StorageStreamerListType) => {
             resolve(isDone);
         });
     });
-}
+};
+
+
+const enableChart = async () => {
+    await initChartInDOM();
+    const isStreamLive = checkStreamerStatus(document);
+    updateStreamersList({ isEnable: true, status: isStreamLive ? 'Active' : 'Inactive' });
+};
+
+const disableChart = async () => {
+    destroy();
+    updateStreamersList({ isEnable: false, status: 'Inactive' });
+};
+
+const onTabCreated = async (payload: { url: string }) => {
+    if (chartExtension && formatChartTitle(window.location.pathname).includes(chartExtension.chartTitle.replace("'s viewers", ""))) return true;
+    
+    // If Chart already exists in DOM
+    if (chartExtension && chartExtension instanceof ChartExtension && accordionComponent instanceof Accordion && typeof accordionElement !== 'undefined' && messageCounter && intervalManager instanceof IntervalManager) {
+        
+        deleteStreamersListStorage(payload.url);
+        destroy();
+    }
+
+    if (document.getElementById('accordionExtension') === null && document.getElementById('extensionChartContainer') === null && !isExtensionInitialized && !isExtensionInitializing) {
+        await initChartInDOM();
+    }
+};
+
+const eventsHandlers: Record<string, any> = {
+    checkStatus,
+    enableChart,
+    disableChart,
+    onTabCreated,
+    onTabUpdated: onTabCreated
+};
 
 chrome.storage.onChanged.addListener((changes) => {
     for (let [key, { newValue }] of Object.entries(changes)) {
@@ -327,8 +358,6 @@ chrome.runtime.onMessage.addListener((request: EventsResquest, _sender, sendResp
 
         // Do not init if isEnableExtension storage variable is false. 
         if (typeof isEnableExtension !== 'undefined' && isEnableExtension === false) return true;
-    
-        console.log("Message received in contentScript:", request);
 
         const { event, payload } = request;
 
@@ -339,62 +368,8 @@ chrome.runtime.onMessage.addListener((request: EventsResquest, _sender, sendResp
     
             return true; // async response
         }
-    
-        //@ts-ignore
-        if (request.event === 'disable_chart') {
-            destroy();
-            updateStreamersList({ isEnable: false, status: 'Inactive' });
-            sendResponse();
-
-            return true;
-        }
-    
-        //@ts-ignore
-        if (request.event === 'enable_chart') {
-            await initChartInDOM();
-            const isStreamLive = checkStreamerStatus(document);
-            updateStreamersList({ isEnable: true, status: isStreamLive ? 'Active' : 'Inactive' });
-            sendResponse();
-
-            return true;
-        }
-    
-        //@ts-ignore
-        /*if (request.event === 'check_status') {
-            sendResponse(tabId);
-           
-            tabId = await getCurrentTabId();
-            const streamerName = await getStreamerName(document);
-            const streamerGame = await getGameName(document);
-            const isStreamLive = checkStreamerStatus(document);
-            updateStreamersList({ streamerName, streamerGame, status: isStreamLive ? 'Active' : 'Inactive' });
-
-            return true;
-        }*/
-    
-        //@ts-ignore
-        if (request?.url && isURLTwitch(request.url)) {
-    
-            // if page reloaded but still on same page, do not init another Chart
-            if (chartExtension && formatChartTitle(window.location.pathname).includes(chartExtension.chartTitle.replace("'s viewers", ""))) return true;
-    
-            // If Chart already exists in DOM
-            if (chartExtension && chartExtension instanceof ChartExtension && accordionComponent instanceof Accordion && typeof accordionElement !== 'undefined' && messageCounter && intervalManager instanceof IntervalManager) {
-                
-                //@ts-ignore
-                deleteStreamersListStorage(request.url);
-                destroy();
-            }
-    
-            if (document.getElementById('accordionExtension') === null && document.getElementById('extensionChartContainer') === null && !isExtensionInitialized && !isExtensionInitializing) {
-                await initChartInDOM();
-            }
-
-            sendResponse();
-            
-            return true;
-        }
     })();
+
     return true;
 });
 

@@ -50,15 +50,15 @@ const isValidTwitchURL = (url: string) => {
     return urlPattern.test(url);
 }
 
-chrome.tabs.onUpdated.addListener(async (tabID, { url }, tab) => {
+chrome.tabs.onUpdated.addListener(async (tabID, { url }) => {
     if (url && isValidTwitchURL(url)) {
-        chrome.tabs.sendMessage(tabID, { url: tab.url, event: "onUpdate" });
+        chrome.tabs.sendMessage(tabID, { event: "onTabUpdated", payload: { url } });
     }
 });
 
 chrome.tabs.onCreated.addListener((tab) => {
-    if (tab.pendingUrl && tab.pendingUrl.startsWith("https://www.twitch.tv/")) {
-        chrome.tabs.sendMessage(tab.id!, { url: tab.pendingUrl, event: "onCreated" }, (response) => {
+    if (tab.pendingUrl && isValidTwitchURL(tab.pendingUrl)) {
+        chrome.tabs.sendMessage(tab.id!, { event: "onTabCreated", payload: { url: tab.pendingUrl } }, (response) => {
             console.log("Response from content script:", response);
         });
     }
@@ -69,14 +69,4 @@ chrome.tabs.onRemoved.addListener(async (tabId: number, removeInfo: chrome.tabs.
     const { streamersList } = await chrome.storage.local.get('streamersList');
     const streamerToDelete: StorageStreamerListType[] = streamersList.filter((streamer: StorageStreamerListType) => streamer.tabId !== tabId || streamer.windowId !== removeInfo.windowId);
     await chrome.storage.local.set({ 'streamersList': streamerToDelete });
-    
 });
-
-/*chrome.tabs.query({ url: "https://www.twitch.tv/*" }, function(tabs) {
-    for (const tab of tabs) {
-        chrome.tabs.sendMessage(tab.id!, { url: tab.url, event: "query" }, (response) => {
-            console.log("Response from content script:", response);
-        });
-      }
- } );*/
-
