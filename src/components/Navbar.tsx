@@ -7,7 +7,7 @@ import { Toggle } from "./Toggle";
 import { Languages } from './Chart/src/js/Texts';
 
 // I18n
-import { loadMessages } from "../loader/fileLoader";
+import { loadMessage } from "../loader/fileLoader";
 
 
 const setIsEnableExtension = async (value: boolean) => {
@@ -102,7 +102,7 @@ const Navbar: FC<NavbarProps> = ({ isDisplayListLang, setIsDisplayListLang, lang
 
     useEffect(() => {
         if (language) {
-            loadMessages("toggle", language)
+            loadMessage("toggle", language)
             .then((message) => {
                 setToggleTitle(message);
             });

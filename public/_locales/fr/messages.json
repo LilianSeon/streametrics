@@ -1,4 +1,24 @@
 {
+  "not_found_button": {
+    "message": "Aller sur",
+    "description": "Go to *url*"
+  },
+  "not_found_message": {
+    "message": "Aucun stream Twitch détecté.",
+    "description": "Not found message"
+  },
+  "focus": {
+    "message": "Cibler",
+    "description": "Focus"
+  },
+  "disable": {
+    "message": "Désactiver",
+    "description": "Disable"
+  },
+  "enable": {
+    "message": "Activer",
+    "description": "enable"
+  },
   "previous_page": {
     "message": "Page précédente",
     "description": "Previous page in pagination"

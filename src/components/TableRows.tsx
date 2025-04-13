@@ -1,7 +1,16 @@
 import { FC } from "react";
+
+// Typings
 import { StorageStreamerListType } from "../typings/StorageType";
 
+export interface TableRowsTextValueI18n {
+    focus: string,
+    disable: string,
+    enable: string
+};
+
 export type TableRowsProps = {
+    actionsLabels: TableRowsTextValueI18n
     searchTextValue?: string,
     streamersList: StorageStreamerListType[],
     currentPage?: number
@@ -25,7 +34,7 @@ const scrollToAnchor = () => {
     }
 };
 
-const TableRows: FC<TableRowsProps> = ({ streamersList, currentPage = 1, searchTextValue = '' }: TableRowsProps) => {
+const TableRows: FC<TableRowsProps> = ({ actionsLabels, streamersList, currentPage = 1, searchTextValue = '' }: TableRowsProps) => {
 
     const currentItems = streamersList.slice(
         (currentPage - 1) * itemsPerPage,
@@ -98,10 +107,10 @@ const TableRows: FC<TableRowsProps> = ({ streamersList, currentPage = 1, searchT
                                     <div className="hidden absolute z-10 w-20 top-[-3px] right-[37px] opacity-90 bg-gray-500 border-gray-900 rounded divide-y divide-gray-100 shadow-sm group-hover/dropdown:block">
                                         <ul className=" text-sm text-white">
                                             <li onClick={ () => onClickFocusHandler(tabId, windowId) } className="hover:bg-gray-400 hover:rounded">
-                                                <a href="" className="block py-1 px-2">Focus</a>
+                                                <a href="" className="block py-1 px-2">{ actionsLabels.focus }</a>
                                             </li>
                                             <li onClick={ () => onClickDisableHanlder(tabId, isEnable) } className="hover:bg-gray-400 hover:rounded">
-                                                <a href="#" className="block py-1 px-2">{ isEnable ? 'Disable': 'Enable' }</a>
+                                                <a href="#" className="block py-1 px-2">{ isEnable ? actionsLabels.disable : actionsLabels.enable }</a>
                                             </li>
                                         </ul>
                                     </div>

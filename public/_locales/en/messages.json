@@ -1,4 +1,24 @@
 {
+  "not_found_button": {
+    "message": "Go to",
+    "description": "Go to *url*"
+  },
+  "not_found_message": {
+    "message": "No live Twitch detected.",
+    "description": "Not found message"
+  },
+  "focus": {
+    "message": "Focus",
+    "description": "Focus"
+  },
+  "disable": {
+    "message": "Disable",
+    "description": "Disable"
+  },
+  "enable": {
+    "message": "Enable",
+    "description": "enable"
+  },
   "previous_page": {
     "message": "Previous page",
     "description": "Previous page in pagination"

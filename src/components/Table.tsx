@@ -3,15 +3,15 @@ import { FC, useEffect, useState } from "react";
 // Typing
 import { StorageStreamerListType } from "../typings/StorageType";
 import { Pagination } from "./Pagination";
-import { TableRows } from "./TableRows";
-import { NotFound } from "./NotFound";
+import { TableRows, TableRowsTextValueI18n } from "./TableRows";
+import { NotFound, NotFoundTextValueI18n } from "./NotFound";
 import { Languages } from "./Chart/src/js/Texts";
 import { loadMessages } from "../loader/fileLoader";
 
-interface TextValueI18n {
-    searchPlaceholder: string,
-    previousPage: string
-    nextPage: string
+interface TableTextValueI18n extends TableRowsTextValueI18n, NotFoundTextValueI18n {
+    search_placeholder: string,
+    previous_page: string
+    next_page: string
 }
 
 export type TableProps = {
@@ -23,7 +23,7 @@ const Table: FC<TableProps> = ({ streamersList, language }: TableProps) => {
 
     const [ currentPage, setCurrentPage ] = useState(1);
     const [ searchTextValue, setSearchTextValue ] = useState('');
-    const [ textValue, setTextValue ] = useState<TextValueI18n>({ searchPlaceholder: '', previousPage: '', nextPage: '' });
+    const [ textValue, setTextValue ] = useState<TableTextValueI18n>({ search_placeholder: '', previous_page: '', next_page: '', focus: '', disable: '', enable: '', not_found_message: '', not_found_button: '' });
 
 
     const filteredStreamers = streamersList.filter(({ streamerName, streamerGame }) =>
@@ -33,17 +33,9 @@ const Table: FC<TableProps> = ({ streamersList, language }: TableProps) => {
 
     useEffect(() => {
         if (language) {
-            loadMessages("search_placeholder", language)
+            loadMessages(["search_placeholder", "previous_page", "next_page", "focus", "disable", "enable", "not_found_button", "not_found_message"], language)
             .then((message) => {
-                setTextValue((textValue) => { return { ...textValue, searchPlaceholder: message }});
-            });
-            loadMessages("previous_page", language)
-            .then((message) => {
-                setTextValue((textValue) => { return { ...textValue, previousPage: message }});
-            });
-            loadMessages("next_page", language)
-            .then((message) => {
-                setTextValue((textValue) => { return { ...textValue, nextPage: message }});
+                setTextValue((textValue) => { return { ...textValue, ...message }});
             });
         }
     }, [language]);
@@ -59,12 +51,12 @@ const Table: FC<TableProps> = ({ streamersList, language }: TableProps) => {
                                     <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"></path>
                                 </svg>
                             </div>
-                            <input value={ searchTextValue } placeholder={ textValue.searchPlaceholder } onChange={ e => setSearchTextValue(e.target.value) } type="text" className="border text-sm rounded-lg block w-44 pl-10 p-2 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-primary-500 focus:border-primary-500" />
+                            <input value={ searchTextValue } placeholder={ textValue.search_placeholder } onChange={ e => setSearchTextValue(e.target.value) } type="text" className="border text-sm rounded-lg block w-44 pl-10 p-2 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-primary-500 focus:border-primary-500" />
                         </div>
                     </form>
                 </div>
                 <div className="grow"></div>
-                <Pagination totalItems={ filteredStreamers.length } currentPage={ currentPage } setCurrentPage={ setCurrentPage } tooltip={{ previous: textValue.previousPage, next: textValue.nextPage }}/>
+                <Pagination totalItems={ filteredStreamers.length } currentPage={ currentPage } setCurrentPage={ setCurrentPage } tooltip={{ previous_page: textValue.previous_page, next_page: textValue.next_page }}/>
             </div>
             <div className="rounded-lg overflow-visible">
                 <table className="rounded-lg w-full text-sm text-left text-gray-400 table-auto overflow-visible">
@@ -79,10 +71,10 @@ const Table: FC<TableProps> = ({ streamersList, language }: TableProps) => {
                         </tr>
                     </thead>
                     <tbody>
-                        { filteredStreamers.length !== 0 ? <TableRows streamersList={ filteredStreamers } currentPage={ currentPage } searchTextValue={ searchTextValue }/> : <></> }
+                        { filteredStreamers.length !== 0 ? <TableRows streamersList={filteredStreamers} currentPage={currentPage} searchTextValue={searchTextValue} actionsLabels={{ focus: textValue.focus, disable: textValue.disable, enable: textValue.enable }} /> : <></> }
                     </tbody>
                 </table>
-                { filteredStreamers.length === 0 ? <NotFound /> : <></> }
+                { filteredStreamers.length === 0 ? <NotFound notFoundTexts={{ not_found_message: textValue.not_found_message, not_found_button: textValue.not_found_button }} /> : <></> }
             </div>
             
         </div>
