@@ -10,7 +10,6 @@ export enum EventsEnum {
     checkStatus = 'checkStatus'
 };
 
-
 export interface ActionsHandler<TInput = any, TOutput = any> {
     (payload: TInput, sender: chrome.runtime.MessageSender): Promise<TOutput>;
 }

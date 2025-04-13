@@ -7,12 +7,14 @@ import { Table } from './components/Table';
 
 // Typing
 import { StorageStreamerListType } from './typings/StorageType';
+import { Languages } from './components/Chart/src/js/Texts';
 
 
 const App: FC = () => {
 
   const [ isDisplayListLang, setIsDisplayListLang ] = useState(false);
   const [ streamerList, setStreamerList ] = useState<StorageStreamerListType[]>([]);
+  const [ language, setLanguage ] = useState<Languages | undefined>();
 
   const onClickBody: React.MouseEventHandler<HTMLDivElement> = () => {
     if (isDisplayListLang) setIsDisplayListLang(!isDisplayListLang)
@@ -20,17 +22,22 @@ const App: FC = () => {
 
   useEffect(() => {
 
-    chrome.storage.onChanged.addListener(({ streamersList }) => {
+    chrome.storage.onChanged.addListener(({ streamersList, language }) => {
       if (streamersList?.newValue) {
-        console.log('onChanged.addListener streamersList :', streamersList?.newValue)
         setStreamerList(streamersList.newValue as StorageStreamerListType[]);
+      }
+
+      if (language?.newValue) {
+        setLanguage(language.newValue);
       }
     });
 
     const getStorage = async (keys: string | string[]) => {
       try {
         const { streamersList } = await chrome.storage.local.get(keys);
+        const { language } = await chrome.storage.local.get('language');
         setStreamerList(streamersList ?? []);
+        setLanguage(language);
 
         return streamersList ?? [];
       } catch (error) {
@@ -47,13 +54,14 @@ const App: FC = () => {
       }
     };
 
-    getStorage('streamersList').then(async () => {
-      const { streamersList } = await chrome.storage.local.get('streamersList');
-      const allStreamerTabId: number[] = [];
-      let checkStatusNoResponse: number = 0;
+    const allStreamerTabId: number[] = [];
+    let checkStatusNoResponse: number = 0;
+
+    getStorage('streamersList').then(async (streamersList: StorageStreamerListType[]) => {
+      
       let nbTab: number = 0;
 
-      return new Promise<boolean>((resolve) => {
+      return new Promise<StorageStreamerListType[]>((resolve) => {
         streamersList?.forEach((streamer: StorageStreamerListType) => {
           chrome.tabs.sendMessage(streamer.tabId, { event: "checkStatus" }).then((response) => {
             nbTab++;
@@ -63,27 +71,27 @@ const App: FC = () => {
               allStreamerTabId.push(response);
             }
 
-            if (nbTab === streamersList.length) resolve(true);
-          }).catch(() => {
+            if (nbTab === streamersList.length) resolve(streamersList);
+          }).catch((_error: string) => {
             checkStatusNoResponse++;
-            if (checkStatusNoResponse + allStreamerTabId.length === streamersList.length) resolve(true);
+            if (checkStatusNoResponse + allStreamerTabId.length === streamersList.length) resolve(streamersList);
           });
         });
-      }).then(() => {
+      })
+      
+    }).then((streamersList: StorageStreamerListType[]) => {
         const filteredStreamerList = streamersList.filter(({ tabId }: StorageStreamerListType) => allStreamerTabId.includes(tabId));
         setStorage(filteredStreamerList);
 
         if (checkStatusNoResponse === streamersList.length) setStorage([]); // If only get error response clear streamerlist
-      });
-      
     });
 
   }, []);
 
   return (
     <div onClick={ onClickBody } style={{ width: '440px', height: '380px'}} className='bg-gray-900'>
-      <Navbar isDisplayListLang={ isDisplayListLang } setIsDisplayListLang={ setIsDisplayListLang } />
-      <Table streamersList={ streamerList } />
+      <Navbar isDisplayListLang={ isDisplayListLang } setIsDisplayListLang={ setIsDisplayListLang } language={ language } />
+      <Table streamersList={ streamerList } language={ language }/>
     </div>
   )
 };

@@ -33,7 +33,7 @@ const TableRows: FC<TableRowsProps> = ({ streamersList, currentPage = 1, searchT
     );
 
     const onClickDisableHanlder = (tabId: StorageStreamerListType['tabId'], isEnable: StorageStreamerListType['isEnable']) => {
-        chrome.tabs.sendMessage(tabId, { event: isEnable ? "disable_chart" : "enable_chart" });
+        chrome.tabs.sendMessage(tabId, { event: isEnable ? "disableChart" : "enableChart" });
     };
 
     const onClickFocusHandler = async (tabId: StorageStreamerListType['tabId'], windowId: StorageStreamerListType['windowId']) => {

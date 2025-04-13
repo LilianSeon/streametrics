@@ -15,6 +15,7 @@ import { customSegmentTooltip } from './js/plugins/customSegmentTooltip';
 // Types
 import { Peak, isArrayOfStrings, isArray, isString, DownLoadCallbacks } from './utils/utils';
 import { ToastMessage } from './components/Toast';
+import { Languages } from './js/Texts';
 
 export type DatasetName = "viewersCount" | "messagesCount";
 
@@ -50,10 +51,10 @@ export default class ChartExtension {
     defaultColor: string = '#fff'; // Label color
     chartDataMessageCount: ChartDataMessage[];
     _isDocumentHidden: boolean;
-    language: string;
+    language: Languages;
     #lastZoomLevel: number | undefined;
 
-    constructor(container: HTMLElement, title?: string, defaultColor?:  string, language?: string){
+    constructor(container: HTMLElement, language: Languages, title?: string, defaultColor?:  string){
         this.container = container;
         this.canvas = null;
         this.chart = null;
@@ -62,7 +63,7 @@ export default class ChartExtension {
         this.defaultColor = defaultColor ?? this.defaultColor;
         this.chartDataMessageCount = [];
         this._isDocumentHidden = false;
-        this.language = language || 'en-US';
+        this.language = language;
 
         const height: number = 250;
 
@@ -177,7 +178,7 @@ export default class ChartExtension {
                             callbacks: {
                                 title: customTooltipTitle,
                                 label: (context) => customTooltipLabel(context, this.language),
-                                afterFooter: customTooltipAfterFooter
+                                afterFooter: (context) => customTooltipAfterFooter(context)
                             },
                         },
                         legend: {

@@ -1,5 +1,14 @@
 import { Dispatch, FC, SetStateAction, useEffect, useMemo, useState, ChangeEventHandler } from "react";
+
+// Components
 import { Toggle } from "./Toggle";
+
+// Typings
+import { Languages } from './Chart/src/js/Texts';
+
+// I18n
+import { loadMessages } from "../loader/fileLoader";
+
 
 const setIsEnableExtension = async (value: boolean) => {
     await chrome.storage.local.set({ isEnableExtension: value });
@@ -19,22 +28,24 @@ const deleteAllStreamers = async () => {
 
 type LangList = {
     language: string,
-    languageShort: string,
+    languageShort: Languages,
     flag: string,
     isSelected: boolean | null
 }
 
 export type NavbarProps = {
     isDisplayListLang: boolean,
-    setIsDisplayListLang: Dispatch<SetStateAction<boolean>>
+    setIsDisplayListLang: Dispatch<SetStateAction<boolean>>,
+    language?: Languages
 }
 
-const Navbar: FC<NavbarProps> = ({ isDisplayListLang, setIsDisplayListLang }: NavbarProps) => {
+const Navbar: FC<NavbarProps> = ({ isDisplayListLang, setIsDisplayListLang, language }: NavbarProps) => {
 
     const [ checkboxValue, setCheckboxValue ] = useState<boolean | undefined>();
     const imgSrc = useMemo(() => chrome.runtime.getURL('images/logo-transparent.png'), []);
     const UKFlagSVG = useMemo(() => chrome.runtime.getURL('images/uk-flag.svg'), []);
     const FRFlagSVG = useMemo(() => chrome.runtime.getURL('images/fr-flag.svg'), []);
+    const [ toggleTitle, setToggleTitle ] = useState('');
 
     const [ langList, setLangList ] = useState<LangList[]>([{
         language: 'English',
@@ -79,7 +90,7 @@ const Navbar: FC<NavbarProps> = ({ isDisplayListLang, setIsDisplayListLang }: Na
         if (event.target.checked) {
             chrome.tabs.query({}).then(async (tabs) => {
                 for (const tab of tabs) {
-                    chrome.tabs.sendMessage(tab.id!, { event: "enable_chart" }).catch((error) => {
+                    chrome.tabs.sendMessage(tab.id!, { event: "enableChart" }).catch((error) => {
                         console.log(error)
                     });
                 }
@@ -89,6 +100,15 @@ const Navbar: FC<NavbarProps> = ({ isDisplayListLang, setIsDisplayListLang }: Na
         }
     };
 
+    useEffect(() => {
+        if (language) {
+            loadMessages("toggle", language)
+            .then((message) => {
+                setToggleTitle(message);
+            });
+        }
+    }, [language]);
+
     return(
         <nav className="bg-gray-900">
             <div className="max-w-screen-xl flex flex-wrap items-center mx-auto p-4">
@@ -97,7 +117,7 @@ const Navbar: FC<NavbarProps> = ({ isDisplayListLang, setIsDisplayListLang }: Na
                     <span className="ml-2 self-center text-xl font-semibold whitespace-nowrap text-white tracking-wide">StreaMetrics</span>
                 </div>
                 <div className="grow"></div>
-                { typeof checkboxValue !== 'undefined' ? <Toggle isChecked={ checkboxValue! } onChangeCheckbox={ onChangeCheckbox }/> : <></>}
+                { typeof checkboxValue !== 'undefined' ? <Toggle isChecked={ checkboxValue! } onChangeCheckbox={ onChangeCheckbox } labelTitle={ toggleTitle }/> : <></>}
                 <div className="flex flex-col items-center space-x-1">
                     <button type="button" onClick={() => setIsDisplayListLang(!isDisplayListLang) } className="inline-flex items-center font-medium justify-center px-2 py-2 text-sm text-white rounded-lg cursor-pointer hover:bg-gray-100 hover:text-black">
                         <img className="mr-2" height={ 20 } width={ 20 } src={ langList.find(({ isSelected }) => isSelected)?.flag }/> ({ langList.find(({ isSelected }) => isSelected)?.languageShort.toUpperCase() })

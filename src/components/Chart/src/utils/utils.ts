@@ -1,4 +1,3 @@
-import { timeAgoTextsEN } from "../assets/nls/Texts";
 import { ChartDataViewer, ChartExtensionData, ExportedDatas } from "../index";
 import { ChatContainer } from "../js/messageCounter";
 
@@ -630,9 +629,10 @@ const formatTimeString = (value: number, singular: string, plural: string, agoTe
 const timeAgo = (date: Date): string => {
     const now = new Date();
     const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-    const { singular, plural, ago } = timeAgoTextsEN;
-
-    if (seconds < 5) return timeAgoTextsEN.justNow;
+    //@ts-ignore
+    const { singular, plural, ago } = chrome.i18n.getMessage('time_ago');
+//@ts-ignore
+    if (seconds < 5) return chrome.i18n.getMessage('time_ago').justNow;
     if (seconds < 60) return formatTimeString(seconds, singular.second, plural.second, ago);
 
     const minutes = Math.floor(seconds / 60);

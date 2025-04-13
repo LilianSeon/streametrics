@@ -1,0 +1,82 @@
+{
+  "previous_page": {
+    "message": "Page précédente",
+    "description": "Previous page in pagination"
+  },
+  "next_page": {
+    "message": "Page suivante",
+    "description": "Next page in pagination"
+  },
+  "search_placeholder": {
+    "message": "Recherche",
+    "description": "Input search placeholder"
+  },
+  "toggle": {
+    "message": "Désactiver l'extension",
+    "description": "Toggle title html propertie"
+  },
+  "time_ago": {
+    "message": "il y a",
+    "description": "Chart tooltip"
+  },
+  "justNow": {
+    "message": "à l\"instant",
+    "description": "Chart tooltip"
+  },
+  "singular_second": {
+    "message": "seconde",
+    "description": "Chart tooltip"
+  },
+  "singular_minute": {
+    "message": "minute",
+    "description": "Chart tooltip"
+  },
+  "singular_hour": {
+    "message": "heure",
+    "description": "Chart tooltip"
+  },
+  "singular_day": {
+    "message": "jour",
+    "description": "Chart tooltip"
+  },
+  "singular_week": {
+    "message": "semaine",
+    "description": "Chart tooltip"
+  },
+  "singular_month": {
+    "message": "mois",
+    "description": "Chart tooltip"
+  },
+  "singular_year": {
+    "message": "an",
+    "description": "Chart tooltip"
+  },
+  "plural_second": {
+    "message": "secondes",
+    "description": "Chart tooltip"
+  },
+  "plural_minute": {
+    "message": "minutes",
+    "description": "Chart tooltip"
+  },
+  "plural_hour": {
+    "message": "heures",
+    "description": "Chart tooltip"
+  },
+  "plural_day": {
+    "message": "jours",
+    "description": "Chart tooltip"
+  },
+  "plural_week": {
+    "message": "semaines",
+    "description": "Chart tooltip"
+  },
+  "plural_month": {
+    "message": "mois",
+    "description": "Chart tooltip"
+  },
+  "plural_year": {
+    "message": "ans",
+    "description": "Chart tooltip"
+  }
+}

@@ -15,7 +15,7 @@ export default defineConfig({
     target: ['ESNext'],
     outDir: 'dist',
     minify: false,
-    chunkSizeWarningLimit: 1600,
+    chunkSizeWarningLimit: 2600,
     rollupOptions: {
       input: {
         index: './index.html',
@@ -32,6 +32,8 @@ export default defineConfig({
         'images/logo128.png': './src/components/Chart/src/assets/images/logo128.png',
         'images/uk-flag.svg': './src/assets/images/uk-flag.svg',
         'images/fr-flag.svg': './src/assets/images/fr-flag.svg',
+        /*'_locales/en/message.json': './src/_locales/en/message.json',
+        '_locales/fr/message.json': './src/_locales/fr/message.json',*/
       },
       output: {
         entryFileNames: "[name].js",
