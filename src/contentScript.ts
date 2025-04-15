@@ -24,7 +24,9 @@ import { checkStatus } from './handlers/events/eventsHandler';
 
 let tabId: number | undefined;
 
-const i18nKeys = ['clear_data', 'refresh_rate', 'bars', 'line', 'download', 'import_data', 'image', 'data'];
+const i18nKeys = ['clear_data', 'refresh_rate', 'bars', 'line', 'download', 'import_data', 'image', 'data', "singular_second", "plural_second", "time_ago", "justNow", "singular_minute", "plural_minute", "singular_hour", "plural_hour", "singular_day", 
+    "plural_day", "singular_week", "plural_week", "singular_month", "plural_month", 
+    "singular_year", "plural_year", "plural_new_message", "singular_new_message"];
 
 
 let chartExtension: ChartExtension | undefined;
@@ -275,7 +277,7 @@ const initChartInDOM = async () => {
             const chartTitle: string = formatChartTitle(window.location.pathname);
             const textColor: string = document.documentElement.className.includes('dark') ? '#ffffff' : '#000000';
             
-            chartExtension = new ChartExtension(accordionElement, language, chartTitle, textColor);
+            chartExtension = new ChartExtension(accordionElement, language, i18nTexts, chartTitle, textColor);
             isExtensionInitializing = false;
             isExtensionInitialized = true;
             accordionComponent?.setProgressBarWidth(60);
@@ -359,6 +361,7 @@ chrome.storage.onChanged.addListener(async (changes) => {
         chartExtension.language = newValue; // Update chart's language
         const i18nTexts = await getI18nMessages(i18nKeys, newValue);
         if (accordionComponent) accordionComponent.setI18nTexts(i18nTexts);
+        chartExtension.setI18nTexts(i18nTexts);
       }
 
       if (key === "isEnableExtension") {

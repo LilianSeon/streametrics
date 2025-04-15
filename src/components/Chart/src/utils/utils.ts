@@ -615,43 +615,51 @@ const wait = (ms: number): Promise<unknown> => {
  * @param { string } singular - The singular form of the time unit
  * @param { string } plural - The plural form of the time unit
  * @param { string } agoText - ago string
+ * @param { string } lang 'en', 'fr'
  * @returns { string } A formatted string indicating the elapsed time
  */
-const formatTimeString = (value: number, singular: string, plural: string, agoText: string): string => {
-    return `${ value } ${ value > 1 ? plural : singular } ${ agoText }`;
+const formatTimeString = (value: number, singular: string, plural: string, agoText: string, lang: string): string => {
+    if (lang === 'en') {
+        return `${ value } ${ value > 1 ? plural : singular } ${ agoText }`;
+    } else {
+        return `${ agoText } ${ value } ${ value > 1 ? plural : singular }`;
+    }
 };
 
 /**
  * Returns a human-readable string representing the time elapsed since a given date.
  * @param { Date } date - The date from which to calculate the elapsed time
+ * @param { string } lang 'en', 'fr'
  * @returns { string } A formatted string describing how long ago the event occurred
  */
-const timeAgo = (date: Date): string => {
+const timeAgo = (date: Date, lang: string, i18nTexts: Record<string, string>): string => {
     const now = new Date();
     const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-    //@ts-ignore
-    const { singular, plural, ago } = chrome.i18n.getMessage('time_ago');
-//@ts-ignore
-    if (seconds < 5) return chrome.i18n.getMessage('time_ago').justNow;
-    if (seconds < 60) return formatTimeString(seconds, singular.second, plural.second, ago);
+    
+    const { singular_second, plural_second, time_ago, justNow, singular_minute, plural_minute, singular_hour, plural_hour, singular_day, 
+        plural_day, singular_week, plural_week, singular_month, plural_month, 
+        singular_year, plural_year } = i18nTexts;
+
+    if (seconds < 5) return justNow;
+    if (seconds < 60) return formatTimeString(seconds, singular_second, plural_second, time_ago, lang);
 
     const minutes = Math.floor(seconds / 60);
-    if (minutes < 60) return formatTimeString(minutes, singular.minute, plural.minute, ago);
+    if (minutes < 60) return formatTimeString(minutes, singular_minute, plural_minute, time_ago, lang);
 
     const hours = Math.floor(minutes / 60);
-    if (hours < 24) return formatTimeString(hours, singular.hour, plural.hour, ago);
+    if (hours < 24) return formatTimeString(hours, singular_hour, plural_hour, time_ago, lang);
 
     const days = Math.floor(hours / 24);
-    if (days < 7) return formatTimeString(days, singular.day, plural.day, ago);
+    if (days < 7) return formatTimeString(days, singular_day, plural_day, time_ago, lang);
     
     const weeks = Math.floor(days / 7);
-    if (weeks < 4) return formatTimeString(weeks, singular.week, plural.week, ago);
+    if (weeks < 4) return formatTimeString(weeks, singular_week, plural_week, time_ago, lang);
     
     const months = Math.floor(days / 30);
-    if (months < 12) return formatTimeString(months, singular.month, plural.month, ago);
+    if (months < 12) return formatTimeString(months, singular_month, plural_month, time_ago, lang);
     
     const years = Math.floor(days / 365);
-    return formatTimeString(years, singular.year, plural.year, ago);
+    return formatTimeString(years, singular_year, plural_year, time_ago, lang);
 };
 
 export { waitUntilElementLoaded, checkStreamerStatus, deleteStreamerById, getCurrentWindowId, getCurrentTabId, getStreamerImage, timeAgo, isURLTwitch, getNbViewer, waitForElm, wait, getDuration, removeSpaceInString, formatChartTitle, getGameName, computedDataLabel, backGroundThemeObserver, detectPeaks, findPeaks, getPercentageOf, getStreamerName, getChatContainer, deleteSequenceSameNumber, downloadJSON, extractDataFromJSON, isArrayOfStrings, isArray, isString, isDarkModeActivated, generateRandomId, downloadImage };

@@ -21,7 +21,7 @@ export type DatasetName = "viewersCount" | "messagesCount";
 
 export type ChartExtensionData = ChartDataViewer[] | [] | ChartDataMessage[];
 
- export type ChartDataViewer = {
+export type ChartDataViewer = {
     duration: string;
     game: string;
     id: number;
@@ -50,11 +50,12 @@ export default class ChartExtension {
     chartDataViewer: ChartDataViewer[] = [];
     defaultColor: string = '#fff'; // Label color
     chartDataMessageCount: ChartDataMessage[];
+    i18nTexts: Record<string, string>
     _isDocumentHidden: boolean;
     language: Languages;
     #lastZoomLevel: number | undefined;
 
-    constructor(container: HTMLElement, language: Languages, title?: string, defaultColor?:  string){
+    constructor(container: HTMLElement, language: Languages, i18nTexts: Record<string, string>, title?: string, defaultColor?:  string){
         this.container = container;
         this.canvas = null;
         this.chart = null;
@@ -64,6 +65,7 @@ export default class ChartExtension {
         this.chartDataMessageCount = [];
         this._isDocumentHidden = false;
         this.language = language;
+        this.i18nTexts = i18nTexts;
 
         const height: number = 250;
 
@@ -78,6 +80,10 @@ export default class ChartExtension {
         }
 
         document.addEventListener( 'visibilitychange' , this.#onVisibilityChanged.bind(this));
+    };
+
+    setI18nTexts(newValue: Record<string, string>) {
+        this.i18nTexts = newValue;
     };
 
     _initChart(container: HTMLCanvasElement | null) {
@@ -177,8 +183,8 @@ export default class ChartExtension {
                             },
                             callbacks: {
                                 title: customTooltipTitle,
-                                label: (context) => customTooltipLabel(context, this.language),
-                                afterFooter: (context) => customTooltipAfterFooter(context)
+                                label: (context) => customTooltipLabel(context, this.language, this.i18nTexts),
+                                afterFooter: (context) => customTooltipAfterFooter(context, this.language, this.i18nTexts)
                             },
                         },
                         legend: {

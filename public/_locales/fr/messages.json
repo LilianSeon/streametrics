@@ -1,4 +1,12 @@
 {
+  "plural_new_message": {
+    "message": "Nouveaux messages",
+    "description": "New messages"
+  },
+  "singular_new_message": {
+    "message": "Nouveau message",
+    "description": "New message"
+  },
   "image": {
     "message": "Image",
     "description": "Image"
@@ -72,7 +80,7 @@
     "description": "Chart tooltip"
   },
   "justNow": {
-    "message": "à l\"instant",
+    "message": "à l'instant",
     "description": "Chart tooltip"
   },
   "singular_second": {

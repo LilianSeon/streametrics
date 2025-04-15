@@ -5,14 +5,17 @@ import { timeAgo } from "../../utils/utils";
 /**
  * 
  * @param context 
+ * @param { string } format
+ * @param { Record<string, string> } i18nTexts
  * @returns { string } 15/08/2024 17:44:11
  */
-const customTooltipAfterFooter = (context: any): string => {
+const customTooltipAfterFooter = (context: any, format: string, i18nTexts: Record<string, string>): string => {
 
     if (context[0].dataset.stack === 'viewersCount') {
         const { time }: { time: Date | string } = context[0].raw;
+        const intlFormat = format === 'en' ? 'en-EN' : 'fr-FR';
 
-        return new Date(time).toLocaleTimeString() + ' - ' + timeAgo(new Date(time));
+        return new Intl.DateTimeFormat(intlFormat).format(new Date(time)) + ' - ' + timeAgo(new Date(time), format, i18nTexts);
     } else if (context[0].dataset.stack === 'messagesCount') {
         return '';
     } else {
@@ -23,16 +26,19 @@ const customTooltipAfterFooter = (context: any): string => {
 /**
  * Display tooltip's core text 
  * @param context
+ * @param { string } format
+ * @param { Record<string, string> } i18nTexts
  * @returns { string } Viewers : 49 562 | Viewers : 49 562 (-86)
  */
-const customTooltipLabel = (context: any, format: string): string | string[] => {
+const customTooltipLabel = (context: any, format: string, i18nTexts: Record<string, string>): string | string[] => {
     if (context.dataset.stack === 'viewersCount') {
         const { nbViewer } = context.raw as ChartDataViewer;
         const { data }: { data: ChartDataViewer[] } = context.dataset;
         const { dataIndex } = context;
         const previousValue: number | undefined = (dataIndex > 0) ? data.at(dataIndex - 1)!.nbViewer : undefined;
+        const intlFormat = format === 'en' ? 'en-EN' : 'fr-FR';
 
-        const formatNbViewer = new Intl.NumberFormat(format, { minimumFractionDigits: 0 });
+        const formatNbViewer = new Intl.NumberFormat(intlFormat, { minimumFractionDigits: 0 });
         const label: string = (nbViewer > 1) ? ' Viewers : ' : ' Viewer : ';
         const formatedString: string = label + formatNbViewer.format(nbViewer);
 
@@ -46,8 +52,9 @@ const customTooltipLabel = (context: any, format: string): string | string[] => 
         return formatedString +' '+ diffString;
     } else if (context.dataset.stack === 'messagesCount') {
         const formattedValue = context.formattedValue;
+        const { singular_new_message, plural_new_message } = i18nTexts;
 
-        return (formattedValue > 1) ? 'New messages : ' + formattedValue : 'New message : ' + formattedValue;
+        return (formattedValue > 1) ? `${plural_new_message} : ${formattedValue}` : `${singular_new_message} : ${formattedValue}`;
     } else {
         return '';
     }

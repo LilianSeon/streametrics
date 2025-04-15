@@ -1,4 +1,12 @@
 {
+  "plural_new_message": {
+    "message": "New messages",
+    "description": "New messages"
+  },
+  "singular_new_message": {
+    "message": "New message",
+    "description": "New message"
+  },
   "image": {
     "message": "Image",
     "description": "Image"
