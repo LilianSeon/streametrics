@@ -1,6 +1,7 @@
 /// <reference types="chrome"/>
 
 // Handlers
+import { getI18nMessages } from "./handlers/actions/i18nMessagesHandler";
 import { getWindowId, getTabId } from "./handlers/actions/infoHandler";
 import { addOneStreamer, updateStreamersList, deleteAllStreamers } from "./handlers/actions/streamersListHandler";
 
@@ -13,7 +14,8 @@ const actionsHandler: Record<string, ActionsHandler> = {
     updateStreamersList,
     deleteAllStreamers,
     getWindowId,
-    getTabId
+    getTabId,
+    getI18nMessages
 };
 
 

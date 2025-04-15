@@ -24,6 +24,8 @@ import { checkStatus } from './handlers/events/eventsHandler';
 
 let tabId: number | undefined;
 
+const i18nKeys = ['clear_data', 'refresh_rate', 'bars', 'line', 'download', 'import_data', 'image', 'data'];
+
 
 let chartExtension: ChartExtension | undefined;
 //let data: ChartDataViewer[] = [];
@@ -160,13 +162,13 @@ const importCallbacks : ChartDownLoadCallbacks = {
     }
 };
 
-const onClickExportImageButtonHandler: OnClickExportImageButtonHandler = () => {
+const onClickExportImageButtonHandler: OnClickExportImageButtonHandler = async () => {
     const imageString = chartExtension?.exportImage();
-    if (imageString) downloadImage(getStreamerName(document)+'_chart_image.png', imageString, downLoadCallbacks);
+    if (imageString) downloadImage(await getStreamerName(document)+'_chart_image.png', imageString, downLoadCallbacks);
 };
 
-const onClickExportButtonHandler: OnClickExportButtonHandler = (): void => {
-    if (chartExtension) downloadJSON(getStreamerName(document)+'_data.json', chartExtension.getDatas(), downLoadCallbacks);
+const onClickExportButtonHandler: OnClickExportButtonHandler = async () => {
+    if (chartExtension) downloadJSON(await getStreamerName(document)+'_data.json', chartExtension.getDatas(), downLoadCallbacks);
 };
 
 const onClickHideShowViewerButtonHandler : OnClickHideShowViewerButtonHandler = (isDisplayViewer: boolean): void => {
@@ -206,6 +208,15 @@ const onClickPlayPauseButtonHandler: OnClickPlayPauseButtonHandler = async (isPl
     if (accordionComponent) accordionComponent.isPlaying = !isPlaying;
 };
 
+const getI18nMessages = async <T extends string[]>(keys: T, lang: string): Promise<Record<T[number], string>> => {
+    
+    return new Promise<Record<T[number], string>>((resolve) => {
+        chrome.runtime.sendMessage({ action: 'getI18nMessages', payload: { keys, lang } }, (isDone) => {
+            resolve(isDone);
+        });
+    });
+};
+
 const initStorage = async (): Promise<void> => {
     try {
         const result = await getStorage(['isAccordionExpanded']);
@@ -235,6 +246,8 @@ const initChartInDOM = async () => {
         isExtensionInitializing = true;
         const informationContainer = await waitForElm('#live-channel-stream-information');
         const chartContainer = await waitForElm('.chat-line__message');
+        const { language } = await getStorage(["language"]);
+        const i18nTexts = await getI18nMessages(i18nKeys, language);
 
         if (typeof messageCounter === 'undefined' && chartContainer) {
             messageCounter = new MessageCounter(getChatContainer(document));
@@ -250,16 +263,18 @@ const initChartInDOM = async () => {
                 intervalManager = new IntervalManager(startLoopGetData, (refreshValue ?? 5) * 1000);
             }
 
-            accordionComponent = new Accordion(informationContainer, refreshValue ?? 5, onClickArrowAccordionHandler, onClickExportButtonHandler, onChangeImportHandler, onClickPlayPauseButtonHandler, onClickClearHandler, onClickHideShowMessageButtonHandler, onClickHideShowViewerButtonHandler, onClickExportImageButtonHandler, onChangeRefreshValue, isAccordionExpanded);
+            accordionComponent = new Accordion(informationContainer, refreshValue ?? 5, i18nTexts, onClickArrowAccordionHandler, onClickExportButtonHandler, onChangeImportHandler, onClickPlayPauseButtonHandler, onClickClearHandler, onClickHideShowMessageButtonHandler, onClickHideShowViewerButtonHandler, onClickExportImageButtonHandler, onChangeRefreshValue, isAccordionExpanded);
             accordionElement = accordionComponent.getChartContainer() as HTMLElement;
+            accordionComponent.setI18nTexts(i18nTexts);
             accordionComponent.setProgressBarWidth(20);
         }
+
         console.log('INIT 20% :', accordionElement, chartExtension)
         if (accordionElement && typeof chartExtension == 'undefined') {
 
             const chartTitle: string = formatChartTitle(window.location.pathname);
             const textColor: string = document.documentElement.className.includes('dark') ? '#ffffff' : '#000000';
-            const { language } = await getStorage(["language"]);
+            
             chartExtension = new ChartExtension(accordionElement, language, chartTitle, textColor);
             isExtensionInitializing = false;
             isExtensionInitialized = true;
@@ -338,10 +353,12 @@ const eventsHandlers: Record<string, any> = {
     onTabUpdated: onTabCreated
 };
 
-chrome.storage.onChanged.addListener((changes) => {
+chrome.storage.onChanged.addListener(async (changes) => {
     for (let [key, { newValue }] of Object.entries(changes)) {
       if (key === "language" && chartExtension) {
         chartExtension.language = newValue; // Update chart's language
+        const i18nTexts = await getI18nMessages(i18nKeys, newValue);
+        if (accordionComponent) accordionComponent.setI18nTexts(i18nTexts);
       }
 
       if (key === "isEnableExtension") {

@@ -1,4 +1,36 @@
 {
+  "image": {
+    "message": "Image",
+    "description": "Image"
+  },
+  "data": {
+    "message": "Données",
+    "description": "Data"
+  },
+  "import_data": {
+    "message": "Importer",
+    "description": "Import data"
+  },
+  "download": {
+    "message": "Télécharger",
+    "description": "download"
+  },
+  "bars": {
+    "message": "Barres",
+    "description": "bars"
+  },
+  "line": {
+    "message": "Ligne",
+    "description": "line"
+  },
+  "refresh_rate": {
+    "message": "Actualisation :",
+    "description": "Refresh rate"
+  },
+  "clear_data": {
+    "message": "Effacer les données",
+    "description": "Clear data"
+  },
   "not_found_button": {
     "message": "Aller sur",
     "description": "Go to *url*"

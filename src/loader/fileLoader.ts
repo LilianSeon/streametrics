@@ -7,7 +7,7 @@ import { Languages } from "../components/Chart/src/js/Texts";
  * @param { Languages } lang - The language code ('en', 'fr') to load the message for.
  * @returns { Promise<string> } A promise that resolves to the localized message string.
  */
-const loadMessage = async (key: string, lang: Languages): Promise<string> => {
+const loadMessage = async <T extends string>(key: T, lang: Languages): Promise<string> => {
     const response = await fetch(`/_locales/${lang}/messages.json`);
     const responseJSON = await response.json();
     return responseJSON[key]['message'];

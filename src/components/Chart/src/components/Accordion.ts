@@ -44,7 +44,7 @@ export default class Accordion implements IAccordion<Element> {
     #isDisplayViewer: boolean = true;
     private onClickArrowAccordionHandler: OnClickArrowAccordionHandler;
 
-    constructor(element: Element, refreshValue: number, onClickArrowAccordionHandler: OnClickArrowAccordionHandler, onClickExportButtonHandler: OnClickExportButtonHandler, onChangeImportHandler: OnChangeImportHandler, onClickPlayPauseButtonHandler: OnClickPlayPauseButtonHandler, onClickClearButtonHandler: OnClickClearButtonHandler, onClickHideShowMessageButtonHandler: OnClickHideShowMessageButtonHandler, onClickHideShowViewerButtonHandler: OnClickHideShowViewerButtonHandler, onClickExportImageButtonHandler: OnClickExportImageButtonHandler, onChangeRefreshValue: OnChangeRefreshValueHandler, isExpanded: boolean) {
+    constructor(element: Element, refreshValue: number, i18nTexts: Record<string, string>, onClickArrowAccordionHandler: OnClickArrowAccordionHandler, onClickExportButtonHandler: OnClickExportButtonHandler, onChangeImportHandler: OnChangeImportHandler, onClickPlayPauseButtonHandler: OnClickPlayPauseButtonHandler, onClickClearButtonHandler: OnClickClearButtonHandler, onClickHideShowMessageButtonHandler: OnClickHideShowMessageButtonHandler, onClickHideShowViewerButtonHandler: OnClickHideShowViewerButtonHandler, onClickExportImageButtonHandler: OnClickExportImageButtonHandler, onChangeRefreshValue: OnChangeRefreshValueHandler, isExpanded: boolean) {
 
         const imgSrc = chrome.runtime.getURL('images/logo-transparent.png');
 
@@ -87,9 +87,13 @@ export default class Accordion implements IAccordion<Element> {
         this.onClickArrowAccordionHandler = onClickArrowAccordionHandler;
 
         // Init BottomNavigation
-        this.bottomNavigation = (this.tabContent) ? new BottomNavigation(this.tabContent, refreshValue, onClickPlayPauseButtonHandler, onClickHideShowMessageButtonHandler, onClickHideShowViewerButtonHandler, onClickClearButtonHandler, onChangeImportHandler, onClickExportButtonHandler, onClickExportImageButtonHandler, onChangeRefreshValue) : undefined;
+        this.bottomNavigation = (this.tabContent) ? new BottomNavigation(this.tabContent, refreshValue, i18nTexts, onClickPlayPauseButtonHandler, onClickHideShowMessageButtonHandler, onClickHideShowViewerButtonHandler, onClickClearButtonHandler, onChangeImportHandler, onClickExportButtonHandler, onClickExportImageButtonHandler, onChangeRefreshValue) : undefined;
 
         isExpanded ? this.expandChartContainer() : this.collapseChartContainer();
+    };
+
+    setI18nTexts(newValue: Record<string, string>) {
+        this.bottomNavigation?.setI18nTexts(newValue);
     };
 
     /**

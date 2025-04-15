@@ -1,4 +1,36 @@
 {
+  "image": {
+    "message": "Image",
+    "description": "Image"
+  },
+  "data": {
+    "message": "Data",
+    "description": "Data"
+  },
+  "import_data": {
+    "message": "Import data",
+    "description": "Import data"
+  },
+  "download": {
+    "message": "Download",
+    "description": "download"
+  },
+  "bars": {
+    "message": "Bars",
+    "description": "bars"
+  },
+  "line": {
+    "message": "Line",
+    "description": "line"
+  },
+  "refresh_rate": {
+    "message": "Refresh rate :",
+    "description": "Refresh rate"
+  },
+  "clear_data": {
+    "message": "Clear data",
+    "description": "Clear data"
+  },
   "not_found_button": {
     "message": "Go to",
     "description": "Go to *url*"

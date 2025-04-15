@@ -10,11 +10,6 @@ export type OnChangeRefreshValueBottomNav= (newRefreshValue: number) => void;
 enum TooltipText {
     Play = 'Play',
     Pause = 'Pause',
-    Clear = 'Clear data',
-    Download = 'Download',
-    ImportData = 'Import data',
-    DownloadImage = 'Image',
-    DownloadData = 'Data'
 };
 
 interface IBottomNavigation<E extends Element> {
@@ -27,7 +22,6 @@ export default class BottomNavigation implements IBottomNavigation<Element> {
     bottomNavigation: Element;
     clearButtonContainer: HTMLElement | null;
     downloadButtonContainer: HTMLElement | null;
-    downloadDropdownButtonContainer: HTMLElement | null;
     exportButtonContainer: HTMLElement | null;
     exportImageButtonContainer: HTMLElement | null;
     importButtonContainer: HTMLElement | null;
@@ -44,6 +38,7 @@ export default class BottomNavigation implements IBottomNavigation<Element> {
     speedButtonContainer: HTMLElement | null;
     thumb: HTMLElement | null;
     tooltipSlider: HTMLElement | null;
+    #i18nTexts: Record<string, string>;
     #isDraggingSlider: boolean = false;
     #isDisplayBar: boolean = true;
     #isDisplayLine: boolean = true;
@@ -60,7 +55,7 @@ export default class BottomNavigation implements IBottomNavigation<Element> {
     private onClickClearButtonHandler: OnClickClearButtonHandlerBottomNav;
     private onClickPlayPauseButtonHandler: OnClickPlayPauseButtonHandlerBottomNav;
 
-    constructor(element: Element, refreshValue: number, onClickPlayPauseButtonHandler: OnClickPlayPauseButtonHandlerBottomNav, onClickHideShowBarButtonHandler: OnClickHideShowBarButtonHandlerBottomNav, onClickHideShowLineButtonHandler: OnClickHideShowLineButtonHandlerBottomNav, onClickClearButtonHandler: OnClickClearButtonHandlerBottomNav, onChangeImportHandler: OnChangeImportHandlerBottomNav, onClickExportButtonHandler: OnClickExportButtonHandlerBottomNav, onClickExportImageButtonHandler: OnClickExportImageButtonHandlerBottomNav, onChangeRefreshValue: OnChangeRefreshValueBottomNav) {
+    constructor(element: Element, refreshValue: number, i18nTexts: Record<string, string>, onClickPlayPauseButtonHandler: OnClickPlayPauseButtonHandlerBottomNav, onClickHideShowBarButtonHandler: OnClickHideShowBarButtonHandlerBottomNav, onClickHideShowLineButtonHandler: OnClickHideShowLineButtonHandlerBottomNav, onClickClearButtonHandler: OnClickClearButtonHandlerBottomNav, onChangeImportHandler: OnChangeImportHandlerBottomNav, onClickExportButtonHandler: OnClickExportButtonHandlerBottomNav, onClickExportImageButtonHandler: OnClickExportImageButtonHandlerBottomNav, onChangeRefreshValue: OnChangeRefreshValueBottomNav) {
 
         const htmlString = `
         <div class="group/outer absolute z-50 w-full max-w-lg -translate-x-1/2 left-1/2 -bottom-[58px] hover:-bottom-[7px] transition-all duration-200 border-8 border-solid border-transparent borderBottomNav">
@@ -79,13 +74,13 @@ export default class BottomNavigation implements IBottomNavigation<Element> {
                             <li>
                                 <div class="flex items-center p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-600">
                                     <input id="hideShowCheckboxBar" type="checkbox" value="${this.#isDisplayBar}" checked="${this.#isDisplayBar}" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded dark:bg-gray-600 dark:border-gray-500 cursor-pointer">
-                                    <label for="hideShowCheckboxBar" class="w-full ms-7 text-xl font-medium text-gray-900 rounded dark:text-gray-300 select-none cursor-pointer">Bar</label>
+                                    <label for="hideShowCheckboxBar" i18n-content="bars" class="w-full ms-7 text-xl font-medium text-gray-900 rounded dark:text-gray-300 select-none cursor-pointer"></label>
                                 </div>
                             </li>
                             <li>
                                 <div class="flex items-center p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-600">
                                     <input id="hideShowCheckboxLine" type="checkbox" value="${this.#isDisplayLine}" checked="${this.#isDisplayLine}" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded dark:bg-gray-600 dark:border-gray-500 cursor-pointer">
-                                    <label for="hideShowCheckboxLine" class="w-full ms-7 text-xl font-medium text-gray-900 rounded dark:text-gray-300 select-none cursor-pointer">Line</label>
+                                    <label for="hideShowCheckboxLine" i18n-content="line" class="w-full ms-7 text-xl font-medium text-gray-900 rounded dark:text-gray-300 select-none cursor-pointer"></label>
                                 </div>
                             </li>
                         </ul>
@@ -97,8 +92,8 @@ export default class BottomNavigation implements IBottomNavigation<Element> {
                                 <path fill-rule="evenodd" d="M8.75 1A2.75 2.75 0 0 0 6 3.75v.443c-.795.077-1.584.176-2.365.298a.75.75 0 1 0 .23 1.482l.149-.022.841 10.518A2.75 2.75 0 0 0 7.596 19h4.807a2.75 2.75 0 0 0 2.742-2.53l.841-10.52.149.023a.75.75 0 0 0 .23-1.482A41.03 41.03 0 0 0 14 4.193V3.75A2.75 2.75 0 0 0 11.25 1h-2.5ZM10 4c.84 0 1.673.025 2.5.075V3.75c0-.69-.56-1.25-1.25-1.25h-2.5c-.69 0-1.25.56-1.25 1.25v.325C8.327 4.025 9.16 4 10 4ZM8.58 7.72a.75.75 0 0 0-1.5.06l.3 7.5a.75.75 0 1 0 1.5-.06l-.3-7.5Zm4.34.06a.75.75 0 1 0-1.5-.06l-.3 7.5a.75.75 0 1 0 1.5.06l.3-7.5Z" clip-rule="evenodd" />
                             </svg>
                         </button>
-                        <div id="tooltip-clearButton" class="absolute invisible text-xl z-10 inline-block px-3 py-2 -top-14 font-medium text-white transition-opacity duration-400 bg-gray-900 rounded-lg shadow-sm opacity-0 dark:bg-gray-700 select-none hover:visible hover:opacity-95">
-                            ${ TooltipText.Clear }
+                        <div id="tooltip-clearButton" i18n-content="clear_data" class="absolute invisible text-xl z-10 inline-block px-3 py-2 -top-14 font-medium text-white transition-opacity duration-400 bg-gray-900 rounded-lg shadow-sm opacity-0 dark:bg-gray-700 select-none hover:visible hover:opacity-95">
+                           
                         </div>
                     </div>
 
@@ -123,7 +118,7 @@ export default class BottomNavigation implements IBottomNavigation<Element> {
                         </button>
                         <div id="tooltip-speedButton" class="absolute invisible text-lg z-10 opacity-0 inline-block pb-5 pt-4 px-6 -top-[7.9rem] left-44 font-medium text-white transition-opacity duration-400 bg-gray-900 rounded-lg shadow-sm hover:visible hover:opacity-95 dark:bg-gray-700">
                             <div class="flow-root text-white select-none">
-                                <div class="float-left">Refresh rate :</div>
+                                <div i18n-content="refresh_rate" class="float-left">Refresh rate :</div>
                                 <div class="float-right">
                                     <span id="refreshRate" class="font-semibold text-xl">${ refreshValue }</span>
                                     <span class="text-sm">/sec</span>
@@ -154,38 +149,39 @@ export default class BottomNavigation implements IBottomNavigation<Element> {
                         </button>
                         <div id="tooltip-downloadButton" class="absolute z-10 -top-[7.4rem] transition-opacity duration-400 opacity-0 hover:visible hover:opacity-95 bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700">
                             <ul class="py-2 text-xl font-medium text-gray-700 dark:text-gray-200">
-                                <li>
-                                    <button id="downloadDropdownButton" type="button" class="flex items-center justify-between w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white select-none">
-                                        ${ TooltipText.Download }
-                                        <svg class="w-2.5 h-2.5 ms-3 rtl:rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-                                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
-                                        </svg>
-                                    </button>
-                                    <div id="tooltip-downloadDropdownButton" class="absolute z-10 opacity-0 left-[11.5rem] top-0 bg-white divide-y divide-gray-600 rounded-lg shadow w-44 hover:opacity-95 hover:visible dark:bg-gray-700 transition-opacity duration-400">
-                                        <ul class="py-2 text-xl font-medium divide-y divide-gray-100 text-gray-700 dark:divide-gray-600 dark:text-gray-200 select-none">
-                                            <li>
-                                                <button id="exportButton" type="button" class="flex items-center w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
-                                                    <svg class="w-6 h-6 mr-3 fill-gray-700 dark:fill-gray-200" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                                                        <path d="M6,6A2,2,0,0,1,8,4,1,1,0,0,0,8,2,4,4,0,0,0,4,6V9a2,2,0,0,1-2,2,1,1,0,0,0,0,2,2,2,0,0,1,2,2v3a4,4,0,0,0,4,4,1,1,0,0,0,0-2,2,2,0,0,1-2-2V15a4,4,0,0,0-1.38-3A4,4,0,0,0,6,9Zm16,5a2,2,0,0,1-2-2V6a4,4,0,0,0-4-4,1,1,0,0,0,0,2,2,2,0,0,1,2,2V9a4,4,0,0,0,1.38,3A4,4,0,0,0,18,15v3a2,2,0,0,1-2,2,1,1,0,0,0,0,2,4,4,0,0,0,4-4V15a2,2,0,0,1,2-2,1,1,0,0,0,0-2Z"/>
-                                                    </svg>
-                                                    ${ TooltipText.DownloadData }
-                                                </button>
-                                            </li>
-                                            <li class="border-solid border-t border-gray-200">
-                                                <button id="exportImageButton" type="button" class="dark:border-gray-700 flex items-center w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
-                                                    <svg class="w-6 h-6 mr-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
-                                                        <path fill-rule="evenodd" d="M2 4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V4Zm10.5 5.707a.5.5 0 0 0-.146-.353l-1-1a.5.5 0 0 0-.708 0L9.354 9.646a.5.5 0 0 1-.708 0L6.354 7.354a.5.5 0 0 0-.708 0l-2 2a.5.5 0 0 0-.146.353V12a.5.5 0 0 0 .5.5h8a.5.5 0 0 0 .5-.5V9.707ZM12 5a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z" clip-rule="evenodd" />
-                                                    </svg>
-                                                    ${ TooltipText.DownloadImage }
-                                                </button>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </li>
+                                <li class="relative group">
+                                <button id="downloadDropdownButton" type="button" class="flex items-center justify-between w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white select-none">
+                                    <span i18n-content="download"></span>
+                                    <svg class="w-2.5 h-2.5 ms-3 rtl:rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
+                                    </svg>
+                                </button>
+
+                                <!-- Tooltip -->
+                                <div id="tooltip-downloadDropdownButton" class="absolute z-10 left-[11.5rem] top-0 mt-[-5px] bg-white divide-y divide-gray-600 rounded-lg shadow w-44 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 dark:bg-gray-700 pointer-events-auto">
+                                    <ul class="py-2 text-xl font-medium divide-y divide-gray-100 text-gray-700 dark:divide-gray-600 dark:text-gray-200 select-none">
+                                        <li>
+                                            <button id="exportButton" type="button" class="flex items-center w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
+                                                <svg class="w-6 h-6 mr-3 fill-gray-700 dark:fill-gray-200" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                                    <path d="M6,6A2,2,0,0,1,8,4,1,1,0,0,0,8,2,4,4,0,0,0,4,6V9a2,2,0,0,1-2,2,1,1,0,0,0,0,2,2,2,0,0,1,2,2v3a4,4,0,0,0,4,4,1,1,0,0,0,0-2,2,2,0,0,1-2-2V15a4,4,0,0,0-1.38-3A4,4,0,0,0,6,9Zm16,5a2,2,0,0,1-2-2V6a4,4,0,0,0-4-4,1,1,0,0,0,0,2,2,2,0,0,1,2,2V9a4,4,0,0,0,1.38,3A4,4,0,0,0,18,15v3a2,2,0,0,1-2,2,1,1,0,0,0,0,2,4,4,0,0,0,4-4V15a2,2,0,0,1,2-2,1,1,0,0,0,0-2Z"/>
+                                                </svg>
+                                                <span i18n-content="data"></span>
+                                            </button>
+                                        </li>
+                                        <li class="border-solid border-t border-gray-200">
+                                            <button id="exportImageButton" type="button" class="dark:border-gray-700 flex items-center w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
+                                                <svg class="w-6 h-6 mr-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
+                                                    <path fill-rule="evenodd" d="M2 4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V4Zm10.5 5.707a.5.5 0 0 0-.146-.353l-1-1a.5.5 0 0 0-.708 0L9.354 9.646a.5.5 0 0 1-.708 0L6.354 7.354a.5.5 0 0 0-.708 0l-2 2a.5.5 0 0 0-.146.353V12a.5.5 0 0 0 .5.5h8a.5.5 0 0 0 .5-.5V9.707ZM12 5a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z" clip-rule="evenodd" />
+                                                </svg>
+                                                <span i18n-content="image"></span>
+                                            </button>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </li>
                                 <li>
                                     <input type="file" id="importInput" accept="application/json" hidden />
-                                    <button id="importButton" type="button" class="flex items-center justify-between w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white select-none">
-                                        ${ TooltipText.ImportData }
+                                    <button id="importButton" i18n-content="import_data" type="button" class="flex items-center justify-between w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white select-none">
                                     </button>
                                 </li>
                             </ul>
@@ -197,6 +193,9 @@ export default class BottomNavigation implements IBottomNavigation<Element> {
         `;
 
         element.insertAdjacentHTML('beforeend', htmlString);
+
+        // NLS
+        this.#i18nTexts = i18nTexts;
 
         this.bottomNavigation = document.getElementById('bottomNavigation') as Element;
 
@@ -232,9 +231,6 @@ export default class BottomNavigation implements IBottomNavigation<Element> {
         this.downloadButtonContainer = document.getElementById('downloadButton');
         this.downloadButtonContainer?.addEventListener('mouseover', this.onMouseoverPlayPauseButtonHandlerFunction.bind(this));
         this.downloadButtonContainer?.addEventListener('mouseout', this.onMouseoutPlayPauseButtonHandlerFunction.bind(this));
-        this.downloadDropdownButtonContainer = document.getElementById('downloadDropdownButton');
-        this.downloadDropdownButtonContainer?.addEventListener('mouseover', this.onMouseoverDownloadDropdownButtonHandlerFunction.bind(this));
-        this.downloadDropdownButtonContainer?.addEventListener('mouseout', this.onMouseoutPlayPauseButtonHandlerFunction.bind(this));
 
         // Set importData callback
         this.importButtonContainer = document.getElementById('importButton');
@@ -323,6 +319,22 @@ export default class BottomNavigation implements IBottomNavigation<Element> {
 
     get refreshValue(): number {
         return this.#refreshValue;
+    };
+
+    setI18nTexts(newValue: Record<string, string>) {
+        this.#i18nTexts = newValue;
+        this.setI18nTextsInDOM();
+    };
+
+    getMessageNLS(key: string) {
+        return this.#i18nTexts[key];
+    };
+
+    setI18nTextsInDOM() {
+        document.querySelectorAll('[i18n-content]').forEach(el => {
+            const messageName = el.getAttribute('i18n-content');
+            if(messageName) el.textContent = this.getMessageNLS(messageName);
+        });
     };
 
     /**
@@ -521,8 +533,6 @@ export default class BottomNavigation implements IBottomNavigation<Element> {
         this.clearButtonContainer?.removeEventListener('click', this.onClickClearButtonHandler);
         this.clearButtonContainer?.removeEventListener('mouseover', this.onMouseoverPlayPauseButtonHandlerFunction.bind(this));
         this.clearButtonContainer?.removeEventListener('mouseout', this.onMouseoutPlayPauseButtonHandlerFunction.bind(this));
-        this.downloadDropdownButtonContainer?.removeEventListener('mouseover', this.onMouseoverPlayPauseButtonHandlerFunction.bind(this));
-        this.downloadDropdownButtonContainer?.removeEventListener('mouseout', this.onMouseoutPlayPauseButtonHandlerFunction.bind(this));
         this.importButtonContainer?.removeEventListener('click', this.#onClickImportButtonHandler);
         this.importInput?.removeEventListener('change', this.onChangeImportHandler);
         this.exportButtonContainer?.removeEventListener('click', this.onClickExportButtonHandler);
