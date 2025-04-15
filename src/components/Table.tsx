@@ -12,7 +12,8 @@ interface TableTextValueI18n extends TableRowsTextValueI18n, NotFoundTextValueI1
     search_placeholder: string,
     previous_page: string
     next_page: string,
-    pagination_of: string
+    pagination_of: string,
+    game: string
 }
 
 export type TableProps = {
@@ -20,13 +21,13 @@ export type TableProps = {
     language?: Languages
 };
 
-const i18nKeys = ["search_placeholder", "previous_page", "next_page", "focus", "disable", "enable", "not_found_button", "not_found_message", "pagination_of"];
+const i18nKeys = ["search_placeholder", "previous_page", "next_page", "focus", "disable", "enable", "not_found_button", "not_found_message", "pagination_of", "game"];
 
 const Table: FC<TableProps> = ({ streamersList, language }: TableProps) => {
 
     const [ currentPage, setCurrentPage ] = useState(1);
     const [ searchTextValue, setSearchTextValue ] = useState('');
-    const [ textValue, setTextValue ] = useState<TableTextValueI18n>({ pagination_of: '', search_placeholder: '', previous_page: '', next_page: '', focus: '', disable: '', enable: '', not_found_message: '', not_found_button: '' });
+    const [ textValue, setTextValue ] = useState<TableTextValueI18n>({ game: '', pagination_of: '', search_placeholder: '', previous_page: '', next_page: '', focus: '', disable: '', enable: '', not_found_message: '', not_found_button: '' });
 
 
     const filteredStreamers = streamersList.filter(({ streamerName, streamerGame }) =>
@@ -67,7 +68,7 @@ const Table: FC<TableProps> = ({ streamersList, language }: TableProps) => {
                         <tr>
                             <th scope="col" className="rounded-tl-lg w-35 px-4 py-3">Streamer</th>
                             <th scope="col" className="w-20 px-4 py-3">Status</th>
-                            <th scope="col" className="w-40 pl-4 py-3">Game</th>
+                            <th scope="col" className="w-40 pl-4 py-3">{ textValue.game } </th>
                             <th scope="col" className="rounded-tr-lg w-5 pr-2 py-3">
                                 <span className="sr-only">Actions</span>
                             </th>

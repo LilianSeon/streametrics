@@ -71,7 +71,7 @@ const App: FC = () => {
               allStreamerTabId.push(response);
             }
 
-            if (nbTab === streamersList.length) resolve(streamersList);
+            if (nbTab + checkStatusNoResponse === streamersList.length) resolve(streamersList);
           }).catch((_error: string) => {
             checkStatusNoResponse++;
             if (checkStatusNoResponse + allStreamerTabId.length === streamersList.length) resolve(streamersList);

@@ -1,4 +1,8 @@
 {
+  "game": {
+    "message": "Game",
+    "description": "Game"
+  },
   "pagination_of": {
     "message": "of",
     "description": "1 of 2"
