@@ -1,4 +1,8 @@
 {
+  "pagination_of": {
+    "message": "sur",
+    "description": "1 sur 2"
+  },
   "plural_new_message": {
     "message": "Nouveaux messages",
     "description": "New messages"

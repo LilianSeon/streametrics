@@ -11,7 +11,8 @@ import { loadMessages } from "../loader/fileLoader";
 interface TableTextValueI18n extends TableRowsTextValueI18n, NotFoundTextValueI18n {
     search_placeholder: string,
     previous_page: string
-    next_page: string
+    next_page: string,
+    pagination_of: string
 }
 
 export type TableProps = {
@@ -19,11 +20,13 @@ export type TableProps = {
     language?: Languages
 };
 
+const i18nKeys = ["search_placeholder", "previous_page", "next_page", "focus", "disable", "enable", "not_found_button", "not_found_message", "pagination_of"];
+
 const Table: FC<TableProps> = ({ streamersList, language }: TableProps) => {
 
     const [ currentPage, setCurrentPage ] = useState(1);
     const [ searchTextValue, setSearchTextValue ] = useState('');
-    const [ textValue, setTextValue ] = useState<TableTextValueI18n>({ search_placeholder: '', previous_page: '', next_page: '', focus: '', disable: '', enable: '', not_found_message: '', not_found_button: '' });
+    const [ textValue, setTextValue ] = useState<TableTextValueI18n>({ pagination_of: '', search_placeholder: '', previous_page: '', next_page: '', focus: '', disable: '', enable: '', not_found_message: '', not_found_button: '' });
 
 
     const filteredStreamers = streamersList.filter(({ streamerName, streamerGame }) =>
@@ -33,7 +36,7 @@ const Table: FC<TableProps> = ({ streamersList, language }: TableProps) => {
 
     useEffect(() => {
         if (language) {
-            loadMessages(["search_placeholder", "previous_page", "next_page", "focus", "disable", "enable", "not_found_button", "not_found_message"], language)
+            loadMessages(i18nKeys, language)
             .then((message) => {
                 setTextValue((textValue) => { return { ...textValue, ...message }});
             });
@@ -56,7 +59,7 @@ const Table: FC<TableProps> = ({ streamersList, language }: TableProps) => {
                     </form>
                 </div>
                 <div className="grow"></div>
-                <Pagination totalItems={ filteredStreamers.length } currentPage={ currentPage } setCurrentPage={ setCurrentPage } tooltip={{ previous_page: textValue.previous_page, next_page: textValue.next_page }}/>
+                <Pagination totalItems={ filteredStreamers.length } currentPage={ currentPage } setCurrentPage={ setCurrentPage } paginationTexts={{ previous_page: textValue.previous_page, next_page: textValue.next_page, pagination_of: textValue.pagination_of }}/>
             </div>
             <div className="rounded-lg overflow-visible">
                 <table className="rounded-lg w-full text-sm text-left text-gray-400 table-auto overflow-visible">
