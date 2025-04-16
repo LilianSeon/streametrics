@@ -287,7 +287,7 @@ const initChartInDOM = async () => {
         if (accordionElement && typeof chartExtension == 'undefined') {
 
             const chartTitle: string = formatChartTitle(window.location.pathname);
-            const textColor: string = document.documentElement.className.includes('dark') ? '#ffffff' : '#000000';
+            const textColor: ThemeBackgroundColor = document.documentElement.className.includes('dark') ? 'dark' : 'light';
             
             chartExtension = new ChartExtension(accordionElement, language, i18nTexts, chartTitle, textColor);
             isExtensionInitializing = false;
@@ -318,6 +318,7 @@ const initChartInDOM = async () => {
     } catch (error) {
         isExtensionInitializing = false;
         isExtensionInitialized = false;
+        console.log(error)
     }
     
     isExtensionInitializing = false;
@@ -431,16 +432,13 @@ const destroy = () => {
 
 const updateDefaultColor = (theme: ThemeBackgroundColor): void => {
     if (chartExtension instanceof ChartExtension) {
-        let newColor: string;
         if (theme === 'dark') { // Dark mode
-            newColor = '#ffffff';
             accordionComponent?.accordion?.classList.add('dark'); // Add dark css class for tailwind
         } else { // Light mode
-            newColor = '#000000';
             accordionComponent?.accordion?.classList.remove('dark');
         }
 
-        chartExtension.setDefaultColor(newColor);
+        chartExtension.setDefaultColor(theme);
     }
 };
 

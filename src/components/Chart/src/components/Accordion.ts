@@ -51,9 +51,9 @@ export default class Accordion implements IAccordion<Element> {
         const imgSrc = chrome.runtime.getURL('images/logo-transparent.png');
 
         const htmlString = `
-            <section id="accordionExtension" class="accordionExtension border-2 border-solid dark:border-zinc-800 rounded-lg">
+            <section id="accordionExtension" class="accordionExtension border-2 border-solid border-zinc-300 dark:border-zinc-800 rounded-lg">
                 <div class="tabExtension">
-                    <div class="flex-container dark:bg-zinc-800 px-2">
+                    <div class="flex-container bg-zinc-300 dark:bg-zinc-800 px-2">
                         <div id="headerLabel" class="pt-2 pb-3 h-20 text-center text-white text-xl flex">
                             <img class="my-auto h-14 rounded-full inline-block" src="${ imgSrc }" alt="logo" />
                             <div class="my-auto ml-4 self-center text-3xl font-semibold whitespace-nowrap tracking-wide inline-block text-black dark:text-white">StreaMetrics</div>
