@@ -3,6 +3,7 @@ export type OnClickExportButtonHandlerBottomNav = (event: MouseEvent) => void;
 export type OnClickExportImageButtonHandlerBottomNav = (event: MouseEvent) => void;
 export type OnClickHideShowBarButtonHandlerBottomNav = (isDisplay: boolean) => void;
 export type OnClickHideShowLineButtonHandlerBottomNav = (isDisplay: boolean) => void;
+export type OnClickHideShowXLabelsButtonHandlerBottomNav = (isDisplay: boolean) => void;
 export type OnClickClearButtonHandlerBottomNav = () => void;
 export type OnChangeImportHandlerBottomNav = (event: Event) => Promise<void>;
 export type OnChangeRefreshValueBottomNav= (newRefreshValue: number) => void;
@@ -31,6 +32,7 @@ export default class BottomNavigation implements IBottomNavigation<Element> {
     hideShowButtonContainer: HTMLElement | null;
     hideShowCheckboxLine: HTMLInputElement | null;
     hideShowCheckboxBar: HTMLInputElement | null;
+    hideShowCheckboxXLabels: HTMLInputElement | null;
     playPauseButtonTooltip: HTMLElement | null;
     progressBar: HTMLElement | null;
     sliderContainer: HTMLElement | null;
@@ -42,6 +44,7 @@ export default class BottomNavigation implements IBottomNavigation<Element> {
     #isDraggingSlider: boolean = false;
     #isDisplayBar: boolean = true;
     #isDisplayLine: boolean = true;
+    #isDisplayXLabels: boolean = false;
     #isPlaying: boolean = true;
     #onChangeRefreshValue: OnChangeRefreshValueBottomNav;
     #sliderValueMax: number = 30;
@@ -52,10 +55,11 @@ export default class BottomNavigation implements IBottomNavigation<Element> {
     private onChangeImportHandler: OnChangeImportHandlerBottomNav;
     private onClickHideShowBarButtonHandler: OnClickHideShowBarButtonHandlerBottomNav;
     private onClickHideShowLineButtonHandler: OnClickHideShowLineButtonHandlerBottomNav;
+    private onClickHideShowXLabelsButtonHandler: OnClickHideShowXLabelsButtonHandlerBottomNav;
     private onClickClearButtonHandler: OnClickClearButtonHandlerBottomNav;
     private onClickPlayPauseButtonHandler: OnClickPlayPauseButtonHandlerBottomNav;
 
-    constructor(element: Element, refreshValue: number, i18nTexts: Record<string, string>, onClickPlayPauseButtonHandler: OnClickPlayPauseButtonHandlerBottomNav, onClickHideShowBarButtonHandler: OnClickHideShowBarButtonHandlerBottomNav, onClickHideShowLineButtonHandler: OnClickHideShowLineButtonHandlerBottomNav, onClickClearButtonHandler: OnClickClearButtonHandlerBottomNav, onChangeImportHandler: OnChangeImportHandlerBottomNav, onClickExportButtonHandler: OnClickExportButtonHandlerBottomNav, onClickExportImageButtonHandler: OnClickExportImageButtonHandlerBottomNav, onChangeRefreshValue: OnChangeRefreshValueBottomNav) {
+    constructor(element: Element, refreshValue: number, i18nTexts: Record<string, string>, onClickPlayPauseButtonHandler: OnClickPlayPauseButtonHandlerBottomNav, onClickHideShowBarButtonHandler: OnClickHideShowBarButtonHandlerBottomNav, onClickHideShowLineButtonHandler: OnClickHideShowLineButtonHandlerBottomNav, onClickHideShowXLabelsButtonHandlerBottomNav: OnClickHideShowXLabelsButtonHandlerBottomNav, onClickClearButtonHandler: OnClickClearButtonHandlerBottomNav, onChangeImportHandler: OnChangeImportHandlerBottomNav, onClickExportButtonHandler: OnClickExportButtonHandlerBottomNav, onClickExportImageButtonHandler: OnClickExportImageButtonHandlerBottomNav, onChangeRefreshValue: OnChangeRefreshValueBottomNav) {
 
         const htmlString = `
         <div class="group/outer absolute z-50 w-full max-w-lg -translate-x-1/2 left-1/2 -bottom-[58px] hover:-bottom-[7px] transition-all duration-200 border-8 border-solid border-transparent borderBottomNav">
@@ -81,6 +85,12 @@ export default class BottomNavigation implements IBottomNavigation<Element> {
                                 <div class="flex items-center p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-600">
                                     <input id="hideShowCheckboxLine" type="checkbox" value="${this.#isDisplayLine}" checked="${this.#isDisplayLine}" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded dark:bg-gray-600 dark:border-gray-500 cursor-pointer">
                                     <label for="hideShowCheckboxLine" i18n-content="line" class="w-full ms-7 text-xl font-medium text-gray-900 rounded dark:text-gray-300 select-none cursor-pointer"></label>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="flex items-center p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-600">
+                                    <input id="hideShowXLabels" type="checkbox" value="${this.#isDisplayXLabels}" unchecked class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded dark:bg-gray-600 dark:border-gray-500 cursor-pointer">
+                                    <label for="hideShowXLabels" i18n-content="axis_x" class="w-full ms-7 text-xl font-medium text-gray-900 rounded dark:text-gray-300 select-none cursor-pointer"></label>
                                 </div>
                             </li>
                         </ul>
@@ -219,6 +229,9 @@ export default class BottomNavigation implements IBottomNavigation<Element> {
         this.hideShowCheckboxBar = document.getElementById('hideShowCheckboxBar') as HTMLInputElement;
         this.hideShowCheckboxBar?.addEventListener('change', this.onClickHideShowBarButtonHandlerFunction.bind(this));
         this.onClickHideShowBarButtonHandler = onClickHideShowBarButtonHandler;
+        this.hideShowCheckboxXLabels = document.getElementById('hideShowXLabels') as HTMLInputElement;
+        this.hideShowCheckboxXLabels?.addEventListener('change', this.onClickHideShowXLabelsButtonHandlerBottomNavFunction.bind(this));
+        this.onClickHideShowXLabelsButtonHandler = onClickHideShowXLabelsButtonHandlerBottomNav;
 
         // Set clearButton callback
         this.clearButtonContainer = document.getElementById('clearButton');
@@ -298,6 +311,14 @@ export default class BottomNavigation implements IBottomNavigation<Element> {
 
     get isPlaying(): boolean {
         return this.#isPlaying;
+    };
+
+    set isDisplayXLabels(newValue: boolean) {
+        this.#isDisplayXLabels = newValue;
+    };
+
+    get isDisplayXLabels() {
+        return this.#isDisplayXLabels;
     };
 
     set isDisplayLine(newValue: boolean) {
@@ -439,6 +460,10 @@ export default class BottomNavigation implements IBottomNavigation<Element> {
      */
     #onClickImportButtonHandler(): void {
         document.getElementById('importInput')?.click();
+    };
+
+    onClickHideShowXLabelsButtonHandlerBottomNavFunction(): void {
+        this.onClickHideShowXLabelsButtonHandler(this.#isDisplayXLabels);
     };
 
     onClickHideShowLineButtonHandlerFunction(): void {

@@ -219,7 +219,8 @@ export default class ChartExtension {
                         },
                         x: {
                             ticks: {
-                                maxTicksLimit: 10
+                                maxTicksLimit: 10,
+                                display: false
                             }
                         }
                     },
@@ -311,6 +312,20 @@ export default class ChartExtension {
 
     exportImage(): string | null {
         return this.chart ? this.chart.toBase64Image() : null;
+    };
+
+    hideXlabels(): void {
+        if (this.chart) {
+            this.chart.options.scales!.x!.ticks!.display = false;
+            this.chart.update();
+        }
+    };
+
+    showXlabels(): void {
+        if (this.chart) {
+            this.chart.options.scales!.x!.ticks!.display = true;
+            this.chart.update();
+        }
     };
 
     /**

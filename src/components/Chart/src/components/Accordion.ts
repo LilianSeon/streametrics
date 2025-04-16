@@ -2,7 +2,7 @@
 import '../assets/css/accordion.css';
 
 // Component
-import BottomNavigation, { OnClickPlayPauseButtonHandlerBottomNav, OnClickHideShowBarButtonHandlerBottomNav, OnClickHideShowLineButtonHandlerBottomNav, OnClickClearButtonHandlerBottomNav, OnChangeImportHandlerBottomNav, OnClickExportButtonHandlerBottomNav, OnClickExportImageButtonHandlerBottomNav, OnChangeRefreshValueBottomNav } from './BottomNavigation';
+import BottomNavigation, { OnClickPlayPauseButtonHandlerBottomNav, OnClickHideShowBarButtonHandlerBottomNav, OnClickHideShowLineButtonHandlerBottomNav, OnClickClearButtonHandlerBottomNav, OnChangeImportHandlerBottomNav, OnClickExportButtonHandlerBottomNav, OnClickExportImageButtonHandlerBottomNav, OnChangeRefreshValueBottomNav, OnClickHideShowXLabelsButtonHandlerBottomNav } from './BottomNavigation';
 
 export type OnClickArrowAccordionHandler = () => void;
 export type OnClickClearButtonHandler = OnClickClearButtonHandlerBottomNav;
@@ -13,6 +13,7 @@ export type OnClickHideShowMessageButtonHandler = OnClickHideShowBarButtonHandle
 export type OnClickHideShowViewerButtonHandler = OnClickHideShowLineButtonHandlerBottomNav;
 export type OnChangeImportHandler = OnChangeImportHandlerBottomNav;
 export type OnChangeRefreshValueHandler = OnChangeRefreshValueBottomNav;
+export type OnClickHideShowXLabelsButtonHandler = OnClickHideShowXLabelsButtonHandlerBottomNav;
 
 interface IAccordion<E extends Element> {
     arrowAccordion: E | null;
@@ -42,9 +43,10 @@ export default class Accordion implements IAccordion<Element> {
     #isPlaying: boolean = true;
     #isDisplayMessage: boolean = true;
     #isDisplayViewer: boolean = true;
+    #isDisplayXLabels: boolean = false;
     private onClickArrowAccordionHandler: OnClickArrowAccordionHandler;
 
-    constructor(element: Element, refreshValue: number, i18nTexts: Record<string, string>, onClickArrowAccordionHandler: OnClickArrowAccordionHandler, onClickExportButtonHandler: OnClickExportButtonHandler, onChangeImportHandler: OnChangeImportHandler, onClickPlayPauseButtonHandler: OnClickPlayPauseButtonHandler, onClickClearButtonHandler: OnClickClearButtonHandler, onClickHideShowMessageButtonHandler: OnClickHideShowMessageButtonHandler, onClickHideShowViewerButtonHandler: OnClickHideShowViewerButtonHandler, onClickExportImageButtonHandler: OnClickExportImageButtonHandler, onChangeRefreshValue: OnChangeRefreshValueHandler, isExpanded: boolean) {
+    constructor(element: Element, refreshValue: number, i18nTexts: Record<string, string>, onClickArrowAccordionHandler: OnClickArrowAccordionHandler, onClickExportButtonHandler: OnClickExportButtonHandler, onChangeImportHandler: OnChangeImportHandler, onClickPlayPauseButtonHandler: OnClickPlayPauseButtonHandler, onClickClearButtonHandler: OnClickClearButtonHandler, onClickHideShowMessageButtonHandler: OnClickHideShowMessageButtonHandler, onClickHideShowViewerButtonHandler: OnClickHideShowViewerButtonHandler, onClickHideShowXLabelsButtonHandler: OnClickHideShowXLabelsButtonHandler, onClickExportImageButtonHandler: OnClickExportImageButtonHandler, onChangeRefreshValue: OnChangeRefreshValueHandler, isExpanded: boolean) {
 
         const imgSrc = chrome.runtime.getURL('images/logo-transparent.png');
 
@@ -87,7 +89,7 @@ export default class Accordion implements IAccordion<Element> {
         this.onClickArrowAccordionHandler = onClickArrowAccordionHandler;
 
         // Init BottomNavigation
-        this.bottomNavigation = (this.tabContent) ? new BottomNavigation(this.tabContent, refreshValue, i18nTexts, onClickPlayPauseButtonHandler, onClickHideShowMessageButtonHandler, onClickHideShowViewerButtonHandler, onClickClearButtonHandler, onChangeImportHandler, onClickExportButtonHandler, onClickExportImageButtonHandler, onChangeRefreshValue) : undefined;
+        this.bottomNavigation = (this.tabContent) ? new BottomNavigation(this.tabContent, refreshValue, i18nTexts, onClickPlayPauseButtonHandler, onClickHideShowMessageButtonHandler, onClickHideShowViewerButtonHandler, onClickHideShowXLabelsButtonHandler, onClickClearButtonHandler, onChangeImportHandler, onClickExportButtonHandler, onClickExportImageButtonHandler, onChangeRefreshValue) : undefined;
 
         isExpanded ? this.expandChartContainer() : this.collapseChartContainer();
     };
@@ -116,6 +118,17 @@ export default class Accordion implements IAccordion<Element> {
         if (this.bottomNavigation) {
             this.bottomNavigation.isDisplayLine = this.#isDisplayViewer;
         }
+    };
+
+    set isDisplayXLabels(newValue: boolean) {
+        this.#isDisplayXLabels = newValue;
+        if (this.bottomNavigation) {
+            this.bottomNavigation.isDisplayXLabels = this.#isDisplayXLabels;
+        }
+    };
+
+    get isDisplayXLabels(): boolean {
+        return this.#isDisplayXLabels;
     };
 
     set isDisplayMessage(newValue: boolean) {
