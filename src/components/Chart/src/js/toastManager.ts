@@ -2,7 +2,7 @@ import Toast, { ToastType } from "../components/Toast";
 
 export type ToastStatus = 'new' | 'in progress' | 'hidden';
 
-type Queue = { type: ToastType, status: ToastStatus, container: HTMLDivElement, message: string, title?: string, callback?: () => void };
+type Queue = { type: ToastType, status: ToastStatus, container: HTMLDivElement, message: string, title?: string, callback?: () => void, yesButtonText?: string, noButtonText?: string };
 
 export default class ToastManager {
     queue: Map<string, Queue>;
@@ -40,9 +40,9 @@ export default class ToastManager {
      * @param { string } title 
      * @param { () => void } callback 
      */
-    addToQueue(type: ToastType, message: string, title?: string, callback?: () => void): void {
+    addToQueue(type: ToastType, message: string, title?: string, callback?: () => void, yesButtonText?: string, noButtonText?: string): void {
         if (this.#verify(type)) {
-            this.queue.set(this.queue.size.toString(), { type, status: 'new', container: this.container, message, title, callback });
+            this.queue.set(this.queue.size.toString(), { type, status: 'new', container: this.container, message, title, callback, yesButtonText, noButtonText });
             this.#processQueue();
         }
     };
@@ -58,7 +58,7 @@ export default class ToastManager {
                         this.queue.delete(key);
                         if (value.callback) value.callback();
                     };
-                    const toast = new Toast(value.type, value.container, value.message, value.title, callback, () => { this.queue.delete(key) });
+                    const toast = new Toast(value.type, value.container, value.message, value.title, callback, () => { this.queue.delete(key) }, value.yesButtonText, value.noButtonText);
                     const duration = value.type === 'interactive' ? 6 : 3;
                     this.queue.set(key, { ...value, status: 'in progress' });
 

@@ -32,7 +32,7 @@ export default class Toast implements IToast<Element> {
     interactiveButtonElementYes: Element | null | undefined;
     interactiveButtonElementNo: HTMLElement | null | undefined;
 
-    constructor(type: ToastType, element: Element, message: string, title?: string, callback?: () => void, callbackNo?: () => void) {
+    constructor(type: ToastType, element: Element, message: string, title?: string, callback?: () => void, callbackNo?: () => void, yesButtonText?: string, noButtonText?: string) {
 
         this.id = generateRandomId();
 
@@ -48,7 +48,7 @@ export default class Toast implements IToast<Element> {
                 break;
 
             case 'interactive':
-                if (title) htmlString = this.#getInteractiveToast(title, message);
+                if (title && yesButtonText && noButtonText) htmlString = this.#getInteractiveToast(title, message, yesButtonText, noButtonText);
                 break;
         
             default:
@@ -85,7 +85,7 @@ export default class Toast implements IToast<Element> {
         this.destroy();
     };
 
-    #getInteractiveToast(title: string, message: string) {
+    #getInteractiveToast(title: string, message: string, yesButtonText: string, noButtonText: string) {
         return `
             <div id="${ this.id }" class="opacity-100 transition-opacity relative w-full max-w-sm p-4 ml-auto text-gray-500 bg-white rounded-lg shadow dark:bg-gray-800 dark:text-gray-400" role="alert">
                 <div class="flex">
@@ -99,10 +99,10 @@ export default class Toast implements IToast<Element> {
                         <div class="mb-2 text-xl font-normal">${ message }</div> 
                         <div class="grid grid-cols-2 gap-2">
                             <div>
-                                <button id="interactiveButton" class="inline-flex justify-center w-full px-2 py-1.5 text-lg font-medium text-center text-white bg-red-600 hover:bg-red-800 rounded-lg">${ ToastMessage.interactiveButtonYes }</button>
+                                <button id="interactiveButton" class="inline-flex justify-center w-full px-2 py-1.5 text-lg font-medium text-center text-white bg-red-600 hover:bg-red-800 rounded-lg">${ yesButtonText }</button>
                             </div>
                             <div>
-                                <button id="interactiveButtonNo" class="inline-flex justify-center w-full px-2 py-1.5 text-lg font-medium text-center text-gray-900 bg-zinc-200 border border-gray-300 rounded-lg hover:bg-zinc-300 dark:bg-gray-600 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-700 dark:focus:ring-gray-700">${ ToastMessage.interactiveButtonNo }</button> 
+                                <button id="interactiveButtonNo" class="inline-flex justify-center w-full px-2 py-1.5 text-lg font-medium text-center text-gray-900 bg-zinc-200 border border-gray-300 rounded-lg hover:bg-zinc-300 dark:bg-gray-600 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-700 dark:focus:ring-gray-700">${ noButtonText }</button> 
                             </div>
                         </div>    
                     </div>

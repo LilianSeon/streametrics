@@ -1,4 +1,36 @@
 {
+  "toast_delete_no": {
+    "message": "Non, annuler",
+    "description": "No button in toast - Delete data"
+  },
+  "toast_delete_yes": {
+    "message": "Oui, sûr",
+    "description": "Yes button in toast - Delete data"
+  },
+  "toast_delete_message": {
+    "message": "Êtes-vous sûr de vouloir supprimer ce graphique ?",
+    "description": "Message in toast - Delete data"
+  },
+  "toast_delete_title": {
+    "message": "Supprimer les données",
+    "description": "Title in toast - Delete data"
+  },
+  "success_import": {
+    "message": "Données importées avec succès.",
+    "description": "Success in toast"
+  },
+  "error_import": {
+    "message": "Les données n'ont pas pu être importées.",
+    "description": "Error in toast"
+  },
+  "error_import_format": {
+    "message": "Format JSON incorrect.",
+    "description": "Error in toast"
+  },
+  "error_download": {
+    "message": "Les données n'ont pas pu être téléchargées.",
+    "description": "Error in toast"
+  },
   "axis_x": {
     "message": "Axe X",
     "description": "X Axis"

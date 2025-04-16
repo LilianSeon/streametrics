@@ -14,7 +14,6 @@ import { customSegmentTooltip } from './js/plugins/customSegmentTooltip';
 
 // Types
 import { Peak, isArrayOfStrings, isArray, isString, DownLoadCallbacks, ThemeBackgroundColor } from './utils/utils';
-import { ToastMessage } from './components/Toast';
 import { Languages } from './js/Texts';
 
 export type DatasetName = "viewersCount" | "messagesCount";
@@ -306,7 +305,7 @@ export default class ChartExtension {
 
                 resolve(true);
             } else {
-                reject(ToastMessage.importError);
+                reject(this.i18nTexts.error_import);
             }
         });
     };

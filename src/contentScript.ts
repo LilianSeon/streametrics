@@ -8,7 +8,6 @@ import IntervalManager from './components/Chart/src/js/intervalManager';
 // Components
 import Accordion, { OnChangeRefreshValueHandler, OnClickExportButtonHandler, OnClickExportImageButtonHandler, OnClickPlayPauseButtonHandler, OnChangeImportHandler, OnClickClearButtonHandler, OnClickHideShowMessageButtonHandler, OnClickHideShowViewerButtonHandler, OnClickHideShowXLabelsButtonHandler } from './components/Chart/src/components/Accordion';
 import { MessageCounter } from './components/Chart/src/js/messageCounter';
-import { ToastMessage } from './components/Chart/src/components/Toast';
 import ChartExtension, { ChartDataViewer, ChartDownLoadCallbacks } from './components/Chart/src/index';
 import ToastManager from './components/Chart/src/js/toastManager';
 
@@ -26,7 +25,10 @@ let tabId: number | undefined;
 
 const i18nKeys = ['clear_data', 'refresh_rate', 'bars', 'line', 'download', 'import_data', 'image', 'data', "singular_second", "plural_second", "time_ago", "justNow", "singular_minute", "plural_minute", "singular_hour", "plural_hour", "singular_day", 
     "plural_day", "singular_week", "plural_week", "singular_month", "plural_month", 
-    "singular_year", "plural_year", "plural_new_message", "singular_new_message", "status_active", "status_inactive", "axis_x"];
+    "singular_year", "plural_year", "plural_new_message", "singular_new_message", "status_active", "status_inactive", "axis_x", "error_download", "error_import_format", "error_import", "success_import", "toast_delete_title",
+    "toast_delete_message", "toast_delete_yes", "toast_delete_no"];
+
+let i18nMessages: Record<string, string> = {};
 
 
 let chartExtension: ChartExtension | undefined;
@@ -113,11 +115,11 @@ const onClickArrowAccordionHandler = async (): Promise<void> => {
 
 const onClickClearHandler: OnClickClearButtonHandler = () => {
     if (typeof toastManager !== 'undefined') {
-        toastManager.addToQueue('interactive', ToastMessage.interactiveMessage, ToastMessage.interactiveTitle, () => {
+        toastManager.addToQueue('interactive', i18nMessages.toast_delete_message, i18nMessages.toast_delete_title, () => {
             chartExtension?.clearData();
             chartExtension?.clearTitle();
             hasImportedData = false;
-        });
+        }, i18nMessages.toast_delete_yes, i18nMessages.toast_delete_no);
     }
 };
 
@@ -128,13 +130,13 @@ const onChangeImportHandler: OnChangeImportHandler = async (event: Event): Promi
             const isDataImported = await chartExtension.importData(data);
 
             if (isDataImported) {
-                toastManager?.addToQueue('success', ToastMessage.importSuccess);
+                toastManager?.addToQueue('success', i18nMessages.success_import);
                 intervalManager.clear();
                 accordionComponent.isPlaying = false;
                 hasImportedData = true;
             }
         } catch (error) {
-            toastManager?.addToQueue('error', ToastMessage.importErrorFormat);
+            toastManager?.addToQueue('error', i18nMessages.error_import_format);
         }
     }
 };
@@ -156,14 +158,14 @@ const downLoadCallbacks: ChartDownLoadCallbacks = {
         if (accordionComponent) accordionComponent.setProgressBarWidth(0);
     },
     error: () => {
-        toastManager?.addToQueue('error', ToastMessage.downloadError);
+        toastManager?.addToQueue('error', i18nMessages.error_download);
     }
 };
 
 const importCallbacks : ChartDownLoadCallbacks = {
     ...downLoadCallbacks,
     error: () => {
-        toastManager?.addToQueue('error', ToastMessage.importError);
+        toastManager?.addToQueue('error', i18nMessages.error_import);
     }
 };
 
@@ -261,7 +263,7 @@ const initChartInDOM = async () => {
         const informationContainer = await waitForElm('#live-channel-stream-information');
         const chartContainer = await waitForElm('.chat-line__message');
         const { language } = await getStorage(["language"]);
-        const i18nTexts = await getI18nMessages(i18nKeys, language);
+        i18nMessages = await getI18nMessages(i18nKeys, language);
 
         if (typeof messageCounter === 'undefined' && chartContainer) {
             messageCounter = new MessageCounter(getChatContainer(document));
@@ -277,9 +279,9 @@ const initChartInDOM = async () => {
                 intervalManager = new IntervalManager(startLoopGetData, (refreshValue ?? 5) * 1000);
             }
 
-            accordionComponent = new Accordion(informationContainer, refreshValue ?? 5, i18nTexts, onClickArrowAccordionHandler, onClickExportButtonHandler, onChangeImportHandler, onClickPlayPauseButtonHandler, onClickClearHandler, onClickHideShowMessageButtonHandler, onClickHideShowViewerButtonHandler, onClickHideShowXLabelsButtonHandler, onClickExportImageButtonHandler, onChangeRefreshValue, isAccordionExpanded);
+            accordionComponent = new Accordion(informationContainer, refreshValue ?? 5, i18nMessages, onClickArrowAccordionHandler, onClickExportButtonHandler, onChangeImportHandler, onClickPlayPauseButtonHandler, onClickClearHandler, onClickHideShowMessageButtonHandler, onClickHideShowViewerButtonHandler, onClickHideShowXLabelsButtonHandler, onClickExportImageButtonHandler, onChangeRefreshValue, isAccordionExpanded);
             accordionElement = accordionComponent.getChartContainer() as HTMLElement;
-            accordionComponent.setI18nTexts(i18nTexts);
+            accordionComponent.setI18nTexts(i18nMessages);
             accordionComponent.setProgressBarWidth(20);
         }
 
@@ -289,7 +291,7 @@ const initChartInDOM = async () => {
             const chartTitle: string = formatChartTitle(window.location.pathname);
             const textColor: ThemeBackgroundColor = document.documentElement.className.includes('dark') ? 'dark' : 'light';
             
-            chartExtension = new ChartExtension(accordionElement, language, i18nTexts, chartTitle, textColor);
+            chartExtension = new ChartExtension(accordionElement, language, i18nMessages, chartTitle, textColor);
             isExtensionInitializing = false;
             isExtensionInitialized = true;
             accordionComponent?.setProgressBarWidth(60);
@@ -308,7 +310,7 @@ const initChartInDOM = async () => {
             const occurrences = streamersList?.filter((streamer) => streamer.streamerName === streamerName).length || 0;
             const windowId = await getCurrentWindowId();
 
-            if(windowId) await addOneStreamer({ occurrences, streamerName, streamerImage, streamerGame, status: i18nTexts.status_active as StorageStatusType, tabId, windowId, streamerURL: document.URL, isEnable: true })
+            if(windowId) await addOneStreamer({ occurrences, streamerName, streamerImage, streamerGame, status: i18nMessages.status_active as StorageStatusType, tabId, windowId, streamerURL: document.URL, isEnable: true })
             
 
             accordionComponent?.setProgressBarWidth(100);
@@ -376,9 +378,9 @@ chrome.storage.onChanged.addListener(async (changes) => {
     for (let [key, { newValue }] of Object.entries(changes)) {
       if (key === "language" && chartExtension) {
         chartExtension.setLanguage(newValue); // Update chart's language
-        const i18nTexts = await getI18nMessages(i18nKeys, newValue);
-        if (accordionComponent) accordionComponent.setI18nTexts(i18nTexts);
-        chartExtension.setI18nTexts(i18nTexts);
+        i18nMessages = await getI18nMessages(i18nKeys, newValue);
+        if (accordionComponent) accordionComponent.setI18nTexts(i18nMessages);
+        chartExtension.setI18nTexts(i18nMessages);
       }
 
       if (key === "isEnableExtension") {
