@@ -63,7 +63,9 @@ const TableRows: FC<TableRowsProps> = ({ actionsLabels, streamersList, currentPa
     const getPillColor = (status: StorageStreamerListType['status']): string => {
         switch (status) {
             case 'Active': return 'bg-gradient-to-r from-green-400 via-green-500 to-green-600';
+            case 'Actif': return 'bg-gradient-to-r from-green-400 via-green-500 to-green-600';
             case 'Inactive': return 'bg-gradient-to-r from-red-400 via-red-500 to-red-600';
+            case 'Inactif': return 'bg-gradient-to-r from-red-400 via-red-500 to-red-600';
             case 'Idle': return 'bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600';
             case 'Pause': return 'bg-gradient-to-r from-orange-400 via-orange-500 to-orange-600';
             default: return 'bg-gradient-to-r from-green-400 via-green-500 to-green-600';
@@ -85,16 +87,16 @@ const TableRows: FC<TableRowsProps> = ({ actionsLabels, streamersList, currentPa
                         <tr key={ index }className={`${index !== streamersList.length-1 ? 'border-b' : ''} border-gray-700 group rounded-br-lg`}>
                             <th scope="row" className={`${shouldApplyRoundedClass ? 'rounded-bl-lg' : ''} bg-gray-900 flex flex-row pl-2 pr-1 py-4 font-medium text-white/90 group-hover:text-white whitespace-nowrap`}>
                                 <img className="mr-2 rounded-full" src={ streamerImage } alt="Streamer avatar" width={ 20 } height={ 20 }/>
-                                <div className="overflow-hidden text-ellipsis whitespace-nowrap w-[120px]" title={ streamerName }>
+                                <div className="overflow-hidden text-ellipsis whitespace-nowrap w-[120px] cursor-default" title={ streamerName }>
                                  { highlightMatch(displayedName, searchTextValue) }
                                 </div>
                             </th>
                             <td className="bg-gray-900 pl-1 pr-1 py-3">
                                 <div className={`${ getPillColor(status) } w-2 h-2 rounded-full inline-block mr-1`}></div>
-                                <div className="group-hover:text-white inline-block">{ status }</div>
+                                <div className="group-hover:text-white inline-block cursor-default">{ status }</div>
                             </td>
                             <td className="bg-gray-900 pl-4 py-3">
-                                <div className="overflow-hidden text-ellipsis whitespace-nowrap w-[125px] group-hover:text-white" title={ streamerGame }>
+                                <div className="overflow-hidden text-ellipsis whitespace-nowrap w-[125px] group-hover:text-white cursor-default" title={ streamerGame }>
                                  { highlightMatch(streamerGame, searchTextValue) }
                                 </div>
                             </td>

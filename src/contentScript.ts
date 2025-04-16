@@ -6,7 +6,7 @@ import { getStorage, setStorage, updateStreamersListStorage } from './components
 import IntervalManager from './components/Chart/src/js/intervalManager';
 
 // Components
-import Accordion, { OnChangeRefreshValueHandler, OnClickExportButtonHandler, OnClickExportImageButtonHandler, OnClickPlayPauseButtonHandler, OnChangeImportHandler, OnClickClearButtonHandler, OnClickHideShowMessageButtonHandler, OnClickHideShowViewerButtonHandler } from './components/Chart/src/components/Accordion';
+import Accordion, { OnChangeRefreshValueHandler, OnClickExportButtonHandler, OnClickExportImageButtonHandler, OnClickPlayPauseButtonHandler, OnChangeImportHandler, OnClickClearButtonHandler, OnClickHideShowMessageButtonHandler, OnClickHideShowViewerButtonHandler, OnClickHideShowXLabelsButtonHandler } from './components/Chart/src/components/Accordion';
 import { MessageCounter } from './components/Chart/src/js/messageCounter';
 import { ToastMessage } from './components/Chart/src/components/Toast';
 import ChartExtension, { ChartDataViewer, ChartDownLoadCallbacks } from './components/Chart/src/index';
@@ -16,7 +16,7 @@ import ToastManager from './components/Chart/src/js/toastManager';
 import './components/Chart/src/assets/css/index.css'; // Font
 
 // Typing
-import { StorageStreamerListType } from './typings/StorageType';
+import { StorageStatusType, StorageStreamerListType } from './typings/StorageType';
 import { EventsResquest } from './typings/MessageType';
 
 // Events Handlers
@@ -26,7 +26,7 @@ let tabId: number | undefined;
 
 const i18nKeys = ['clear_data', 'refresh_rate', 'bars', 'line', 'download', 'import_data', 'image', 'data', "singular_second", "plural_second", "time_ago", "justNow", "singular_minute", "plural_minute", "singular_hour", "plural_hour", "singular_day", 
     "plural_day", "singular_week", "plural_week", "singular_month", "plural_month", 
-    "singular_year", "plural_year", "plural_new_message", "singular_new_message"];
+    "singular_year", "plural_year", "plural_new_message", "singular_new_message", "status_active", "status_inactive", "axis_x"];
 
 
 let chartExtension: ChartExtension | undefined;
@@ -78,12 +78,15 @@ const startLoopGetData = async () => {
     
         if (isNaN(nbViewer)) {
             intervalManager?.clear();
-            await updateStreamersList({ isEnable: false, status: 'Inactive' });
+            const { language } = await getStorage(["language"]);
+            const { status_inactive } = await getI18nMessages(['status_inactive'], language);
+            await updateStreamersList({ isEnable: false, status: status_inactive as StorageStatusType });
             waitUntilElementLoaded('p.CoreText-sc-1txzju1-0.fiDbWi') // Wait for viewers counter
                 .then(async (element) => { // Then restart fetching data loop
                     if (element) {
+                        const { status_active } = await getI18nMessages(['status_active'], language);
                         intervalManager?.play();
-                        await updateStreamersList({ isEnable: true, status: 'Active' });
+                        await updateStreamersList({ isEnable: true, status: status_active as StorageStatusType });
                     }
                 });
         }
@@ -187,6 +190,13 @@ const onClickHideShowMessageButtonHandler : OnClickHideShowMessageButtonHandler 
     }
 };
 
+const onClickHideShowXLabelsButtonHandler : OnClickHideShowXLabelsButtonHandler = (isDisplayXLabels: boolean): void => {
+    if (chartExtension && accordionComponent) {
+        (isDisplayXLabels) ? chartExtension.hideXlabels() : chartExtension.showXlabels();
+        accordionComponent.isDisplayXLabels = !isDisplayXLabels;
+    }
+};
+
 const onClickPlayPauseButtonHandler: OnClickPlayPauseButtonHandler = async (isPlaying: boolean): Promise<void> => {
     const { streamersList }: { streamersList?: StorageStreamerListType[] } = await getStorage(['streamersList']);
 
@@ -204,7 +214,9 @@ const onClickPlayPauseButtonHandler: OnClickPlayPauseButtonHandler = async (isPl
         hasImportedData = false;
         
         const isStreamLive = checkStreamerStatus(document);
-        if (streamersList && tabId) await setStorage({ 'streamersList': updateStreamersListStorage(streamersList, tabId, { status: isStreamLive ? 'Active' : 'Inactive' }) });
+        const { language } = await getStorage(["language"]);
+        const { status_inactive, status_active } = await getI18nMessages(isStreamLive ? ['status_active'] : ['status_inactive'], language);
+        if (streamersList && tabId) await setStorage({ 'streamersList': updateStreamersListStorage(streamersList, tabId, { status: (status_inactive ?? status_active) as StorageStatusType }) });
     }
 
     if (accordionComponent) accordionComponent.isPlaying = !isPlaying;
@@ -265,7 +277,7 @@ const initChartInDOM = async () => {
                 intervalManager = new IntervalManager(startLoopGetData, (refreshValue ?? 5) * 1000);
             }
 
-            accordionComponent = new Accordion(informationContainer, refreshValue ?? 5, i18nTexts, onClickArrowAccordionHandler, onClickExportButtonHandler, onChangeImportHandler, onClickPlayPauseButtonHandler, onClickClearHandler, onClickHideShowMessageButtonHandler, onClickHideShowViewerButtonHandler, onClickExportImageButtonHandler, onChangeRefreshValue, isAccordionExpanded);
+            accordionComponent = new Accordion(informationContainer, refreshValue ?? 5, i18nTexts, onClickArrowAccordionHandler, onClickExportButtonHandler, onChangeImportHandler, onClickPlayPauseButtonHandler, onClickClearHandler, onClickHideShowMessageButtonHandler, onClickHideShowViewerButtonHandler, onClickHideShowXLabelsButtonHandler, onClickExportImageButtonHandler, onChangeRefreshValue, isAccordionExpanded);
             accordionElement = accordionComponent.getChartContainer() as HTMLElement;
             accordionComponent.setI18nTexts(i18nTexts);
             accordionComponent.setProgressBarWidth(20);
@@ -296,7 +308,7 @@ const initChartInDOM = async () => {
             const occurrences = streamersList?.filter((streamer) => streamer.streamerName === streamerName).length || 0;
             const windowId = await getCurrentWindowId();
 
-            if(windowId) await addOneStreamer({ occurrences, streamerName, streamerImage, streamerGame, status: 'Active', tabId, windowId, streamerURL: document.URL, isEnable: true })
+            if(windowId) await addOneStreamer({ occurrences, streamerName, streamerImage, streamerGame, status: i18nTexts.status_active as StorageStatusType, tabId, windowId, streamerURL: document.URL, isEnable: true })
             
 
             accordionComponent?.setProgressBarWidth(100);
@@ -324,12 +336,16 @@ const addOneStreamer = async (newStreamer: StorageStreamerListType) => {
 const enableChart = async () => {
     await initChartInDOM();
     const isStreamLive = checkStreamerStatus(document);
-    updateStreamersList({ isEnable: true, status: isStreamLive ? 'Active' : 'Inactive' });
+    const { language } = await getStorage(["language"]);
+    const { status_inactive, status_active } = await getI18nMessages(isStreamLive ? ['status_active'] : ['status_inactive'], language);
+    updateStreamersList({ isEnable: true, status: (status_inactive ?? status_active) as StorageStatusType });
 };
 
 const disableChart = async () => {
     destroy();
-    updateStreamersList({ isEnable: false, status: 'Inactive' });
+    const { language } = await getStorage(["language"]);
+    const { status_inactive } = await getI18nMessages(['status_inactive'], language);
+    updateStreamersList({ isEnable: false, status: status_inactive as StorageStatusType });
 };
 
 const onTabCreated = async (payload: { url: string }) => {

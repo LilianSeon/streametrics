@@ -1,4 +1,5 @@
 import { checkStreamerStatus, getCurrentTabId, getGameName, getStreamerName } from "../../components/Chart/src/utils/utils";
+import { getStorage } from "../../components/Chart/src/utils/utilsStorage";
 
 const checkStatus = (_payload: any, sendResponse: (response?: any) => void) => {
     return new Promise(async(resolve, reject) => {
@@ -7,7 +8,12 @@ const checkStatus = (_payload: any, sendResponse: (response?: any) => void) => {
         const streamerName = await getStreamerName(document);
         const streamerGame = await getGameName(document);
         const isStreamLive = checkStreamerStatus(document);
-        chrome.runtime.sendMessage({ action: 'updateStreamersList', payload: { tabId, payload: { streamerName, streamerGame, status: isStreamLive ? 'Active' : 'Inactive' } }})
+        const { language } = await getStorage(["language"]);
+        const response = await fetch(`/_locales/${language}/messages.json`);
+        const responseJSON = await response.json();
+        const { status_inactive, status_active } = responseJSON[isStreamLive ? 'status_active' : 'status_inactive']['message'];
+        
+        chrome.runtime.sendMessage({ action: 'updateStreamersList', payload: { tabId, payload: { streamerName, streamerGame, status: status_inactive ?? status_active  } }})
             .then(() => {
                 resolve(true);
             })

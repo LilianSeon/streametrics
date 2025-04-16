@@ -1,4 +1,16 @@
 {
+  "axis_x": {
+    "message": "Axe X",
+    "description": "X Axis"
+  },
+  "status_inactive": {
+    "message": "Inactif",
+    "description": "Inactive"
+  },
+  "status_active": {
+    "message": "Actif",
+    "description": "Active"
+  },
   "game": {
     "message": "Jeux",
     "description": "Game"
