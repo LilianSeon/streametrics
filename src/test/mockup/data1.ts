@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { ChartDataViewer } from "../../components/Chart/src/index";
 
 export const data1: ChartDataViewer[] = [

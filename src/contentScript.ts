@@ -64,7 +64,7 @@ const startLoopGetData = async () => {
                 duration,
                 nbViewer,
                 game,
-                time: new Date(),
+                time: new Date().getTime(),
             } as ChartDataViewer;
     
             // Update title if empty
@@ -374,7 +374,7 @@ const eventsHandlers: Record<string, any> = {
 chrome.storage.onChanged.addListener(async (changes) => {
     for (let [key, { newValue }] of Object.entries(changes)) {
       if (key === "language" && chartExtension) {
-        chartExtension.language = newValue; // Update chart's language
+        chartExtension.setLanguage(newValue); // Update chart's language
         const i18nTexts = await getI18nMessages(i18nKeys, newValue);
         if (accordionComponent) accordionComponent.setI18nTexts(i18nTexts);
         chartExtension.setI18nTexts(i18nTexts);

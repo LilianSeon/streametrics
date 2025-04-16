@@ -73,7 +73,7 @@ export default class BottomNavigation implements IBottomNavigation<Element> {
                             <path d="m10.748 13.93 2.523 2.523a9.987 9.987 0 0 1-3.27.547c-4.258 0-7.894-2.66-9.337-6.41a1.651 1.651 0 0 1 0-1.186A10.007 10.007 0 0 1 2.839 6.02L6.07 9.252a4 4 0 0 0 4.678 4.678Z" />
                         </svg>
                     </button>
-                    <div id="tooltip-hideShowButton" class="absolute transition-opacity duration-400 opacity-0 invisible z-10 w-32 top-[-7.2rem] font-medium bg-white rounded-lg shadow dark:bg-gray-700 hover:visible hover:opacity-95">
+                    <div id="tooltip-hideShowButton" class="absolute transition-opacity duration-400 opacity-0 invisible z-10 w-32 top-[-10rem] font-medium bg-white rounded-lg shadow dark:bg-gray-700 hover:visible hover:opacity-95">
                         <ul class="p-2 text-lg text-gray-700 dark:text-gray-200">
                             <li>
                                 <div class="flex items-center p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-600">

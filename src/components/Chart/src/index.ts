@@ -26,7 +26,7 @@ export type ChartDataViewer = {
     game: string;
     id: number;
     nbViewer: number;
-    time: Date | string;
+    time: number;
     dataLabel?: string;
     dataLabelColor?: string;
 }
@@ -119,7 +119,7 @@ export default class ChartExtension {
                         borderColor: ctx => down(ctx, 'rgb(192,75,75)') || up(ctx, 'rgb(24,204,84)') 
                     },
                     parsing: {
-                        xAxisKey: 'duration',
+                        xAxisKey: 'time',
                         yAxisKey: 'nbViewer'
                     },
                     borderWidth: 2,
@@ -203,7 +203,7 @@ export default class ChartExtension {
                             //stackWeight: 1,
                             beginAtZero: true,
                             ticks: {
-                                callback: this.#tickFormatCallback.bind(this),
+                                callback: this.#tickYFormatCallback.bind(this),
                                 maxTicksLimit: 7
                             }
                         },
@@ -212,14 +212,15 @@ export default class ChartExtension {
                             stack: 'chartExtension',
                             beginAtZero: false,
                             ticks: {
-                                callback: this.#tickFormatCallback.bind(this),
+                                callback: this.#tickYFormatCallback.bind(this),
                                 maxTicksLimit: 7
                             }
                             //stackWeight: 2,
                         },
                         x: {
                             ticks: {
-                                maxTicksLimit: 10,
+                                callback: this.#tickXFormatCallback.bind(this),
+                                maxTicksLimit: 9,
                                 display: false
                             }
                         }
@@ -381,11 +382,30 @@ export default class ChartExtension {
     };
 
     /**
+     * Set language then update X axis labels.
+     * @param { Languages } newValue 'en' or 'fr'
+     */
+    setLanguage(newValue: Languages): void {
+        this.language = newValue;
+        this.chart?.update();
+    };
+
+    /**
+     * Format time for ticks (X labels).
+     * @param { string | number } value 
+     * @returns { number }
+     */
+    #tickXFormatCallback(value: string | number): string {
+        const label: number = parseInt(this.chart?.scales.x.getLabelForValue(value as number) as string);
+        return this.formatTimeByLocale(new Date(label), this.language);
+    };
+
+    /**
      * Get ride of decimal for ticks (Y labels).
      * @param { string | number } value 
      * @returns { number }
      */
-    #tickFormatCallback(value: string | number): string {
+    #tickYFormatCallback(value: string | number): string {
         const tickValue = (typeof value === 'number') ? value : parseInt(value);
         return new Intl.NumberFormat(this.language).format(~~tickValue);
     };
@@ -471,13 +491,33 @@ export default class ChartExtension {
 
     private addDataViewers({ duration, nbViewer, game, time, id }: ChartDataViewer, update: boolean): void {
         if (this.chart?.data?.labels && duration && nbViewer && !isNaN(nbViewer)) {
-
-            this.chart.data.labels.push(duration);
+            
+            this.chart.data.labels.push(time);
             //@ts-ignore
             this.chart.data.datasets[0].data.push({ duration, nbViewer, game, time, id });
 
             if (update)  this.chart.update();
         }
+    };
+
+    /**
+     * Formats a Date object as a time string (hours:minutes:seconds)
+     * based on the specified locale ('en' for English, 'fr' for French).
+     *
+     * - English ('en'): 12-hour format with AM/PM
+     * - French ('fr'): 24-hour format
+     *
+     * @param { Date } date - The Date object to format.
+     * @param { Languages}  lang - The locale code ('en' or 'fr').
+     * @returns { string } - The formatted time string.
+     */
+    formatTimeByLocale(date: Date, lang: Languages): string {
+        return new Intl.DateTimeFormat(lang, {
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+          hour12: lang === 'en' // AM/AP for english, 24h pour français
+        }).format(date);
     };
 
     addPeaks(peaks: Peak[]) {
