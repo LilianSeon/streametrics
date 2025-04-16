@@ -13,7 +13,7 @@ import { customSegmentTooltip } from './js/plugins/customSegmentTooltip';
 //import customDatalabels from './plugins/customDatalabels';
 
 // Types
-import { Peak, isArrayOfStrings, isArray, isString, DownLoadCallbacks } from './utils/utils';
+import { Peak, isArrayOfStrings, isArray, isString, DownLoadCallbacks, ThemeBackgroundColor } from './utils/utils';
 import { ToastMessage } from './components/Toast';
 import { Languages } from './js/Texts';
 
@@ -48,14 +48,14 @@ export default class ChartExtension {
     chart: Chart<"line" | "bar", ChartExtensionData> | null;
     chartTitle: string;
     chartDataViewer: ChartDataViewer[] = [];
-    defaultColor: string = '#fff'; // Label color
+    defaultColor: ThemeBackgroundColor = 'dark'; // Theme color
     chartDataMessageCount: ChartDataMessage[];
     i18nTexts: Record<string, string>
     _isDocumentHidden: boolean;
     language: Languages;
     #lastZoomLevel: number | undefined;
 
-    constructor(container: HTMLElement, language: Languages, i18nTexts: Record<string, string>, title?: string, defaultColor?:  string){
+    constructor(container: HTMLElement, language: Languages, i18nTexts: Record<string, string>, title?: string, defaultColor?:  ThemeBackgroundColor){
         this.container = container;
         this.canvas = null;
         this.chart = null;
@@ -88,8 +88,6 @@ export default class ChartExtension {
 
     _initChart(container: HTMLCanvasElement | null) {
         if (container) {
-
-            this.setDefaultColor(this.defaultColor);
 
             /**
              * Return value if data is going down
@@ -231,6 +229,8 @@ export default class ChartExtension {
             });
 
             Chart.register(zoomPlugin);
+
+            this.setDefaultColor(this.defaultColor);
         }
     };
 
@@ -554,14 +554,41 @@ export default class ChartExtension {
         } 
     };
 
-    setDefaultColor(newValue: string) {
+    setDefaultColor(newValue: ThemeBackgroundColor) {
         if (newValue){
-            this.defaultColor = newValue;
-            Chart.defaults.color = newValue;
+            if (newValue === 'dark') this.setDarkColors()
+            if (newValue === 'light') this.setLightColor();
+
             Chart.defaults.borderColor = 'transparent';
             Chart.defaults.font.size = 13;
             this.chart?.update('none');
         }
+    };
+
+    setDarkColors() {
+        const darkColor = '#000000';
+        this.defaultColor = 'dark';
+        Chart.defaults.color = darkColor;
+        this.chart!.options!.scales!.x!.ticks!.color = '#ffffff';
+        this.chart!.options!.scales!.y!.ticks!.color = '#ffffff';
+        this.chart!.options!.scales!.y2!.ticks!.color = '#ffffff';
+        this.chart!.options!.plugins!.title!.color = '#ffffff';
+        this.chart!.options!.scales!.x!.grid!.display = false;
+        this.chart!.options!.scales!.y!.grid!.display = false;
+        this.chart!.options!.scales!.y2!.grid!.display = false;
+    };
+
+    setLightColor() {
+        const lightColor = '#ffffff';
+        this.defaultColor = 'light';
+        Chart.defaults.color = lightColor;
+        this.chart!.options!.scales!.x!.ticks!.color = '#000000';
+        this.chart!.options!.scales!.y!.ticks!.color = '#000000';
+        this.chart!.options!.scales!.y2!.ticks!.color = '#000000';
+        this.chart!.options!.plugins!.title!.color = '#000000';
+        this.chart!.options!.scales!.x!.grid!.display = false;
+        this.chart!.options!.scales!.y!.grid!.display = false;
+        this.chart!.options!.scales!.y2!.grid!.display = false;
     };
 
 };
