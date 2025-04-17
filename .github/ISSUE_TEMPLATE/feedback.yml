@@ -2,7 +2,7 @@ name: 💬 General Feedback
 description: Share your thoughts or experience with the project
 title: "[FEEDBACK] : "
 labels: ["feedback"]
-assignees: []
+assignees: ["LilianSeon"]
 
 body:
   - type: textarea

@@ -2,7 +2,7 @@ name: 🐛 Bug Report
 description: Report an issue you encountered
 title: "[BUG] : "
 labels: ["bug"]
-assignees: []
+assignees: ["LilianSeon"]
 
 body:
   - type: markdown
@@ -15,7 +15,7 @@ body:
     attributes:
       label: Description
       description: Describe the bug you experienced
-      placeholder: "Example: When I click the 'Save' button, nothing happens."
+      placeholder: "Example: When I click the 'Play' button, nothing happens."
     validations:
       required: true
 
