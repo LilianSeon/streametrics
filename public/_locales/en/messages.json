@@ -75,13 +75,13 @@
     "message": "Download",
     "description": "download"
   },
-  "bars": {
-    "message": "Bars",
-    "description": "bars"
+  "messages": {
+    "message": "Messages",
+    "description": "Messages"
   },
-  "line": {
-    "message": "Line",
-    "description": "line"
+  "viewers": {
+    "message": "Viewers",
+    "description": "Viewers"
   },
   "refresh_rate": {
     "message": "Refresh rate :",

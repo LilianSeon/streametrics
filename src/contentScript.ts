@@ -23,7 +23,7 @@ import { checkStatus } from './handlers/events/eventsHandler';
 
 let tabId: number | undefined;
 
-const i18nKeys = ['clear_data', 'refresh_rate', 'bars', 'line', 'download', 'import_data', 'image', 'data', "singular_second", "plural_second", "time_ago", "justNow", "singular_minute", "plural_minute", "singular_hour", "plural_hour", "singular_day", 
+const i18nKeys = ['clear_data', 'refresh_rate', 'messages', 'viewers', 'download', 'import_data', 'image', 'data', "singular_second", "plural_second", "time_ago", "justNow", "singular_minute", "plural_minute", "singular_hour", "plural_hour", "singular_day", 
     "plural_day", "singular_week", "plural_week", "singular_month", "plural_month", 
     "singular_year", "plural_year", "plural_new_message", "singular_new_message", "status_active", "status_inactive", "axis_x", "error_download", "error_import_format", "error_import", "success_import", "toast_delete_title",
     "toast_delete_message", "toast_delete_yes", "toast_delete_no"];

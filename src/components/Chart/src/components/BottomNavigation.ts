@@ -73,18 +73,18 @@ export default class BottomNavigation implements IBottomNavigation<Element> {
                             <path d="m10.748 13.93 2.523 2.523a9.987 9.987 0 0 1-3.27.547c-4.258 0-7.894-2.66-9.337-6.41a1.651 1.651 0 0 1 0-1.186A10.007 10.007 0 0 1 2.839 6.02L6.07 9.252a4 4 0 0 0 4.678 4.678Z" />
                         </svg>
                     </button>
-                    <div id="tooltip-hideShowButton" class="absolute transition-opacity duration-400 opacity-0 invisible z-10 w-32 top-[-10rem] font-medium bg-zinc-300 rounded-lg shadow dark:bg-gray-700 hover:visible hover:opacity-95">
+                    <div id="tooltip-hideShowButton" class="absolute transition-opacity duration-400 opacity-0 invisible z-10 w-40 top-[-10rem] -left-4 font-medium bg-zinc-300 rounded-lg shadow dark:bg-gray-700 hover:visible hover:opacity-95">
                         <ul class="p-2 text-lg text-gray-700 dark:text-gray-200">
                             <li>
                                 <div class="flex items-center p-2 rounded hover:bg-zinc-200 dark:hover:bg-gray-600">
-                                    <input id="hideShowCheckboxBar" type="checkbox" value="${this.#isDisplayBar}" checked="${this.#isDisplayBar}" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded dark:bg-gray-600 dark:border-gray-500 cursor-pointer">
-                                    <label for="hideShowCheckboxBar" i18n-content="bars" class="w-full ms-7 text-xl font-medium text-gray-900 rounded dark:text-gray-300 select-none cursor-pointer"></label>
+                                    <input id="hideShowCheckboxLine" type="checkbox" value="${this.#isDisplayLine}" checked="${this.#isDisplayLine}" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded dark:bg-gray-600 dark:border-gray-500 cursor-pointer">
+                                    <label for="hideShowCheckboxLine" i18n-content="viewers" class="w-full ms-7 text-xl font-medium text-gray-900 rounded dark:text-gray-300 select-none cursor-pointer"></label>
                                 </div>
                             </li>
                             <li>
                                 <div class="flex items-center p-2 rounded hover:bg-zinc-200 dark:hover:bg-gray-600">
-                                    <input id="hideShowCheckboxLine" type="checkbox" value="${this.#isDisplayLine}" checked="${this.#isDisplayLine}" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded dark:bg-gray-600 dark:border-gray-500 cursor-pointer">
-                                    <label for="hideShowCheckboxLine" i18n-content="line" class="w-full ms-7 text-xl font-medium text-gray-900 rounded dark:text-gray-300 select-none cursor-pointer"></label>
+                                    <input id="hideShowCheckboxBar" type="checkbox" value="${this.#isDisplayBar}" checked="${this.#isDisplayBar}" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded dark:bg-gray-600 dark:border-gray-500 cursor-pointer">
+                                    <label for="hideShowCheckboxBar" i18n-content="messages" class="w-full ms-7 text-xl font-medium text-gray-900 rounded dark:text-gray-300 select-none cursor-pointer"></label>
                                 </div>
                             </li>
                             <li>
