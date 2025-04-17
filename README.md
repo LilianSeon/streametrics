@@ -35,7 +35,7 @@ Once installed, StreaMetrics automatically detects when you're watching a Twitch
 
 4. Click on Load unpacked
 
-5. Select the extension folder
+5. Select the extension folder `/dist`
 
 That’s it! Open a Twitch stream and watch the graph appear below the player.
 
