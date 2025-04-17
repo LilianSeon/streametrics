@@ -80,7 +80,7 @@ To get started:
 
 ```console
 npm install
-npm run fullBuild
+npm run build
 ```
 
 ## 🤝 Contributing

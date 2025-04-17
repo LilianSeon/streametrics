@@ -12,8 +12,8 @@
     "dev": "vite",
     "test": "vitest",
     "coverage": "vitest run --coverage",
-    "build": "vite build",
-    "fullBuild": "tsc -b && vite build && npx tailwindcss -i ./src/input.css -o ./dist/css/output.css",
+    "halfBuild": "vite build",
+    "build": "tsc -b && vite build && npx tailwindcss -i ./src/input.css -o ./dist/css/output.css",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "test:browser": "vitest --workspace=vitest.workspace.ts"
