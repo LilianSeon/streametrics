@@ -1,0 +1,38 @@
+name: ✨ Feature Request
+description: Suggest an improvement or new idea
+title: "[FEATURE] : "
+labels: ["enhancement"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for sharing your idea 💡
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What feature would you like to see?
+      placeholder: "I’d like to be able to filter results by date"
+    validations:
+      required: true
+
+  - type: textarea
+    id: justification
+    attributes:
+      label: Why is this useful?
+      description: Explain the need or problem it solves
+
+  - type: textarea
+    id: usage
+    attributes:
+      label: Example Use Case
+      description: Describe how you'd use this feature in practice
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: Have you thought of other ways to solve this?

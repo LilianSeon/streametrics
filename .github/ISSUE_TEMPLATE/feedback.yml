@@ -1,0 +1,19 @@
+name: 💬 General Feedback
+description: Share your thoughts or experience with the project
+title: "[FEEDBACK] : "
+labels: ["feedback"]
+assignees: []
+
+body:
+  - type: textarea
+    id: feedback
+    attributes:
+      label: Your Feedback
+      description: Tell us what you like, what could be improved, etc.
+      placeholder: "I really like how fast the app loads, but the navigation was confusing."
+
+  - type: input
+    id: usage
+    attributes:
+      label: How long have you been using the project?
+      placeholder: "Example: 1 week, 1 month, etc."
