@@ -4,6 +4,7 @@ import './background';
 // Components
 import { Navbar } from './components/Navbar';
 import { Table } from './components/Table';
+import { Footer } from './components/Footer';
 
 // Typing
 import { StorageStreamerListType } from './typings/StorageType';
@@ -91,7 +92,8 @@ const App: FC = () => {
   return (
     <div onClick={ onClickBody } style={{ width: '440px', height: '380px'}} className='bg-gray-900'>
       <Navbar isDisplayListLang={ isDisplayListLang } setIsDisplayListLang={ setIsDisplayListLang } language={ language } />
-      <Table streamersList={ streamerList } language={ language }/>
+      <Table streamersList={ streamerList } language={ language } />
+      <Footer language={ language } />
     </div>
   )
 };

@@ -1,4 +1,12 @@
 {
+  "report_issue": {
+    "message": "Found a bug or have an idea?",
+    "description": "Report an issue message"
+  },
+  "open_issue": {
+    "message": "Open an issue",
+    "description": "Open an issue"
+  },
   "toast_delete_no": {
     "message": "No, cancel",
     "description": "No button in toast - Delete data"
