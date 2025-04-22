@@ -1,5 +1,5 @@
 {
-  "name": "first-extension",
+  "name": "streametrics",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -11,6 +11,7 @@
   "scripts": {
     "dev": "vite",
     "test": "vitest",
+    "testui": "vitest --ui",
     "coverage": "vitest run --coverage",
     "halfBuild": "vite build",
     "build": "tsc -b && vite build && npx tailwindcss -i ./src/input.css -o ./dist/css/output.css",
@@ -23,12 +24,15 @@
     "build": "^0.1.4",
     "chart.js": "^4.4.3",
     "chartjs-plugin-datalabels": "^2.2.0",
-    "puppeteer": "^23.9.0",
+    "puppeteer": "^23.11.1",
     "puppeteer-core": "^23.9.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
+    "@jest/globals": "^29.7.0",
+    "@testing-library/dom": "^10.4.0",
+    "@testing-library/jest-dom": "^6.6.3",
     "@types/chrome": "^0.0.268",
     "@types/hammerjs": "^2.0.46",
     "@types/lodash.isequal": "^4.5.8",
@@ -38,14 +42,17 @@
     "@typescript-eslint/eslint-plugin": "^7.13.1",
     "@typescript-eslint/parser": "^7.13.1",
     "@vitejs/plugin-react": "^4.3.1",
-    "@vitest/browser": "^1.6.0",
+    "@vitest/browser": "^1.6.1",
+    "@vitest/ui": "^1.6.1",
     "eslint": "^8.57.0",
     "eslint-plugin-react-hooks": "^4.6.2",
     "eslint-plugin-react-refresh": "^0.4.7",
-    "playwright": "^1.49.0",
+    "jsdom": "^26.1.0",
+    "playwright": "^1.52.0",
     "tailwindcss": "3.4.13",
+    "ts-jest": "^29.3.2",
     "typescript": "^5.2.2",
-    "vite": "^5.3.1",
-    "vitest": "^1.6.0"
+    "vite": "^5.4.18",
+    "vitest": "^1.6.1"
   }
 }

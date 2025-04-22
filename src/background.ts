@@ -28,6 +28,7 @@ chrome.runtime.onInstalled.addListener(async (details: chrome.runtime.InstalledD
         await chrome.storage.local.set({ isAccordionExpanded: true });
         await chrome.storage.local.set({ refreshValue: 5 });
         await chrome.storage.local.set({ isEnableExtension: true });
+        await chrome.storage.local.set({ streamersList: [] });
     }
 });
 

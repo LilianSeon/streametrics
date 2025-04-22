@@ -235,8 +235,8 @@ const getI18nMessages = async <T extends string[]>(keys: T, lang: string): Promi
 
 const initStorage = async (): Promise<void> => {
     try {
-        const result = await getStorage(['isAccordionExpanded']);
-        if (typeof result == 'undefined') {
+        const isAccordionExpanded = await getStorage(['isAccordionExpanded']);
+        if (typeof isAccordionExpanded == 'undefined') {
             await setStorage( {'isAccordionExpanded': true} );
         } else {
             return;
