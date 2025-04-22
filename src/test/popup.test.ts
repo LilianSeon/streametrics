@@ -14,7 +14,9 @@ beforeEach(async () => {
         headless: false,
         args: [
           `--disable-extensions-except=${EXTENSION_PATH}`,
-          `--load-extension=${EXTENSION_PATH}`
+          `--load-extension=${EXTENSION_PATH}`,
+          '--no-sandbox',
+          '--disable-setuid-sandbox'
         ]
     });
 
@@ -26,6 +28,7 @@ beforeEach(async () => {
       );
       
     worker = await workerTarget.worker();
+    console.log(worker)
 }, 10000);
 
 afterEach(async () => {
