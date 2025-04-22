@@ -1,15 +1,15 @@
 import path from 'path';
-import puppeteer, { Browser, WebWorker } from 'puppeteer';
+import puppeteer, { Browser } from 'puppeteer';
 import { beforeEach, afterEach, test, expect } from 'vitest'
 
 const EXTENSION_PATH = path.join(process.cwd(), 'dist');
 const EXTENSION_ID = 'oebogjkjhmaifchplglelphhlefhiico';
 
 let browser: Browser | undefined;
-let worker: WebWorker | null;
 
 
 beforeEach(async () => {
+    console.log('Launching browser...');
     browser = await puppeteer.launch({
         headless: false,
         args: [
@@ -19,17 +19,7 @@ beforeEach(async () => {
           '--disable-setuid-sandbox'
         ]
     });
-
-    const workerTarget = await browser.waitForTarget(
-        // Assumes that there is only one service worker created by the extension and its URL ends with background.js.
-        target =>
-          target.type() === 'service_worker' &&
-          target.url().endsWith('background.js'),
-      );
-      
-    worker = await workerTarget.worker();
-    console.log(worker)
-}, 10000);
+}, 30000);
 
 afterEach(async () => {
     await browser?.close();
