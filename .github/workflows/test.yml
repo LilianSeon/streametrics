@@ -27,5 +27,8 @@ jobs:
       - name: Install xvfb
         run: sudo apt-get update && sudo apt-get install -y xvfb
 
+      - name: Build extension
+        run: npm run build
+
       - name: Run tests with xvfb
         run: xvfb-run --auto-servernum -- npm run test
