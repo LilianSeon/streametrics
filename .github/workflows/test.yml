@@ -1,0 +1,28 @@
+name: Run tests on commit
+
+on:
+  push:
+    branches:
+      - main  # ou la branche que tu veux surveiller
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22'  # ou la version que tu utilises
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run tests
+        run: npm run test
