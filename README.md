@@ -27,7 +27,9 @@ Once installed, StreaMetrics automatically detects when you're watching a Twitch
 
 1. Clone this repository:
    ```bash
-   git clone https://github.com/LilianSeon/extension.git
+   git clone https://github.com/LilianSeon/streametrics.git
+   cd streametrics
+   npm i & npm run build
 
 2. Open Chrome and go to chrome://extensions/
 
