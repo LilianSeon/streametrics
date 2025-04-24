@@ -30,7 +30,7 @@
         }
     ],
     "web_accessible_resources": [{
-        "resources": ["fonts/pacifico.woff2", "images/logo-transparent.png", "images/uk-flag.svg"],
+        "resources": ["fonts/pacifico.woff2", "images/logo-transparent.png", "images/not_found-transparent.png", "images/uk-flag.svg"],
         "matches": ["https://www.twitch.tv/*", "https://www.twitch.tv/*"]
     }]
 }

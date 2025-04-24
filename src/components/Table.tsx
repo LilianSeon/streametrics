@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from "react";
+import { FC, useEffect, useMemo, useState } from "react";
 
 // Typing
 import { StorageStreamerListType } from "../typings/StorageType";
@@ -7,13 +7,14 @@ import { TableRows, TableRowsTextValueI18n } from "./TableRows";
 import { NotDetected, NotDetectedTextValueI18n } from "./NotDetected";
 import { Languages } from "./Chart/src/js/Texts";
 import { loadMessages } from "../loader/fileLoader";
+import { NotFound, NotFoundTextValueI18n } from "./NotFound";
 
-interface TableTextValueI18n extends TableRowsTextValueI18n, NotDetectedTextValueI18n {
+interface TableTextValueI18n extends TableRowsTextValueI18n, NotDetectedTextValueI18n, NotFoundTextValueI18n {
     search_placeholder: string,
     previous_page: string
     next_page: string,
     pagination_of: string,
-    game: string
+    game: string,
 }
 
 export type TableProps = {
@@ -21,19 +22,30 @@ export type TableProps = {
     language?: Languages
 };
 
-const i18nKeys = ["search_placeholder", "previous_page", "next_page", "focus", "disable", "enable", "not_detected_button", "not_detected_message", "pagination_of", "game"];
+const i18nKeys = ["not_found_message", "not_found_advise", "search_placeholder", "previous_page", "next_page", "focus", "disable", "enable", "not_detected_button", "not_detected_message", "pagination_of", "game"];
 
 const Table: FC<TableProps> = ({ streamersList, language }: TableProps) => {
 
     const [ currentPage, setCurrentPage ] = useState(1);
     const [ searchTextValue, setSearchTextValue ] = useState('');
-    const [ textValue, setTextValue ] = useState<TableTextValueI18n>({ game: '', pagination_of: '', search_placeholder: '', previous_page: '', next_page: '', focus: '', disable: '', enable: '', not_detected_message: '', not_detected_button: '' });
+    const [ textValue, setTextValue ] = useState<TableTextValueI18n>({ not_found_message: '', not_found_advise: '', game: '', pagination_of: '', search_placeholder: '', previous_page: '', next_page: '', focus: '', disable: '', enable: '', not_detected_message: '', not_detected_button: '' });
 
 
-    const filteredStreamers = streamersList.filter(({ streamerName, streamerGame }) =>
+    const filteredStreamers = useMemo(() => streamersList.filter(({ streamerName, streamerGame }) =>
         streamerName.toLowerCase().includes(searchTextValue.toLowerCase()) ||
         streamerGame.toLowerCase().includes(searchTextValue.toLowerCase())
-    );
+    ), [streamersList, searchTextValue]);
+
+    const filteredStreamersLength = useMemo(() => filteredStreamers.length, [filteredStreamers]);
+    const searchTextValueLength = useMemo(() => searchTextValue.length, [searchTextValue]);
+
+    const displayNotFoundOrNotDetected = (filteredStreamersLength: number, searchTextValueLength: number) => {
+        if (filteredStreamersLength === 0 && searchTextValueLength === 0) {
+            return (<NotDetected notFoundTexts={{ not_detected_message: textValue.not_detected_message, not_detected_button: textValue.not_detected_button }} />);
+        } else if (filteredStreamersLength === 0 && searchTextValueLength !== 0) {
+            return (<NotFound searchValue={ searchTextValue } notFoundTexts={{ not_found_message: textValue.not_found_message, not_found_advise: textValue.not_found_advise }} />);
+        }
+    };
 
     useEffect(() => {
         if (language) {
@@ -60,7 +72,7 @@ const Table: FC<TableProps> = ({ streamersList, language }: TableProps) => {
                     </form>
                 </div>
                 <div className="grow"></div>
-                <Pagination totalItems={ filteredStreamers.length } currentPage={ currentPage } setCurrentPage={ setCurrentPage } paginationTexts={{ previous_page: textValue.previous_page, next_page: textValue.next_page, pagination_of: textValue.pagination_of }}/>
+                <Pagination totalItems={ filteredStreamersLength } currentPage={ currentPage } setCurrentPage={ setCurrentPage } paginationTexts={{ previous_page: textValue.previous_page, next_page: textValue.next_page, pagination_of: textValue.pagination_of }}/>
             </div>
             <div className="rounded-lg overflow-visible">
                 <table className="rounded-lg w-full text-sm text-left text-gray-400 table-auto overflow-visible">
@@ -75,10 +87,10 @@ const Table: FC<TableProps> = ({ streamersList, language }: TableProps) => {
                         </tr>
                     </thead>
                     <tbody>
-                        { filteredStreamers.length !== 0 ? <TableRows streamersList={filteredStreamers} currentPage={currentPage} searchTextValue={searchTextValue} actionsLabels={{ focus: textValue.focus, disable: textValue.disable, enable: textValue.enable }} /> : <></> }
+                        { filteredStreamersLength !== 0 ? <TableRows streamersList={filteredStreamers} currentPage={currentPage} searchTextValue={searchTextValue} actionsLabels={{ focus: textValue.focus, disable: textValue.disable, enable: textValue.enable }} /> : <></> }
                     </tbody>
                 </table>
-                { filteredStreamers.length === 0 ? <NotDetected notFoundTexts={{ not_detected_message: textValue.not_detected_message, not_detected_button: textValue.not_detected_button }} /> : <></> }
+                { displayNotFoundOrNotDetected(filteredStreamersLength, searchTextValueLength) }
             </div>
             
         </div>

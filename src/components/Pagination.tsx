@@ -33,11 +33,11 @@ const Pagination: FC<PaginationProps> = ({ totalItems, itemsPerPage = 3, current
                         </a>
                     </li>
                     <li>
-                        <a href="#" className="flex items-center justify-center text-sm py-2 px-2 leading-tight bg-gray-800 border border-gray-700 text-gray-400 hover:bg-gray-700 hover:text-white">
+                        <div className="flex items-center justify-center text-sm py-2 px-2 leading-tight bg-gray-800 border border-gray-700 text-gray-400">
                             <span className="mr-1 font-semibold text-white">{ totalItems === 0 ? '0' : currentPage }</span>
                             { paginationTexts.pagination_of }
                             <span className="ml-1 font-semibold text-white">{ totalPages }</span>
-                        </a>
+                        </div>
                     </li>
                     <li onClick={ goToNextPage } title={ paginationTexts.next_page }>
                         <a href="#" className="flex items-center justify-center h-full py-1.5 px-3 leading-tight rounded-r-lg border bg-gray-800 border-gray-700 text-gray-400 hover:bg-gray-700 hover:text-white">

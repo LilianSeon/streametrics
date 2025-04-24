@@ -1,4 +1,12 @@
 {
+  "not_found_advise": {
+    "message": "Try another keyword.",
+    "description": "Try another keyword"
+  },
+  "not_found_message": {
+    "message": "No results found for",
+    "description": "No results found for"
+  },
   "report_issue": {
     "message": "Found a bug or have an idea?",
     "description": "Report an issue message"
