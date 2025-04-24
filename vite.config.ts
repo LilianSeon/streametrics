@@ -26,10 +26,6 @@ export default defineConfig({
         'css/index.css': './src/components/Chart/src/assets/css/index.css',
         //'css/output.css': './src/components/Chart/src/assets/css/output.css',
         'images/logo-transparent.png': './src/components/Chart/src/assets/images/logo-transparent.png',
-        'images/logo16.png': './src/components/Chart/src/assets/images/logo16.png',
-        'images/logo32.png': './src/components/Chart/src/assets/images/logo32.png',
-        'images/logo48.png': './src/components/Chart/src/assets/images/logo48.png',
-        'images/logo128.png': './src/components/Chart/src/assets/images/logo128.png',
         'images/uk-flag.svg': './src/assets/images/uk-flag.svg',
         'images/fr-flag.svg': './src/assets/images/fr-flag.svg',
         /*'_locales/en/message.json': './src/_locales/en/message.json',
@@ -40,10 +36,6 @@ export default defineConfig({
         assetFileNames: (assetInfo) => {
           if (assetInfo.name == "pacifico.woff2") return "fonts/pacifico.woff2";
           if (assetInfo.name == "logo-transparent.png") return "images/logo-transparent.png";
-          if (assetInfo.name == "logo16.png") return "images/logo16.png";
-          if (assetInfo.name == "logo32.png") return "images/logo32.png";
-          if (assetInfo.name == "logo48.png") return "images/logo48.png";
-          if (assetInfo.name == "logo128.png") return "images/logo128.png";
           if (assetInfo.name == "uk-flag.svg") return "images/uk-flag.svg";
           if (assetInfo.name == "fr-flag.svg") return "images/fr-flag.svg";
           return assetInfo.name as string;

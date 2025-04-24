@@ -113,7 +113,7 @@ const Navbar: FC<NavbarProps> = ({ isDisplayListLang, setIsDisplayListLang, lang
         <nav className="bg-gray-900">
             <div className="max-w-screen-xl flex flex-wrap items-center mx-auto p-4">
                 <div className="flex items-center">
-                    <img className="my-auto h-8 rounded-full inline-block" src={ imgSrc } alt="logo" />
+                    <img className="my-auto h-9 inline-block" src={ imgSrc } alt="logo" />
                     <span className="ml-2 self-center text-xl font-semibold whitespace-nowrap text-white tracking-wide">StreaMetrics</span>
                 </div>
                 <div className="grow"></div>

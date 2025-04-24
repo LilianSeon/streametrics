@@ -55,7 +55,7 @@ export default class Accordion implements IAccordion<Element> {
                 <div class="tabExtension">
                     <div class="flex-container bg-zinc-300 dark:bg-zinc-800 px-2">
                         <div id="headerLabel" class="pt-2 pb-3 h-20 text-center text-white text-xl flex">
-                            <img class="my-auto h-14 rounded-full inline-block" src="${ imgSrc }" alt="logo" />
+                            <img class="my-auto h-14 inline-block" src="${ imgSrc }" alt="logo" />
                             <div class="my-auto ml-4 self-center text-3xl font-semibold whitespace-nowrap tracking-wide inline-block text-black dark:text-white">StreaMetrics</div>
                         </div>
                         <div id="arrowAccordion" class="my-auto mr-3 cursor-pointer transition-transform duration-350 ${ isExpanded ? 'rotate-180' : '' }">

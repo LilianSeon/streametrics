@@ -5,10 +5,10 @@
     "default_locale": "en",
     "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAsGvoN8R5Njmxg4HDVVXUeYrEUzHd9gTILVkdqRxGxKIIyWYg+kCOJ+pR8OTMNtzTubE4/XnbjaDhofMAhA94suFaYLSLN8eQMuxBqmYvZnIye59NSxA58WFIjvMYMrO6vHlLIR1PWuv3BApv3UuzzhvRwko0g9EOtqMl4Xoq8pcLhqJvQuyZuZWhdVVFmHu/+2aY0GVWOq6kvo6Sfll0clYJiDdv2HX1fgBJQa+fh87/5e309uPY6WxA5tS/KYX1oqct/DZ5zfjIkoJHpJOvy0BeQV0NJ8fVPKN+a9iuuKK4V2ur66PRFDWJsehcDwkrf++tCw7eS7oK0YFNL4f+vQIDAQAB",
     "icons": {
-        "16": "images/logo16.png", 
-        "32": "images/logo32.png",
-        "48": "images/logo48.png",
-        "128": "images/logo128.png"
+        "16": "images/logo-transparent.png", 
+        "32": "images/logo-transparent.png",
+        "48": "images/logo-transparent.png",
+        "128": "images/logo-transparent.png"
     },
     "action": {
         "default_popup": "index.html"
