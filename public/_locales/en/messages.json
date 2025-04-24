@@ -99,11 +99,11 @@
     "message": "Clear data",
     "description": "Clear data"
   },
-  "not_found_button": {
+  "not_detected_button": {
     "message": "Go to",
     "description": "Go to *url*"
   },
-  "not_found_message": {
+  "not_detected_message": {
     "message": "No live Twitch detected.",
     "description": "Not found message"
   },

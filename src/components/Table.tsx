@@ -4,11 +4,11 @@ import { FC, useEffect, useState } from "react";
 import { StorageStreamerListType } from "../typings/StorageType";
 import { Pagination } from "./Pagination";
 import { TableRows, TableRowsTextValueI18n } from "./TableRows";
-import { NotFound, NotFoundTextValueI18n } from "./NotFound";
+import { NotDetected, NotDetectedTextValueI18n } from "./NotDetected";
 import { Languages } from "./Chart/src/js/Texts";
 import { loadMessages } from "../loader/fileLoader";
 
-interface TableTextValueI18n extends TableRowsTextValueI18n, NotFoundTextValueI18n {
+interface TableTextValueI18n extends TableRowsTextValueI18n, NotDetectedTextValueI18n {
     search_placeholder: string,
     previous_page: string
     next_page: string,
@@ -21,13 +21,13 @@ export type TableProps = {
     language?: Languages
 };
 
-const i18nKeys = ["search_placeholder", "previous_page", "next_page", "focus", "disable", "enable", "not_found_button", "not_found_message", "pagination_of", "game"];
+const i18nKeys = ["search_placeholder", "previous_page", "next_page", "focus", "disable", "enable", "not_detected_button", "not_detected_message", "pagination_of", "game"];
 
 const Table: FC<TableProps> = ({ streamersList, language }: TableProps) => {
 
     const [ currentPage, setCurrentPage ] = useState(1);
     const [ searchTextValue, setSearchTextValue ] = useState('');
-    const [ textValue, setTextValue ] = useState<TableTextValueI18n>({ game: '', pagination_of: '', search_placeholder: '', previous_page: '', next_page: '', focus: '', disable: '', enable: '', not_found_message: '', not_found_button: '' });
+    const [ textValue, setTextValue ] = useState<TableTextValueI18n>({ game: '', pagination_of: '', search_placeholder: '', previous_page: '', next_page: '', focus: '', disable: '', enable: '', not_detected_message: '', not_detected_button: '' });
 
 
     const filteredStreamers = streamersList.filter(({ streamerName, streamerGame }) =>
@@ -78,7 +78,7 @@ const Table: FC<TableProps> = ({ streamersList, language }: TableProps) => {
                         { filteredStreamers.length !== 0 ? <TableRows streamersList={filteredStreamers} currentPage={currentPage} searchTextValue={searchTextValue} actionsLabels={{ focus: textValue.focus, disable: textValue.disable, enable: textValue.enable }} /> : <></> }
                     </tbody>
                 </table>
-                { filteredStreamers.length === 0 ? <NotFound notFoundTexts={{ not_found_message: textValue.not_found_message, not_found_button: textValue.not_found_button }} /> : <></> }
+                { filteredStreamers.length === 0 ? <NotDetected notFoundTexts={{ not_detected_message: textValue.not_detected_message, not_detected_button: textValue.not_detected_button }} /> : <></> }
             </div>
             
         </div>
