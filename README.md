@@ -29,7 +29,7 @@ Once installed, StreaMetrics automatically detects when you're watching a Twitch
    ```bash
    git clone https://github.com/LilianSeon/streametrics.git
    cd streametrics
-   npm i & npm run build
+   npm i && npm run build
 
 2. Open Chrome and go to chrome://extensions/
 
