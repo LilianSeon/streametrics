@@ -408,14 +408,6 @@ const waitForElm = (selector: string): Promise<Element | null> => {
             childList: true,
             subtree: true
         });
-
-        // Timeout 10 secondes
-        setTimeout(() => {
-            if (document.querySelector(selector) === null) {
-                observer.disconnect();
-                resolve(null);
-            }
-        }, 10000);
     });
 };
 

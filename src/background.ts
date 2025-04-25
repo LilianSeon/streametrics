@@ -55,7 +55,7 @@ const isValidTwitchURL = (url: string) => {
 
 chrome.tabs.onUpdated.addListener(async (tabID, { url }) => {
     if (url && isValidTwitchURL(url)) {
-        chrome.tabs.sendMessage(tabID, { event: "onTabUpdated", payload: { url } });
+        chrome.tabs.sendMessage(tabID, { event: "onTabUpdated", payload: { url, tabID } });
     }
 });
 

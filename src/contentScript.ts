@@ -252,6 +252,7 @@ const initStorage = async (): Promise<void> => {
 const initChartInDOM = async () => {
 
     try {
+        isExtensionInitializing = true;
         const { isEnableExtension } = await getStorage(['isEnableExtension']);
 
         // Do not init if isEnableExtension storage variable is false. 
@@ -259,7 +260,6 @@ const initChartInDOM = async () => {
         
         console.log("%c 🚀 StreaMetrics Chrome extension initializing... ", "color: white; background-color: #2563eb; font-size: 14px; padding: 8px; border-radius: 4px;");
         tabId = await getCurrentTabId();
-        isExtensionInitializing = true;
         const informationContainer = await waitForElm('#live-channel-stream-information');
         const chartContainer = await waitForElm('.chat-line__message');
         const { language } = await getStorage(["language"]);
@@ -307,7 +307,10 @@ const initChartInDOM = async () => {
             accordionComponent?.setProgressBarWidth(80);
             const streamerGame = await getGameName(document);
             accordionComponent?.setProgressBarWidth(90);
-            const occurrences = streamersList?.filter((streamer) => streamer.streamerName === streamerName).length || 0;
+            let occurrences = 0;
+            streamersList?.filter((streamer) => streamer.streamerName === streamerName)?.forEach((streamer) => {
+                occurrences = ++streamer.occurrences;
+            });
             const windowId = await getCurrentWindowId();
 
             if(windowId) await addOneStreamer({ occurrences, streamerName, streamerImage, streamerGame, status: i18nMessages.status_active as StorageStatusType, tabId, windowId, streamerURL: document.URL, isEnable: true })
@@ -337,7 +340,7 @@ const addOneStreamer = async (newStreamer: StorageStreamerListType) => {
 
 
 const enableChart = async () => {
-    await initChartInDOM();
+    if (!isExtensionInitialized && !isExtensionInitializing) await initChartInDOM();
     const isStreamLive = checkStreamerStatus(document);
     const { language } = await getStorage(["language"]);
     const { status_inactive, status_active } = await getI18nMessages(isStreamLive ? ['status_active'] : ['status_inactive'], language);
@@ -351,13 +354,13 @@ const disableChart = async () => {
     updateStreamersList({ isEnable: false, status: status_inactive as StorageStatusType });
 };
 
-const onTabCreated = async (payload: { url: string }) => {
+const onTabCreated = async (payload: { url: string, tabID: number }) => {
     if (chartExtension && formatChartTitle(window.location.pathname).includes(chartExtension.chartTitle.replace("'s viewers", ""))) return true;
     
     // If Chart already exists in DOM
     if (chartExtension && chartExtension instanceof ChartExtension && accordionComponent instanceof Accordion && typeof accordionElement !== 'undefined' && messageCounter && intervalManager instanceof IntervalManager) {
         
-        deleteStreamersListStorage(payload.url);
+        deleteStreamersListStorage(payload.tabID);
         destroy();
     }
 
@@ -412,10 +415,9 @@ chrome.runtime.onMessage.addListener((request: EventsResquest, _sender, sendResp
     return true;
 });
 
-const deleteStreamersListStorage = async (url: StorageStreamerListType['streamerURL']) => {
+const deleteStreamersListStorage = async (tabId: StorageStreamerListType['tabId']) => {
     const { streamersList }: { streamersList?: StorageStreamerListType[] } = await getStorage(['streamersList']);
-    const tabId = await getCurrentTabId();
-    const streamerToDelete: StorageStreamerListType[] | undefined = streamersList?.filter((streamer: StorageStreamerListType) => streamer.tabId !== tabId && streamer.streamerURL !== url);
+    const streamerToDelete: StorageStreamerListType[] | undefined = streamersList?.filter((streamer: StorageStreamerListType) => streamer.tabId !== tabId);
     await setStorage({'streamersList': streamerToDelete});
 };
 
@@ -430,6 +432,7 @@ const destroy = () => {
     accordionComponent = undefined;
     accordionElement = undefined;
     isExtensionInitialized = false;
+    isExtensionInitializing = false;
 };
 
 const updateDefaultColor = (theme: ThemeBackgroundColor): void => {
@@ -447,6 +450,6 @@ const updateDefaultColor = (theme: ThemeBackgroundColor): void => {
 
 window.addEventListener('DOMContentLoaded', async () => {
     if (document.getElementById('accordionExtension') === null && document.getElementById('extensionChartContainer') === null && !isExtensionInitialized) {
-        await initChartInDOM();
+        if (!isExtensionInitialized && !isExtensionInitializing) await initChartInDOM();
     }
 });
