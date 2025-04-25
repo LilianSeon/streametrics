@@ -9,10 +9,8 @@ const checkStatus = (_payload: any, sendResponse: (response?: any) => void) => {
         const streamerGame = await getGameName(document);
         const isStreamLive = checkStreamerStatus(document);
         const { language } = await getStorage(["language"]);
-        const response = await fetch(`/_locales/${language}/messages.json`);
-        const responseJSON = await response.json();
-        const { status_inactive, status_active } = responseJSON[isStreamLive ? 'status_active' : 'status_inactive']['message'];
-        
+        const { status_inactive, status_active } = await chrome.runtime.sendMessage({ action: 'getI18nMessages', payload: { keys: isStreamLive ? ['status_active'] : ['status_inactive'], lang: language } });
+    
         chrome.runtime.sendMessage({ action: 'updateStreamersList', payload: { tabId, payload: { streamerName, streamerGame, status: status_inactive ?? status_active  } }})
             .then(() => {
                 resolve(true);
