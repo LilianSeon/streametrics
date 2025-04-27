@@ -3,15 +3,15 @@
 // Handlers
 import { getI18nMessages } from "./handlers/actions/i18nMessagesHandler";
 import { getWindowId, getTabId } from "./handlers/actions/infoHandler";
-import { addOneStreamer, updateStreamersList, deleteAllStreamers } from "./handlers/actions/streamersListHandler";
+import { addOneStreamer, updateStreamersList, deleteAllStreamers, deleteOneStreamer } from "./handlers/actions/streamersListHandler";
 
 // Typing
 import { ActionsHandler, ActionsResquest } from "./typings/MessageType";
-import { StorageStreamerListType } from "./typings/StorageType";
 
 const actionsHandler: Record<string, ActionsHandler> = {
     addOneStreamer,
     updateStreamersList,
+    deleteOneStreamer,
     deleteAllStreamers,
     getWindowId,
     getTabId,
@@ -51,7 +51,7 @@ chrome.runtime.onMessage.addListener((request: ActionsResquest, sender, sendResp
 const isValidTwitchURL = (url: string) => {
     const urlPattern = /^(https):\/\/(www)\.(twitch)\.(tv)\/[-a-zA-Z0-9@:%._\+~#=]/;
     return urlPattern.test(url);
-}
+};
 
 chrome.tabs.onUpdated.addListener(async (tabID, { url }) => {
     if (url && isValidTwitchURL(url)) {
@@ -68,8 +68,7 @@ chrome.tabs.onCreated.addListener((tab) => {
 });
 
 chrome.tabs.onRemoved.addListener(async (tabId: number, removeInfo: chrome.tabs.TabRemoveInfo) => {
-    // Delete streamer in streamerList storage
-    const { streamersList } = await chrome.storage.local.get('streamersList');
-    const streamerToDelete: StorageStreamerListType[] = streamersList.filter((streamer: StorageStreamerListType) => streamer.tabId !== tabId || streamer.windowId !== removeInfo.windowId);
-    await chrome.storage.local.set({ 'streamersList': streamerToDelete });
+    if (actionsHandler['deleteOneStreamer']) {
+        actionsHandler['deleteOneStreamer']({ tabId, removeInfo });
+    }
 });

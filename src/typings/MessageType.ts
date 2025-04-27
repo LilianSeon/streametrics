@@ -11,7 +11,7 @@ export enum EventsEnum {
 };
 
 export interface ActionsHandler<TInput = any, TOutput = any> {
-    (payload: TInput, sender: chrome.runtime.MessageSender): Promise<TOutput>;
+    (payload: TInput, sender?: chrome.runtime.MessageSender): Promise<TOutput>;
 }
 
 export interface EventsHandler<TInput = any, TOutput = any> {

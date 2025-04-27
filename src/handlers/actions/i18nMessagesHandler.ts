@@ -18,7 +18,7 @@ const loadMessages = async <T extends string[]>(keys: T, lang: Languages): Promi
     return Object.fromEntries(entries) as Record<T[number], string>;
 };
 
-const getI18nMessages: ActionsHandler = async <T extends string[]>(payload: { keys: T, lang: string }, _sender: chrome.runtime.MessageSender) => {
+const getI18nMessages: ActionsHandler = async <T extends string[]>(payload: { keys: T, lang: string }, _sender?: chrome.runtime.MessageSender) => {
 
     return new Promise(async (resolve, reject) => {
         if (payload?.keys && payload?.lang) {

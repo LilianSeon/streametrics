@@ -25,6 +25,7 @@ export default defineConfig({
         'fonts/pacifico.woff2': './src/components/Chart/src/assets/fonts/pacifico.woff2',
         'css/index.css': './src/components/Chart/src/assets/css/index.css',
         //'css/output.css': './src/components/Chart/src/assets/css/output.css',
+        'images/logo.png': './src/components/Chart/src/assets/images/logo.png',
         'images/logo-transparent.png': './src/components/Chart/src/assets/images/logo-transparent.png',
         'images/not_found-transparent.png': './src/components/Chart/src/assets/images/not_found-transparent.png',
         'images/uk-flag.svg': './src/assets/images/uk-flag.svg',
@@ -37,6 +38,7 @@ export default defineConfig({
         assetFileNames: (assetInfo) => {
           if (assetInfo.name == "pacifico.woff2") return "fonts/pacifico.woff2";
           if (assetInfo.name == "logo-transparent.png") return "images/logo-transparent.png";
+          if (assetInfo.name == "logo.png") return "images/logo.png";
           if (assetInfo.name == "not_found-transparent.png") return "images/not_found-transparent.png";
           if (assetInfo.name == "uk-flag.svg") return "images/uk-flag.svg";
           if (assetInfo.name == "fr-flag.svg") return "images/fr-flag.svg";
