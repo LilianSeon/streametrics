@@ -1,0 +1,103 @@
+# 🤝 Contributing to StreaMetrics
+
+First of all, thanks for taking the time to contribute! 🚀  
+We welcome contributions of all kinds — new features, bug fixes, improvements, ideas, and feedback!
+
+---
+
+## 📋 How to Contribute
+
+### 1. Fork the Project
+
+Click on "Fork" at the top right of this repo and create your own copy.
+
+### 2. Clone your Fork
+
+```bash
+git clone https://github.com/your-username/streametrics.git
+cd streametrics
+```
+
+### 3. Create a New Branch
+
+Name your branch clearly based on your contribution type.
+
+```bash
+git checkout -b feature/your-feature-name
+# or
+git checkout -b fix/your-bug-fix
+```
+
+### 4. Make Your Changes
+
+- Follow the existing code style.
+- Keep changes focused and small.
+- Add or update documentation if needed.
+- Test your changes on Twitch streams!
+
+### 5. Commit Your Changes
+
+Write clear and meaningful commit messages.
+
+```bash
+git commit -m "[theme] - A short desccription"
+```
+
+### 6. Push to Your Fork
+
+```bash
+git push origin feature/your-feature-name
+```
+
+### 7. Open a Pull Request
+
+- Go to the original repo.
+- Click "New Pull Request" and select your branch.
+- Fill in the pull request template.
+- Describe **why** and **what** you changed.
+- Link related issues if applicable.
+
+---
+
+## 🛠️ Setup for Development
+
+1. Install dependencies:
+
+```bash
+npm install
+```
+
+2. Build the extension:
+
+```bash
+npm run build
+```
+
+3. Load the `/dist` folder into Chrome via `chrome://extensions` → "Load unpacked".
+
+4. Open a Twitch stream to see StreaMetrics in action!
+
+---
+
+## 📚 Code Style Guidelines
+
+- Use clear, consistent naming.
+- Use [Prettier](https://prettier.io/) to format code if needed.
+- Keep components and files lightweight and focused.
+- Use **TypeScript** for new code if possible.
+- Write comments where necessary, but aim for clean, self-explanatory code.
+
+---
+
+## 🙏 Need Help?
+
+If you’re unsure about something or have questions, feel free to:
+- Open an [Issue](https://github.com/LilianSeon/streametrics/issues)
+- Reach out through a comment on an existing PR or issue
+
+We’re happy to help!
+
+---
+
+Thanks again for being awesome! 🚀  
+Let's make **StreaMetrics** even better together!
