@@ -20,8 +20,6 @@ const actionsHandler: Record<string, ActionsHandler> = {
 
 
 chrome.runtime.onInstalled.addListener(async (details: chrome.runtime.InstalledDetails) => {
-    console.log('onInstalled', details)
-
     // When user install this extension for the first time set local storage
     if (details.reason === chrome.runtime.OnInstalledReason.INSTALL) {
         await chrome.storage.local.set({ language: "en" });

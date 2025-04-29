@@ -285,7 +285,6 @@ const initChartInDOM = async () => {
             accordionComponent.setProgressBarWidth(20);
         }
 
-        console.log('INIT 20% :', accordionElement, chartExtension)
         if (accordionElement && typeof chartExtension == 'undefined') {
 
             const chartTitle: string = formatChartTitle(window.location.pathname);

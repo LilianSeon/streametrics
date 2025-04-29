@@ -51,6 +51,10 @@ const checkStreamerStatus = (document: Document): boolean => {
     return !isNaN(getNbViewer(document));
 };
 
+const checkChartIsPaused = (document: Document): boolean => {
+    return document.getElementById('tooltip-playPauseButton')?.innerHTML === "Play";
+};
+
 const getCurrentWindowId = async (): Promise<number | undefined> => {
 
     return new Promise((resolve) => {
@@ -562,8 +566,8 @@ const extractDataFromJSON = (event: Event, callBacks: DownLoadCallbacks): Promis
  * @param { unknown } value 
  * @returns { boolean }
  */
-const isArrayOfStrings = (value: unknown): value is [''] => {
-    return Array.isArray(value) && value.every(item => typeof item === "string");
+const isArrayOfNumbers = (value: unknown): value is [''] => {
+    return Array.isArray(value) && value.every(item => typeof item === "number");
 };
 
 /**
@@ -654,4 +658,4 @@ const timeAgo = (date: Date, lang: string, i18nTexts: Record<string, string>): s
     return formatTimeString(years, singular_year, plural_year, time_ago, lang);
 };
 
-export { waitUntilElementLoaded, checkStreamerStatus, deleteStreamerById, getCurrentWindowId, getCurrentTabId, getStreamerImage, timeAgo, isURLTwitch, getNbViewer, waitForElm, wait, getDuration, removeSpaceInString, formatChartTitle, getGameName, computedDataLabel, backGroundThemeObserver, detectPeaks, findPeaks, getPercentageOf, getStreamerName, getChatContainer, deleteSequenceSameNumber, downloadJSON, extractDataFromJSON, isArrayOfStrings, isArray, isString, isDarkModeActivated, generateRandomId, downloadImage };
+export { checkChartIsPaused, waitUntilElementLoaded, checkStreamerStatus, deleteStreamerById, getCurrentWindowId, getCurrentTabId, getStreamerImage, timeAgo, isURLTwitch, getNbViewer, waitForElm, wait, getDuration, removeSpaceInString, formatChartTitle, getGameName, computedDataLabel, backGroundThemeObserver, detectPeaks, findPeaks, getPercentageOf, getStreamerName, getChatContainer, deleteSequenceSameNumber, downloadJSON, extractDataFromJSON, isArrayOfNumbers, isArray, isString, isDarkModeActivated, generateRandomId, downloadImage };

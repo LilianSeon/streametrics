@@ -23,7 +23,7 @@
     },
     "content_scripts": [
         {
-            "matches": ["https://www.twitch.tv/*", "https://www.twitch.tv/*"],
+            "matches": ["https://www.twitch.tv/*"],
             "js": ["js/content_scripts.js"],
             "run_at": "document_start",
             "css": [ "./css/accordion.css", "./css/index.css", "./css/output.css" ]
@@ -31,6 +31,6 @@
     ],
     "web_accessible_resources": [{
         "resources": ["fonts/pacifico.woff2", "images/logo-transparent.png", "images/not_found-transparent.png", "images/uk-flag.svg"],
-        "matches": ["https://www.twitch.tv/*", "https://www.twitch.tv/*"]
+        "matches": ["https://www.twitch.tv/*"]
     }]
 }

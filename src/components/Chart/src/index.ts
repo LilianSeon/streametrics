@@ -13,7 +13,7 @@ import { customSegmentTooltip } from './js/plugins/customSegmentTooltip';
 //import customDatalabels from './plugins/customDatalabels';
 
 // Types
-import { Peak, isArrayOfStrings, isArray, isString, DownLoadCallbacks, ThemeBackgroundColor } from './utils/utils';
+import { Peak, isArrayOfNumbers, isArray, isString, DownLoadCallbacks, ThemeBackgroundColor } from './utils/utils';
 import { Languages } from './js/Texts';
 
 export type DatasetName = "viewersCount" | "messagesCount";
@@ -275,7 +275,7 @@ export default class ChartExtension {
     #exportedDatasPropertiesCheck(data: ExportedDatas): boolean {
         const sample = {
             data: isArray,
-            labels: isArrayOfStrings,
+            labels: isArrayOfNumbers,
             title: isString
         };
 
