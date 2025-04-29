@@ -258,7 +258,6 @@ const initChartInDOM = async () => {
         // Do not init if isEnableExtension storage variable is false. 
         if (typeof isEnableExtension !== 'undefined' && isEnableExtension === false) return;
         
-        console.log("%c 🚀 StreaMetrics Chrome extension initializing... ", "color: white; background-color: #2563eb; font-size: 14px; padding: 8px; border-radius: 4px;");
         tabId = await getCurrentTabId();
         const informationContainer = await waitForElm('#live-channel-stream-information');
         const chartContainer = await waitForElm('.chat-line__message');
@@ -317,7 +316,6 @@ const initChartInDOM = async () => {
 
             accordionComponent?.setProgressBarWidth(100);
             accordionComponent?.setProgressBarWidth(0);
-            console.log("%c ⚡ StreaMetrics Chrome extension started ✨ ", "color: white; background-color: #65a30d; font-size: 14px; padding: 8px; border-radius: 4px;");
         }
     } catch (error) {
         isExtensionInitializing = false;

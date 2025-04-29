@@ -1,6 +1,8 @@
-# StreaMetrics 🎥📊
+# <img src="src/components/Chart/src/assets/images/logo-transparent.png" alt="Logo" style="margin-bottom: -10px;" width="45"/> StreaMetrics
 
 **StreaMetrics** is an open-source Chrome extension that adds a real-time analytics graph below Twitch streams, showing the evolution of **viewer count** and **chat activity** over time.
+
+<img src="public/images/Capture7.PNG" alt="Logo" style="margin-bottom: -10px;" width="400"/>
 
 ## ✨ Features
 
