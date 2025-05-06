@@ -99,10 +99,10 @@ export default class Toast implements IToast<Element> {
                         <div class="mb-2 text-xl font-normal">${ message }</div> 
                         <div class="grid grid-cols-2 gap-2">
                             <div>
-                                <button id="interactiveButton" class="inline-flex justify-center w-full px-2 py-1.5 text-lg font-medium text-center text-white bg-blue-500 dark:bg-blue-600 hover:bg-blue-600 dark:hover:bg-blue-700 rounded-lg">${ yesButtonText }</button>
+                                <button id="interactiveButton" class="inline-flex justify-center w-full px-2 pt-1.5 pb-1 text-lg font-medium text-white bg-blue-500 dark:bg-blue-600 hover:bg-blue-600 dark:hover:bg-blue-700 rounded-lg">${ yesButtonText }</button>
                             </div>
                             <div>
-                                <button id="interactiveButtonNo" class="inline-flex justify-center w-full px-2 py-1.5 text-lg font-medium text-center text-gray-900 bg-zinc-200 border border-gray-300 rounded-lg hover:bg-zinc-300 dark:bg-gray-600 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-700 dark:focus:ring-gray-700">${ noButtonText }</button> 
+                                <button id="interactiveButtonNo" class="inline-flex justify-center w-full px-2 pt-1.5 pb-1 text-lg font-medium text-gray-900 bg-zinc-200 border border-gray-300 rounded-lg hover:bg-zinc-300 dark:bg-gray-600 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-700 dark:focus:ring-gray-700">${ noButtonText }</button> 
                             </div>
                         </div>    
                     </div>
