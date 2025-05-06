@@ -1,4 +1,10 @@
 {
+  "extention_name": {
+    "message": "StreaMetrics – Graphiques Twitch en direct"
+  },
+  "extention_description": {
+    "message": "Suivez en direct le nombre de spectateurs et l'activité du chat sur Twitch grâce à un graphique sous la vidéo. Open-source et facile à utiliser."
+  },
   "not_found_advise": {
     "message": "Essayez un autre mot-clé.",
     "description": "Try another keyword"

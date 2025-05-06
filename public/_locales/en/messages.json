@@ -1,4 +1,10 @@
 {
+  "extention_name": {
+    "message": "StreaMetrics – Twitch Viewer & Chat Graphs"
+  },
+  "extention_description": {
+    "message": "Track real-time viewer count and chat activity on Twitch with a live graph under the stream. Open-source and easy to use."
+  },
   "not_found_advise": {
     "message": "Try another keyword.",
     "description": "Try another keyword"
