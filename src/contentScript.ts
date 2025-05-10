@@ -260,6 +260,7 @@ const initChartInDOM = async () => {
         
         tabId = await getCurrentTabId();
         const informationContainer = await waitForElm('#live-channel-stream-information');
+        await waitForElm(".CoreText-sc-1txzju1-0.dLeJdh");
         const chartContainer = await waitForElm('.chat-line__message');
         const { language } = await getStorage(["language"]);
         i18nMessages = await getI18nMessages(i18nKeys, language);
@@ -278,10 +279,15 @@ const initChartInDOM = async () => {
                 intervalManager = new IntervalManager(startLoopGetData, (refreshValue ?? 5) * 1000);
             }
 
-            accordionComponent = new Accordion(informationContainer, refreshValue ?? 5, i18nMessages, onClickArrowAccordionHandler, onClickExportButtonHandler, onChangeImportHandler, onClickPlayPauseButtonHandler, onClickClearHandler, onClickHideShowMessageButtonHandler, onClickHideShowViewerButtonHandler, onClickHideShowXLabelsButtonHandler, onClickExportImageButtonHandler, onChangeRefreshValue, isAccordionExpanded);
-            accordionElement = accordionComponent.getChartContainer() as HTMLElement;
-            accordionComponent.setI18nTexts(i18nMessages);
-            accordionComponent.setProgressBarWidth(20);
+            try {
+                accordionComponent = new Accordion(informationContainer, refreshValue ?? 5, i18nMessages, onClickArrowAccordionHandler, onClickExportButtonHandler, onChangeImportHandler, onClickPlayPauseButtonHandler, onClickClearHandler, onClickHideShowMessageButtonHandler, onClickHideShowViewerButtonHandler, onClickHideShowXLabelsButtonHandler, onClickExportImageButtonHandler, onChangeRefreshValue, isAccordionExpanded);
+                accordionElement = accordionComponent.getChartContainer() as HTMLElement;
+                accordionComponent.setI18nTexts(i18nMessages);
+                accordionComponent.setProgressBarWidth(20);
+            } catch(_) {
+                setTimeout(() => { initChartInDOM() }, 4000);
+            }
+            
         }
 
         if (accordionElement && typeof chartExtension == 'undefined') {
