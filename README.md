@@ -23,7 +23,7 @@ Once installed, StreaMetrics automatically detects when you're watching a Twitch
 
 ### From Chrome Web Store
 
-> _Coming soon..._
+> [Chrome Web Store](https://chromewebstore.google.com/detail/streametrics-%E2%80%93-graphiques/oebogjkjhmaifchplglelphhlefhiico)
 
 ### Manual Installation (Developer Mode)
 
