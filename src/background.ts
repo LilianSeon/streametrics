@@ -18,6 +18,13 @@ const actionsHandler: Record<string, ActionsHandler> = {
     getI18nMessages
 };
 
+chrome.storage.onChanged.addListener(({ streamersList }) => {
+      if (streamersList?.newValue) {
+        chrome.action.setBadgeBackgroundColor({ color: '#60a5fa' });
+        chrome.action.setBadgeText({ text: `${ streamersList.newValue.length === 0 ? '' : streamersList.newValue.length }` });
+      }
+});
+
 
 chrome.runtime.onInstalled.addListener(async (details: chrome.runtime.InstalledDetails) => {
     // When user install this extension for the first time set local storage

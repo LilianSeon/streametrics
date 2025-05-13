@@ -35,7 +35,7 @@ let chartExtension: ChartExtension | undefined;
 //let data: ChartDataViewer[] = [];
 let accordionComponent: Accordion | undefined;
 //let toastComponent: Toast | undefined;
-let accordionElement: HTMLElement | undefined;
+let chartContainer: HTMLElement | undefined;
 let isExtensionInitialized: boolean = false;
 let isExtensionInitializing: boolean = false;
 let messageCounter: MessageCounter | undefined;
@@ -261,17 +261,17 @@ const initChartInDOM = async () => {
         tabId = await getCurrentTabId();
         const informationContainer = await waitForElm('#live-channel-stream-information');
         await waitForElm(".CoreText-sc-1txzju1-0.dLeJdh");
-        const chartContainer = await waitForElm('.chat-line__message');
+        const chatContainer = await waitForElm('.chat-line__message');
         const { language } = await getStorage(["language"]);
         i18nMessages = await getI18nMessages(i18nKeys, language);
 
-        if (typeof messageCounter === 'undefined' && chartContainer) {
+        if (typeof messageCounter === 'undefined' && chatContainer) {
             messageCounter = new MessageCounter(getChatContainer(document));
         }
 
         await initStorage();
 
-        if (informationContainer && informationContainer.parentNode && chartContainer && typeof accordionComponent == 'undefined' && typeof accordionElement == 'undefined' && document.getElementById("accordionExtension") === null) {
+        if (informationContainer && informationContainer.parentNode && chatContainer && typeof accordionComponent == 'undefined' && typeof chartContainer == 'undefined' && document.getElementById("accordionExtension") === null) {
             const { isAccordionExpanded } = await getStorage(['isAccordionExpanded']);
             const { refreshValue } = await getStorage(['refreshValue']);
 
@@ -281,21 +281,39 @@ const initChartInDOM = async () => {
 
             try {
                 accordionComponent = new Accordion(informationContainer, refreshValue ?? 5, i18nMessages, onClickArrowAccordionHandler, onClickExportButtonHandler, onChangeImportHandler, onClickPlayPauseButtonHandler, onClickClearHandler, onClickHideShowMessageButtonHandler, onClickHideShowViewerButtonHandler, onClickHideShowXLabelsButtonHandler, onClickExportImageButtonHandler, onChangeRefreshValue, isAccordionExpanded);
-                accordionElement = accordionComponent.getChartContainer() as HTMLElement;
+                chartContainer = accordionComponent.getChartContainer() as HTMLElement;
+                let accordionElement = accordionComponent.getAccordionElement() as HTMLElement;
+                
+                const observer = new MutationObserver((mutationsList) => {
+                    for (const mutation of mutationsList) {
+                    if (mutation.type === 'childList') {
+                        mutation.removedNodes.forEach((node) => {
+                        if (node === accordionElement) {
+                            console.log('L’élément a été supprimé du DOM.');
+                            initChartInDOM();
+                            observer.disconnect();
+                        }
+                        });
+                    }
+                    }
+                });
+
+                observer.observe(document.body, { childList: true });
+
                 accordionComponent.setI18nTexts(i18nMessages);
                 accordionComponent.setProgressBarWidth(20);
             } catch(_) {
-                setTimeout(() => { initChartInDOM() }, 4000);
+                setTimeout(() => { if(!isExtensionInitialized) initChartInDOM() }, 4000);
             }
             
         }
 
-        if (accordionElement && typeof chartExtension == 'undefined') {
+        if (chartContainer && typeof chartExtension == 'undefined') {
 
             const chartTitle: string = formatChartTitle(window.location.pathname);
             const textColor: ThemeBackgroundColor = document.documentElement.className.includes('dark') ? 'dark' : 'light';
             
-            chartExtension = new ChartExtension(accordionElement, language, i18nMessages, chartTitle, textColor);
+            chartExtension = new ChartExtension(chartContainer, language, i18nMessages, chartTitle, textColor);
             isExtensionInitializing = false;
             isExtensionInitialized = true;
             accordionComponent?.setProgressBarWidth(60);
@@ -303,21 +321,16 @@ const initChartInDOM = async () => {
             updateDefaultColor(isDarkModeActivated() ? 'dark' : 'light');
             toastManager = new ToastManager(accordionComponent!.toastContainer);
 
-            const { streamersList }: { streamersList?: StorageStreamerListType[] } = await getStorage(['streamersList']);
-
             const streamerName = await getStreamerName(document);
             accordionComponent?.setProgressBarWidth(70);
             const streamerImage = await getStreamerImage(document, streamerName);
             accordionComponent?.setProgressBarWidth(80);
             const streamerGame = await getGameName(document);
             accordionComponent?.setProgressBarWidth(90);
-            let occurrences = 0;
-            streamersList?.filter((streamer) => streamer.streamerName === streamerName)?.forEach((streamer) => {
-                occurrences = ++streamer.occurrences;
-            });
+            
             const windowId = await getCurrentWindowId();
 
-            if(windowId) await addOneStreamer({ occurrences, streamerName, streamerImage, streamerGame, status: i18nMessages.status_active as StorageStatusType, tabId, windowId, streamerURL: document.URL, isEnable: true })
+            if(windowId) await addOneStreamer({ occurrences: 0, streamerName, streamerImage, streamerGame, status: i18nMessages.status_active as StorageStatusType, tabId, windowId, streamerURL: document.URL, isEnable: true })
             
 
             accordionComponent?.setProgressBarWidth(100);
@@ -361,7 +374,7 @@ const onTabCreated = async (payload: { url: string, tabID: number }) => {
     if (chartExtension && formatChartTitle(window.location.pathname).includes(chartExtension.chartTitle.replace("'s viewers", ""))) return true;
     
     // If Chart already exists in DOM
-    if (chartExtension && chartExtension instanceof ChartExtension && accordionComponent instanceof Accordion && typeof accordionElement !== 'undefined' && messageCounter && intervalManager instanceof IntervalManager) {
+    if (chartExtension && chartExtension instanceof ChartExtension && accordionComponent instanceof Accordion && typeof chartContainer !== 'undefined' && messageCounter && intervalManager instanceof IntervalManager) {
         
         deleteStreamersListStorage(payload.tabID);
         destroy();
@@ -433,7 +446,7 @@ const destroy = () => {
     messageCounter = undefined;
     chartExtension = undefined;
     accordionComponent = undefined;
-    accordionElement = undefined;
+    chartContainer = undefined;
     isExtensionInitialized = false;
     isExtensionInitializing = false;
 };

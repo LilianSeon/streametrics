@@ -73,10 +73,12 @@ export default class Accordion implements IAccordion<Element> {
             </section>
         `;
 
-        element.insertAdjacentHTML('afterend', htmlString);
+        element.insertAdjacentHTML('beforeend', htmlString);
 
         // Toast
         this.toastContainer = document.getElementById('toastContainer') as HTMLDivElement;
+
+        if (this.toastContainer === null) throw new Error('Accordion did not init')
 
         this.arrowAccordion = document.getElementById('arrowAccordion');
         this.arrowAccordion?.addEventListener('click', onClickArrowAccordionHandler);
