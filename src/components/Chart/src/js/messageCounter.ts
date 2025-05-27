@@ -5,6 +5,7 @@ export class MessageCounter {
     chatContainer: ChatContainer;
     observer: MutationObserver | null;
     messagesCount: number;
+    messages: string[];
     previousMessagesCount: number;
 
     constructor(chatContainer: ChatContainer) {
@@ -13,6 +14,7 @@ export class MessageCounter {
         this.observer = null;
         this.messagesCount = 0;
         this.previousMessagesCount = 0;
+        this.messages = [];
 
         this.#observeAmountOfNewMessages();
     }
@@ -28,6 +30,10 @@ export class MessageCounter {
         return this.messagesCount - previousMessagesCount;
     }
 
+    getNewMessages() {
+        return this.messages;
+    }
+
     /**
      * Watch chat HTML container when child get updated
      * set messagesCount to number of added nodes.
@@ -35,7 +41,20 @@ export class MessageCounter {
      #observeAmountOfNewMessages(): void {
         this.observer = new MutationObserver((mutations: MutationRecord[]) => {
             mutations.forEach((mutation) => {
-                this.messagesCount += mutation.addedNodes.length; 
+                this.messagesCount += mutation.addedNodes.length;
+
+                if (mutation.addedNodes.length > 0) {
+                    mutation.addedNodes.forEach((node) => {
+                        const text = (<HTMLElement>node).innerText;
+                        this.messages.push(text);
+                
+                        // Si on dépasse 1500, on supprime les plus anciens
+                        if (this.messages.length > 1500) {
+                            const overflow = this.messages.length - 1500;
+                            this.messages.splice(0, overflow);
+                        }
+                    });
+                }
             });
 
             const isAmountOfNewMessagesCloseToChatContainerChildren: boolean = this.#isCloseTo(this.messagesCount - this.previousMessagesCount, this.chatContainer[0].children.length, 3)

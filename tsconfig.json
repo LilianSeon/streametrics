@@ -1,6 +1,9 @@
 {
   "compilerOptions": {
     "esModuleInterop": true,
+    "types": [
+      "@types/audioworklet"
+    ]
   },
   "files": [],
   "references": [

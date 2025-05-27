@@ -362,6 +362,17 @@ const getGameName = (document: Document): Promise<string> => {
 
 /**
  * @param { Document } document
+ * @returns { Promise<string> } Stream title
+ */
+const getStreamTitle = (document: Document): string => {
+
+    const getHTMLElementByData = document.querySelectorAll<HTMLElement>('[data-a-target="stream-title"]')[0]?.innerText;
+
+    return getHTMLElementByData;
+};
+
+/**
+ * @param { Document } document
  * @returns { number } Number of viewer
  */
 const getNbViewer = (document: Document): number => {
@@ -658,4 +669,40 @@ const timeAgo = (date: Date, lang: string, i18nTexts: Record<string, string>): s
     return formatTimeString(years, singular_year, plural_year, time_ago, lang);
 };
 
-export { checkChartIsPaused, waitUntilElementLoaded, checkStreamerStatus, deleteStreamerById, getCurrentWindowId, getCurrentTabId, getStreamerImage, timeAgo, isURLTwitch, getNbViewer, waitForElm, wait, getDuration, removeSpaceInString, formatChartTitle, getGameName, computedDataLabel, backGroundThemeObserver, detectPeaks, findPeaks, getPercentageOf, getStreamerName, getChatContainer, deleteSequenceSameNumber, downloadJSON, extractDataFromJSON, isArrayOfNumbers, isArray, isString, isDarkModeActivated, generateRandomId, downloadImage };
+const encodeWAV = (samples: Float32Array, sampleRate: number = 44100): Blob => {
+  const buffer = new ArrayBuffer(44 + samples.length * 2);
+  const view = new DataView(buffer);
+
+  const writeString = (offset: number, str: string): void => {
+    for (let i = 0; i < str.length; i++) {
+      view.setUint8(offset + i, str.charCodeAt(i));
+    }
+  };
+
+  // RIFF/WAV header
+  writeString(0, 'RIFF');
+  view.setUint32(4, 36 + samples.length * 2, true);
+  writeString(8, 'WAVE');
+  writeString(12, 'fmt ');
+  view.setUint32(16, 16, true); // Subchunk1Size
+  view.setUint16(20, 1, true);  // PCM format
+  view.setUint16(22, 1, true);  // Mono channel
+  view.setUint32(24, sampleRate, true);
+  view.setUint32(28, sampleRate * 2, true); // Byte rate
+  view.setUint16(32, 2, true);  // Block align
+  view.setUint16(34, 16, true); // Bits per sample
+  writeString(36, 'data');
+  view.setUint32(40, samples.length * 2, true);
+
+  // PCM data
+  let offset = 44;
+  for (let i = 0; i < samples.length; i++, offset += 2) {
+    const s = Math.max(-1, Math.min(1, samples[i]));
+    view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+  }
+
+  return new Blob([view], { type: 'audio/wav' });
+}
+
+
+export { getStreamTitle, encodeWAV, checkChartIsPaused, waitUntilElementLoaded, checkStreamerStatus, deleteStreamerById, getCurrentWindowId, getCurrentTabId, getStreamerImage, timeAgo, isURLTwitch, getNbViewer, waitForElm, wait, getDuration, removeSpaceInString, formatChartTitle, getGameName, computedDataLabel, backGroundThemeObserver, detectPeaks, findPeaks, getPercentageOf, getStreamerName, getChatContainer, deleteSequenceSameNumber, downloadJSON, extractDataFromJSON, isArrayOfNumbers, isArray, isString, isDarkModeActivated, generateRandomId, downloadImage };

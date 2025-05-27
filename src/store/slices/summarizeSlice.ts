@@ -1,0 +1,30 @@
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+
+export type SummarizeValue = {
+    text: string,
+    time: number
+}
+
+export interface SummarizeState {
+  value: SummarizeValue[];
+}
+
+const initialState: SummarizeState = {
+  value: [],
+};
+
+const summarizeSlice = createSlice({
+  name: 'summarize',
+  initialState,
+  reducers: {
+    addSummary: (state, action: PayloadAction<SummarizeValue>) => {
+      state.value.push(action.payload);
+    },
+    clearSummaries: (state) => {
+      state.value = [];
+    },
+  },
+});
+
+export const { addSummary, clearSummaries } = summarizeSlice.actions;
+export default summarizeSlice.reducer;

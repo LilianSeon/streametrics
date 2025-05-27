@@ -34,7 +34,7 @@ const Footer: FC<FooterProps> = ({ language }:FooterProps) => {
     }, [language]);
 
     return(
-        <footer className="max-w-screen-xl flex flex-wrap items-center mx-auto p-4">
+        <footer className="max-w-screen-xl flex flex-wrap items-center p-4">
             <div className="grow"></div>
             <div className="text-gray-200">{ textValue.report_issue } <a onClick={ onClickLink } className="text-blue-500 cursor-pointer hover:underline">{ textValue.open_issue }</a></div>
         </footer>

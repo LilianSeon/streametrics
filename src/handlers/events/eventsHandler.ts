@@ -1,4 +1,4 @@
-import { checkChartIsPaused, checkStreamerStatus, getCurrentTabId, getGameName, getStreamerName } from "../../components/Chart/src/utils/utils";
+import { checkChartIsPaused, checkStreamerStatus, getCurrentTabId, getGameName, getStreamerName, getStreamTitle } from "../../components/Chart/src/utils/utils";
 import { getStorage } from "../../components/Chart/src/utils/utilsStorage";
 
 const checkStatus = (_payload: any, sendResponse: (response?: any) => void) => {
@@ -30,5 +30,22 @@ const getStatus = async (isStreamLive: boolean, isPaused: boolean): Promise<stri
     return status_inactive ?? status_active;
 };
 
+const getInfo = (_payload: any, sendResponse: (response?: any) => void): Promise<{ streamerName: string, streamerGame: string, streamTitle: string, language: string } | false> => {
+    return new Promise(async(resolve, reject) => {
+        const streamerName = await getStreamerName(document);
+        const streamerGame = await getGameName(document);
+        const streamTitle = getStreamTitle(document);
+        const { language } = await getStorage(["language"]);
 
-export { checkStatus }
+        if (streamerName && streamerGame && streamTitle && language) {
+            sendResponse({ streamerName, streamerGame, streamTitle, language });
+            resolve({ streamerName, streamerGame, streamTitle, language });
+        } else {
+            sendResponse(false);
+            reject(false)
+        }
+    });
+};
+
+
+export { getInfo, checkStatus }

@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+requests
+openai-whisper
+transformers
+torch  # requis pour whisper
+demucs

@@ -1,6 +1,12 @@
 import { FC, useEffect, useState } from 'react';
 import './background';
 
+// Store
+import { useDispatch } from 'react-redux';
+import { RootState } from './store/store'
+import { useAppSelector } from './store/hooks';
+import { addSummary } from './store/slices/summarizeSlice';
+
 // Components
 import { Navbar } from './components/Navbar';
 import { Table } from './components/Table';
@@ -9,9 +15,13 @@ import { Footer } from './components/Footer';
 // Typing
 import { StorageStreamerListType } from './typings/StorageType';
 import { Languages } from './components/Chart/src/js/Texts';
+import { Summarize } from './components/Summarize';
 
 
 const App: FC = () => {
+
+  const dispatch = useDispatch();
+  const summaries = useAppSelector((state: RootState) => state.summarize.value);
 
   const [ isDisplayListLang, setIsDisplayListLang ] = useState(false);
   const [ streamerList, setStreamerList ] = useState<StorageStreamerListType[]>([]);
@@ -21,7 +31,19 @@ const App: FC = () => {
     if (isDisplayListLang) setIsDisplayListLang(!isDisplayListLang)
   };
 
+  const summarizeReady = ({ summary, time }: { summary: string, time: string }) => {
+    dispatch(addSummary({ text: summary, time: parseInt(time) }));
+  };
+
   useEffect(() => {
+
+    chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+      console.log('onMessage sidePanel', message, sender, sendResponse)
+
+      if (message.action === "summarizeReady") {
+        summarizeReady(message.payload)
+      }
+    });
 
     chrome.storage.onChanged.addListener(({ streamersList, language }) => {
       if (streamersList?.newValue) {
@@ -90,9 +112,10 @@ const App: FC = () => {
   }, []);
 
   return (
-    <div onClick={ onClickBody } style={{ width: '440px', height: '380px'}} className='bg-gray-900'>
+    <div onClick={ onClickBody } style={{ height: '100%'}} className='flex flex-col bg-gray-900'>
       <Navbar isDisplayListLang={ isDisplayListLang } setIsDisplayListLang={ setIsDisplayListLang } language={ language } />
       <Table streamersList={ streamerList } language={ language } />
+      <Summarize summaries={ summaries } />
       <Footer language={ language } />
     </div>
   )

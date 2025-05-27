@@ -8,6 +8,9 @@ import { Languages } from './Chart/src/js/Texts';
 
 // I18n
 import { loadMessage } from "../loader/fileLoader";
+import { useAppDispatch } from "../store/hooks";
+import { AppDispatch } from "../store/store";
+import { updateLanguage } from "../store/slices/languageSlice";
 
 
 const setIsEnableExtension = async (value: boolean) => {
@@ -41,6 +44,8 @@ export type NavbarProps = {
 
 const Navbar: FC<NavbarProps> = ({ isDisplayListLang, setIsDisplayListLang, language }: NavbarProps) => {
 
+    const dispatch = useAppDispatch<AppDispatch>();
+
     const [ checkboxValue, setCheckboxValue ] = useState<boolean | undefined>();
     const imgSrc = useMemo(() => chrome.runtime.getURL('images/logo-transparent.png'), []);
     const UKFlagSVG = useMemo(() => chrome.runtime.getURL('images/uk-flag.svg'), []);
@@ -71,7 +76,7 @@ const Navbar: FC<NavbarProps> = ({ isDisplayListLang, setIsDisplayListLang, lang
         const initStorage = async () => {
           const { language } = await chrome.storage.local.get(["language"]);
           const { isEnableExtension } = await chrome.storage.local.get(["isEnableExtension"]);
-          setLangList(langList.map((lang) => { return {...lang, isSelected: lang.languageShort === language } }))
+          setLanguage(language);
           setCheckboxValue(isEnableExtension);
         };
     
@@ -80,8 +85,9 @@ const Navbar: FC<NavbarProps> = ({ isDisplayListLang, setIsDisplayListLang, lang
     }, []);
 
     
-    const setLanguage = async (lang: string) => {
+    const setLanguage = async (lang: Languages) => {
         setLangList(langList.map((language) => { return {...language, isSelected: language.languageShort === lang } }));
+        dispatch(updateLanguage(lang));
         await chrome.storage.local.set({ "language": lang });
     };
 

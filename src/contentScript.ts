@@ -19,7 +19,7 @@ import { StorageStatusType, StorageStreamerListType } from './typings/StorageTyp
 import { EventsResquest } from './typings/MessageType';
 
 // Events Handlers
-import { checkStatus } from './handlers/events/eventsHandler';
+import { checkStatus, getInfo } from './handlers/events/eventsHandler';
 
 let tabId: number | undefined;
 
@@ -44,6 +44,17 @@ let intervalManager: IntervalManager | undefined;
 let hasImportedData: boolean = false;
 let toastManager: ToastManager | undefined;
 
+/*async function fetchTopics(messages: string[]) {
+    const res = await fetch("http://127.0.0.1:5000/detect-topics", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ messages }),
+    });
+  
+    const data = await res.json();
+    return data; // tableau de tableaux de mots
+}*/
+
 /**
  * Get needed data then add it to the Chart
  */
@@ -52,10 +63,12 @@ const startLoopGetData = async () => {
         const nbViewer: number = getNbViewer(document);
         const game: string = await getGameName(document);
         let messageAmount: number = 0;
+        //let messages: string[] = [];
     
         if (chartExtension && duration && nbViewer) {
     
             if (typeof messageCounter !== 'undefined') {
+                //messages = messageCounter.getNewMessages();
                 messageAmount = messageCounter.getAmountOfNewMessages(messageCounter.previousMessagesCount);
             }
     
@@ -75,6 +88,7 @@ const startLoopGetData = async () => {
             chartExtension.addData(newData, messageAmount);
             //chartExtension.addPeaks(peaks);
             loopCounter++;
+            //if (messages?.length > 20) console.log(await fetchTopics(messages));
     
         }
     
@@ -246,6 +260,19 @@ const initStorage = async (): Promise<void> => {
     }
 };
 
+const onClickSummary = async () => {
+    console.log('ID de l\'onglet actuel :', tabId);
+    const { language } = await getStorage(["language"]);
+    const game: string = await getGameName(document);
+    const streamer = await getStreamerName(document);
+
+    /*chrome.runtime.sendMessage({ action: 'startTabCapture', payload: { streamer, game, language } }, (response) => {
+        console.log('startTabCapture', response)
+    });*/
+    
+    chrome.runtime.sendMessage({ action: 'openSidePanel', payload: { streamer, game, language } });
+};
+
 /**
  * Check if `#live-channel-stream-information` is in DOM or wait for it, then start getting datas and init chart
  */
@@ -280,21 +307,21 @@ const initChartInDOM = async () => {
             }
 
             try {
-                accordionComponent = new Accordion(informationContainer, refreshValue ?? 5, i18nMessages, onClickArrowAccordionHandler, onClickExportButtonHandler, onChangeImportHandler, onClickPlayPauseButtonHandler, onClickClearHandler, onClickHideShowMessageButtonHandler, onClickHideShowViewerButtonHandler, onClickHideShowXLabelsButtonHandler, onClickExportImageButtonHandler, onChangeRefreshValue, isAccordionExpanded);
+                accordionComponent = new Accordion(informationContainer, refreshValue ?? 5, i18nMessages, onClickArrowAccordionHandler, onClickExportButtonHandler, onChangeImportHandler, onClickPlayPauseButtonHandler, onClickClearHandler, onClickHideShowMessageButtonHandler, onClickHideShowViewerButtonHandler, onClickHideShowXLabelsButtonHandler, onClickExportImageButtonHandler, onChangeRefreshValue, isAccordionExpanded, onClickSummary);
                 chartContainer = accordionComponent.getChartContainer() as HTMLElement;
                 let accordionElement = accordionComponent.getAccordionElement() as HTMLElement;
                 
                 const observer = new MutationObserver((mutationsList) => {
                     for (const mutation of mutationsList) {
-                    if (mutation.type === 'childList') {
-                        mutation.removedNodes.forEach((node) => {
-                        if (node === accordionElement) {
-                            console.log('L’élément a été supprimé du DOM.');
-                            initChartInDOM();
-                            observer.disconnect();
+                        if (mutation.type === 'childList') {
+                            mutation.removedNodes.forEach(() => {
+                            if (document.getElementById(accordionElement.id) === null && isExtensionInitialized) { // If accordion getting deleted
+                                destroy();
+                                initChartInDOM();
+                                observer.disconnect();
+                            }
+                            });
                         }
-                        });
-                    }
                     }
                 });
 
@@ -390,7 +417,8 @@ const eventsHandlers: Record<string, any> = {
     enableChart,
     disableChart,
     onTabCreated,
-    onTabUpdated: onTabCreated
+    onTabUpdated: onTabCreated,
+    getInfo
 };
 
 chrome.storage.onChanged.addListener(async (changes) => {

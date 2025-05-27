@@ -87,7 +87,7 @@ const Table: FC<TableProps> = ({ streamersList, language }: TableProps) => {
                         </tr>
                     </thead>
                     <tbody>
-                        { filteredStreamersLength !== 0 ? <TableRows streamersList={filteredStreamers} currentPage={currentPage} searchTextValue={searchTextValue} actionsLabels={{ focus: textValue.focus, disable: textValue.disable, enable: textValue.enable }} /> : <></> }
+                        { filteredStreamersLength !== 0 ? <TableRows streamersList={filteredStreamers} currentPage={currentPage} searchTextValue={searchTextValue} actionsLabels={{ focus: textValue.focus, disable: textValue.disable, enable: textValue.enable }} language={ language } /> : <></> }
                     </tbody>
                 </table>
                 { displayNotFoundOrNotDetected(filteredStreamersLength, searchTextValueLength) }
