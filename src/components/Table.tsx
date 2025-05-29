@@ -78,16 +78,16 @@ const Table: FC<TableProps> = ({ streamersList, language }: TableProps) => {
                 <table className="rounded-lg w-full text-sm text-left text-gray-400 table-auto overflow-visible">
                     <thead className="text-xs uppercase bg-gray-700 text-gray-300">
                         <tr>
-                            <th scope="col" className="rounded-tl-lg w-35 px-4 py-3">Streamer</th>
-                            <th scope="col" className="w-20 px-4 py-3">Status</th>
-                            <th scope="col" className="w-40 pl-4 py-3">{ textValue.game } </th>
-                            <th scope="col" className="rounded-tr-lg w-5 pr-2 py-3">
+                            <th className="rounded-tl-lg px-4 py-3">Streamer</th>
+                            <th className="py-3">Status</th>
+                            <th className="py-3 pl-1">{ textValue.game }</th>
+                            <th className="rounded-tr-lg py-3">
                                 <span className="sr-only">Actions</span>
                             </th>
                         </tr>
                     </thead>
                     <tbody>
-                        { filteredStreamersLength !== 0 ? <TableRows streamersList={filteredStreamers} currentPage={currentPage} searchTextValue={searchTextValue} actionsLabels={{ focus: textValue.focus, disable: textValue.disable, enable: textValue.enable }} language={ language } /> : <></> }
+                        { filteredStreamersLength !== 0 && <TableRows streamersList={filteredStreamers} currentPage={currentPage} searchTextValue={searchTextValue} actionsLabels={{ focus: textValue.focus, disable: textValue.disable, enable: textValue.enable }} language={ language } />}
                     </tbody>
                 </table>
                 { displayNotFoundOrNotDetected(filteredStreamersLength, searchTextValueLength) }

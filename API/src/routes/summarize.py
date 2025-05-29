@@ -44,10 +44,15 @@ async def summarize(
         title: str = Form(...)
     ):
 
+    temp_path = None
+
     try:
+
+        file_bytes = await audio.read()
+
         # Sauvegarde temporaire du fichier
         with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp:
-            tmp.write(await audio.read())
+            tmp.write(file_bytes)
             temp_path = tmp.name
 
         result = whisper_model.transcribe(temp_path, fp16=False, no_speech_threshold=0.6)
@@ -63,5 +68,5 @@ async def summarize(
     except Exception as e:
         return JSONResponse(content={"error": str(e)}, status_code=500)
     finally:
-        if os.path.exists(temp_path):
+        if temp_path and os.path.exists(temp_path):
             os.remove(temp_path)

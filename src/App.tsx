@@ -16,12 +16,14 @@ import { Footer } from './components/Footer';
 import { StorageStreamerListType } from './typings/StorageType';
 import { Languages } from './components/Chart/src/js/Texts';
 import { Summarize } from './components/Summarize';
+import { AudioBarsValue, updateAudioBars } from './store/slices/audioBarsSlice';
 
 
 const App: FC = () => {
 
   const dispatch = useDispatch();
   const summaries = useAppSelector((state: RootState) => state.summarize.value);
+  const audioBars = useAppSelector((state: RootState) => state.audioBars.value);
 
   const [ isDisplayListLang, setIsDisplayListLang ] = useState(false);
   const [ streamerList, setStreamerList ] = useState<StorageStreamerListType[]>([]);
@@ -35,13 +37,21 @@ const App: FC = () => {
     dispatch(addSummary({ text: summary, time: parseInt(time) }));
   };
 
+  const drawAudioBars = (payload: AudioBarsValue[]) => {
+    dispatch(updateAudioBars(payload));
+  };
+
   useEffect(() => {
 
-    chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-      console.log('onMessage sidePanel', message, sender, sendResponse)
+    chrome.runtime.onMessage.addListener((message, _sender, _sendResponse) => {
+      //console.log('onMessage sidePanel', message, sender, sendResponse)
 
       if (message.action === "summarizeReady") {
         summarizeReady(message.payload)
+      }
+
+      if (message.action === "drawAudioBars") {
+        drawAudioBars(message.payload)
       }
     });
 
@@ -115,7 +125,7 @@ const App: FC = () => {
     <div onClick={ onClickBody } style={{ height: '100%'}} className='flex flex-col bg-gray-900'>
       <Navbar isDisplayListLang={ isDisplayListLang } setIsDisplayListLang={ setIsDisplayListLang } language={ language } />
       <Table streamersList={ streamerList } language={ language } />
-      <Summarize summaries={ summaries } />
+      <Summarize summaries={ summaries } audioBars={ audioBars }/>
       <Footer language={ language } />
     </div>
   )

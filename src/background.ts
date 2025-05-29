@@ -5,7 +5,6 @@ import { getI18nMessages } from "./handlers/actions/i18nMessagesHandler";
 import { getWindowId, getTabId } from "./handlers/actions/infoHandler";
 import { openSidePanel } from "./handlers/actions/openSidePanel";
 import { addOneStreamer, updateStreamersList, deleteAllStreamers, deleteOneStreamer } from "./handlers/actions/streamersListHandler";
-import { summarizeReady } from "./handlers/actions/summarizeReady";
 import { startTabCapture } from "./handlers/actions/tabCapture";
 
 // Typing
@@ -71,15 +70,14 @@ const actionsHandler: Record<string, ActionsHandler> = {
     getTabId,
     getI18nMessages,
     startTabCapture,
-    openSidePanel,
-    summarizeReady
+    openSidePanel
 };
 
 chrome.storage.onChanged.addListener(({ streamersList }) => {
-      if (streamersList?.newValue) {
-        chrome.action.setBadgeBackgroundColor({ color: '#60a5fa' });
-        chrome.action.setBadgeText({ text: `${ streamersList.newValue.length === 0 ? '' : streamersList.newValue.length }` });
-      }
+  if (streamersList?.newValue) {
+    chrome.action.setBadgeBackgroundColor({ color: '#60a5fa' });
+    chrome.action.setBadgeText({ text: `${ streamersList.newValue.length === 0 ? '' : streamersList.newValue.length }` });
+  }
 });
 
 

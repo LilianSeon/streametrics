@@ -81,6 +81,61 @@ const startRecording = async (message: any) => {
 
       const source = audioCtx.createMediaStreamSource(audioStream);
 
+      const barCount = 3;
+      //const bars: number[] = [];
+      //let barsAttributes: any[] = [];
+      const lastHeights = new Array(barCount).fill(2);
+      const eqGains = [1, 1.5, 2.5]; // Custom gain per band
+      const analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 64;
+      source.connect(analyser);
+
+
+      /**
+       * Linearly interpolate between a and b.
+       */
+      const lerp = (a: number, b: number, t: number): number => {
+        return a + (b - a) * t;
+      };
+
+      /**
+       * Computes visual audio bars and sends to sidePanel.
+       */
+      const sendVisualizerBars = () => {
+        const bufferLength = analyser.frequencyBinCount;
+        const dataArray = new Uint8Array(bufferLength);
+        analyser.getByteFrequencyData(dataArray);
+
+        const barsAttributes = [];
+
+        for (let i = 0; i < barCount; i++) {
+          const start = Math.floor(i * bufferLength / barCount);
+          const end = Math.floor((i + 1) * bufferLength / barCount);
+          let sum = 0;
+          for (let j = start; j < end; j++) {
+            sum += dataArray[j];
+          }
+          const avg = sum / (end - start);
+          const gain = eqGains[i];
+          const scaled = Math.min(avg * gain, 255);
+          const scale = scaled / 255;
+
+          // 30x20 SVG reference frame
+          const targetHeight = 2 + scale * 15; // max 16px height
+          const height = lerp(lastHeights[i], targetHeight, 0.3);
+          lastHeights[i] = height;
+
+          const y = 10 - height / 2;
+
+          barsAttributes.push({ y: y.toFixed(2), height: height.toFixed(2) });
+        }
+
+        chrome.runtime.sendMessage({ action: 'drawAudioBars', payload: barsAttributes });
+      };
+
+      setInterval(sendVisualizerBars, 100);
+    
+
       const workletNode = new AudioWorkletNode(audioCtx, 'custom-audio-processor');
 
       let audioBuffer: number[] = [];
@@ -116,7 +171,7 @@ const startRecording = async (message: any) => {
           formData.append('time', new Date().getTime().toString());
 
           try {
-            const res = await fetch("http://127.0.0.1:5000/summarize/", {
+            const res = await fetch("http://127.0.0.1:5000/summarize/", { //188.245.179.58
               method: "POST",
               body: formData
             });
