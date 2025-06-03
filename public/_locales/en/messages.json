@@ -1,6 +1,14 @@
 {
+  "summary_button_disable": {
+    "message": "Disable summary",
+    "description": "Button disable summary"
+  },
+  "summary_button_enable": {
+    "message": "Enable summary",
+    "description": "Button enable summary"
+  },
   "extention_name": {
-    "message": "StreaMetrics – Twitch Viewer & Chat Graphs"
+    "message": "StreaMetrics - Twitch Viewer & Chat Graphs"
   },
   "extention_description": {
     "message": "Track real-time viewer count and chat activity on Twitch with a live graph under the stream. Open-source and easy to use."

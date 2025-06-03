@@ -17,7 +17,7 @@ const NotDetected: FC<NotDetectedProps> = ({ notFoundTexts }: NotDetectedProps) 
 
     return(
         <p>
-            <div className='flex flex-row justify-center items-center pt-10 pb-2 text-base text-gray-200'>
+            <div className='flex flex-row justify-center items-center pt-2 pb-2 text-base text-gray-200'>
                 <p className="flex justify-center items-center">{ notFoundTexts.not_detected_message }</p>
             </div>
             <div className="flex flex-row justify-center items-center">

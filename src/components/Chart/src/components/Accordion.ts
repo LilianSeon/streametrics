@@ -39,7 +39,6 @@ export default class Accordion implements IAccordion<Element> {
     progressBarContainer: HTMLDivElement;
     tabContent: HTMLElement | null;
     toastContainer: HTMLDivElement;
-    summaryButton: HTMLButtonElement | null;
     isExpanded: boolean;
     #isPlaying: boolean = true;
     #isDisplayMessage: boolean = true;
@@ -47,7 +46,7 @@ export default class Accordion implements IAccordion<Element> {
     #isDisplayXLabels: boolean = false;
     private onClickArrowAccordionHandler: OnClickArrowAccordionHandler;
 
-    constructor(element: Element, refreshValue: number, i18nTexts: Record<string, string>, onClickArrowAccordionHandler: OnClickArrowAccordionHandler, onClickExportButtonHandler: OnClickExportButtonHandler, onChangeImportHandler: OnChangeImportHandler, onClickPlayPauseButtonHandler: OnClickPlayPauseButtonHandler, onClickClearButtonHandler: OnClickClearButtonHandler, onClickHideShowMessageButtonHandler: OnClickHideShowMessageButtonHandler, onClickHideShowViewerButtonHandler: OnClickHideShowViewerButtonHandler, onClickHideShowXLabelsButtonHandler: OnClickHideShowXLabelsButtonHandler, onClickExportImageButtonHandler: OnClickExportImageButtonHandler, onChangeRefreshValue: OnChangeRefreshValueHandler, isExpanded: boolean, onClickSummaryButtonHandler: any) {
+    constructor(element: Element, refreshValue: number, i18nTexts: Record<string, string>, onClickArrowAccordionHandler: OnClickArrowAccordionHandler, onClickExportButtonHandler: OnClickExportButtonHandler, onChangeImportHandler: OnChangeImportHandler, onClickPlayPauseButtonHandler: OnClickPlayPauseButtonHandler, onClickClearButtonHandler: OnClickClearButtonHandler, onClickHideShowMessageButtonHandler: OnClickHideShowMessageButtonHandler, onClickHideShowViewerButtonHandler: OnClickHideShowViewerButtonHandler, onClickHideShowXLabelsButtonHandler: OnClickHideShowXLabelsButtonHandler, onClickExportImageButtonHandler: OnClickExportImageButtonHandler, onChangeRefreshValue: OnChangeRefreshValueHandler, isExpanded: boolean) {
 
         const imgSrc = chrome.runtime.getURL('images/logo-transparent.png');
 
@@ -58,7 +57,6 @@ export default class Accordion implements IAccordion<Element> {
                         <div id="headerLabel" class="pt-2 pb-3 h-20 text-center text-white text-xl flex">
                             <img class="my-auto h-14 inline-block" src="${ imgSrc }" alt="logo" />
                             <div class="my-auto ml-4 self-center text-3xl font-semibold whitespace-nowrap tracking-wide inline-block text-black dark:text-white">StreaMetrics</div>
-                            <button id="summaryButton" type="button" class="ml-5 text-white bg-gradient-to-br from-pink-500 to-orange-400 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-pink-200 dark:focus:ring-pink-800 font-medium rounded-lg text-blg px-5 py-2.5 text-center me-2 mb-2">Summary</button>
                         </div>
                         <div id="arrowAccordion" class="my-auto mr-3 cursor-pointer transition-transform duration-350 ${ isExpanded ? 'rotate-180' : '' }">
                             <svg class="h-8 w-8 text-black dark:text-white" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">  <path stroke="none" d="M0 0h24v24H0z"/>  <polyline points="6 15 12 9 18 15" /></svg>
@@ -81,9 +79,6 @@ export default class Accordion implements IAccordion<Element> {
         this.toastContainer = document.getElementById('toastContainer') as HTMLDivElement;
 
         if (this.toastContainer === null) throw new Error('Accordion did not init')
-
-        this.summaryButton = document.getElementById('summaryButton') as HTMLButtonElement;
-        this.summaryButton?.addEventListener('click', onClickSummaryButtonHandler);
 
         this.arrowAccordion = document.getElementById('arrowAccordion');
         this.arrowAccordion?.addEventListener('click', onClickArrowAccordionHandler);

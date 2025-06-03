@@ -30,7 +30,7 @@ const getStatus = async (isStreamLive: boolean, isPaused: boolean): Promise<stri
     return status_inactive ?? status_active;
 };
 
-const getInfo = (_payload: any, sendResponse: (response?: any) => void): Promise<{ streamerName: string, streamerGame: string, streamTitle: string, language: string } | false> => {
+const getInfo = (_payload?: any, sendResponse?: (response?: any) => void): Promise<{ streamerName: string, streamerGame: string, streamTitle: string, language: string } | false> => {
     return new Promise(async(resolve, reject) => {
         const streamerName = await getStreamerName(document);
         const streamerGame = await getGameName(document);
@@ -38,10 +38,10 @@ const getInfo = (_payload: any, sendResponse: (response?: any) => void): Promise
         const { language } = await getStorage(["language"]);
 
         if (streamerName && streamerGame && streamTitle && language) {
-            sendResponse({ streamerName, streamerGame, streamTitle, language });
+            if (sendResponse) sendResponse({ streamerName, streamerGame, streamTitle, language });
             resolve({ streamerName, streamerGame, streamTitle, language });
         } else {
-            sendResponse(false);
+            if (sendResponse) sendResponse(false);
             reject(false)
         }
     });

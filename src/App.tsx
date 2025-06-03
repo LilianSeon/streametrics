@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from 'react';
+import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import './background';
 
 // Store
@@ -17,6 +17,8 @@ import { StorageStreamerListType } from './typings/StorageType';
 import { Languages } from './components/Chart/src/js/Texts';
 import { Summarize } from './components/Summarize';
 import { AudioBarsValue, updateAudioBars } from './store/slices/audioBarsSlice';
+import { updateSidePanelOpenedFrom } from './store/slices/sidePanelOpenedFromSlice';
+import { updatePulse } from './store/slices/pulseSlice';
 
 
 const App: FC = () => {
@@ -24,44 +26,72 @@ const App: FC = () => {
   const dispatch = useDispatch();
   const summaries = useAppSelector((state: RootState) => state.summarize.value);
   const audioBars = useAppSelector((state: RootState) => state.audioBars.value);
+  const sidePanelOpenedFrom = useAppSelector((state: RootState) => state.sidePanelOpenedFrom.value) as chrome.tabs.Tab;
+  
+  const sidePanelOpenedFromTabId = useMemo(() => sidePanelOpenedFrom?.id, [sidePanelOpenedFrom]);
+  const sidePanelOpenedFromWindowId = useMemo(() => sidePanelOpenedFrom?.windowId, [sidePanelOpenedFrom]);
 
   const [ isDisplayListLang, setIsDisplayListLang ] = useState(false);
   const [ streamerList, setStreamerList ] = useState<StorageStreamerListType[]>([]);
   const [ language, setLanguage ] = useState<Languages | undefined>();
 
+  const currentStreamerNameRef = useRef<string | undefined>();
+
+  const currentStreamerName = useMemo(() => streamerList.find(({ tabId }) => tabId === sidePanelOpenedFromTabId)?.streamerName, [streamerList, sidePanelOpenedFromTabId]);
+  const currentStreamerImage = useMemo(() => streamerList.find(({ tabId }) => tabId === sidePanelOpenedFromTabId)?.streamerImage, [streamerList, sidePanelOpenedFromTabId]);
+
+
+  useEffect(() => {
+    currentStreamerNameRef.current = currentStreamerName;
+  }, [currentStreamerName]);
+
+  useEffect(() => {
+    if (currentStreamerName && currentStreamerImage && sidePanelOpenedFromTabId) dispatch(addSummary({ text: '', time: new Date().getTime(), streamerName: currentStreamerName, streamerImage: currentStreamerImage }));
+  }, [currentStreamerName, currentStreamerImage])
+
   const onClickBody: React.MouseEventHandler<HTMLDivElement> = () => {
     if (isDisplayListLang) setIsDisplayListLang(!isDisplayListLang)
   };
 
-  const summarizeReady = ({ summary, time }: { summary: string, time: string }) => {
-    dispatch(addSummary({ text: summary, time: parseInt(time) }));
-  };
+  const summarizeReady = useCallback(({ summary, time, streamerName }: { summary: string, time: string, streamerName: string }, currentStreamerName: string) => {
+    if (streamerName === currentStreamerName) dispatch(addSummary({ text: summary, time: parseInt(time), streamerName }));
+  }, []);
 
-  const drawAudioBars = (payload: AudioBarsValue[]) => {
-    dispatch(updateAudioBars(payload));
-  };
+  const drawAudioBars = useCallback(({ bars, pulse }: { bars: AudioBarsValue[], pulse: number }) => {
+    if (bars) dispatch(updateAudioBars(bars));
+    if (pulse) dispatch(updatePulse(pulse));
+  }, []);
 
   useEffect(() => {
 
     chrome.runtime.onMessage.addListener((message, _sender, _sendResponse) => {
-      //console.log('onMessage sidePanel', message, sender, sendResponse)
 
-      if (message.action === "summarizeReady") {
-        summarizeReady(message.payload)
+      if (message.action === "summarizeReady" && currentStreamerNameRef.current) {
+        summarizeReady(message.payload, currentStreamerNameRef.current);
       }
 
       if (message.action === "drawAudioBars") {
-        drawAudioBars(message.payload)
+        drawAudioBars(message.payload);
       }
     });
 
-    chrome.storage.onChanged.addListener(({ streamersList, language }) => {
+    chrome.storage.onChanged.addListener(({ streamersList, language, sidePanelOpenedFrom }) => {
       if (streamersList?.newValue) {
         setStreamerList(streamersList.newValue as StorageStreamerListType[]);
       }
 
       if (language?.newValue) {
         setLanguage(language.newValue);
+        chrome.runtime.sendMessage({
+            action: 'updateMetadata',
+            payload: {
+                language: language.newValue
+            }
+        });
+      }
+
+      if (sidePanelOpenedFrom?.newValue) {
+        dispatch(updateSidePanelOpenedFrom(sidePanelOpenedFrom.newValue));
       }
     });
 
@@ -69,6 +99,8 @@ const App: FC = () => {
       try {
         const { streamersList } = await chrome.storage.local.get(keys);
         const { language } = await chrome.storage.local.get('language');
+        const { sidePanelOpenedFrom } = await chrome.storage.local.get('sidePanelOpenedFrom');
+        dispatch(updateSidePanelOpenedFrom(sidePanelOpenedFrom));
         setStreamerList(streamersList ?? []);
         setLanguage(language);
 
@@ -125,7 +157,7 @@ const App: FC = () => {
     <div onClick={ onClickBody } style={{ height: '100%'}} className='flex flex-col bg-gray-900'>
       <Navbar isDisplayListLang={ isDisplayListLang } setIsDisplayListLang={ setIsDisplayListLang } language={ language } />
       <Table streamersList={ streamerList } language={ language } />
-      <Summarize summaries={ summaries } audioBars={ audioBars }/>
+      <Summarize summaries={ summaries } audioBars={ audioBars } streamerName={ currentStreamerName } tabId={ sidePanelOpenedFromTabId } windowId={ sidePanelOpenedFromWindowId }/>
       <Footer language={ language } />
     </div>
   )

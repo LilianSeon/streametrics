@@ -2,7 +2,9 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 export type SummarizeValue = {
     text: string,
-    time: number
+    time: number,
+    streamerName?: string,
+    streamerImage?: string,
 }
 
 export interface SummarizeState {

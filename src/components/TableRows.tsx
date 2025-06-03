@@ -3,9 +3,6 @@ import { FC } from "react";
 // Typings
 import { StorageStreamerListType } from "../typings/StorageType";
 import { Languages } from "./Chart/src/js/Texts";
-/*import { AppDispatch } from "../store/store";
-import { addSummary } from "../store/slices/summarizeSlice";
-import { useAppDispatch } from "../store/hooks";*/
 
 export interface TableRowsTextValueI18n {
     focus: string,
@@ -23,41 +20,6 @@ export type TableRowsProps = {
 
 const itemsPerPage = 3;
 
-/*const encodeWAV = (samples: Float32Array, sampleRate = 44100) => {
-    const buffer = new ArrayBuffer(44 + samples.length * 2);
-    const view = new DataView(buffer);
-
-    const writeString = (offset: any, str: string) => {
-        for (let i = 0; i < str.length; i++) {
-            view.setUint8(offset + i, str.charCodeAt(i));
-        }
-    };
-
-    // RIFF/WAV header
-    writeString(0, 'RIFF');
-    view.setUint32(4, 36 + samples.length * 2, true);
-    writeString(8, 'WAVE');
-    writeString(12, 'fmt ');
-    view.setUint32(16, 16, true); // Subchunk1Size
-    view.setUint16(20, 1, true);  // PCM format
-    view.setUint16(22, 1, true);  // Mono channel
-    view.setUint32(24, sampleRate, true);
-    view.setUint32(28, sampleRate * 2, true); // Byte rate
-    view.setUint16(32, 2, true);  // Block align
-    view.setUint16(34, 16, true); // Bits per sample
-    writeString(36, 'data');
-    view.setUint32(40, samples.length * 2, true);
-
-    // PCM data
-    let offset = 44;
-    for (let i = 0; i < samples.length; i++, offset += 2) {
-        const s = Math.max(-1, Math.min(1, samples[i]));
-        view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
-    }
-
-    return new Blob([view], { type: 'audio/wav' });
-}*/
-
 const highlightMatch = (text: string, search: string) => {
     if (!search) return text;
     const regex = new RegExp(`(${search})`, 'gi'); // g: Finds all matches in the text + i: Makes the search case-insensitive.
@@ -74,21 +36,12 @@ const scrollToAnchor = () => {
     }
 };
 
-const TableRows: FC<TableRowsProps> = ({ actionsLabels, streamersList, currentPage = 1, searchTextValue = '', language = 'en' }: TableRowsProps) => {
-
-    //const dispatch = useAppDispatch<AppDispatch>();
+const TableRows: FC<TableRowsProps> = ({ actionsLabels, streamersList, currentPage = 1, searchTextValue = '' }: TableRowsProps) => {
 
     const currentItems = streamersList.slice(
         (currentPage - 1) * itemsPerPage,
         currentPage * itemsPerPage
     );
-
-    const onClickSummarizeHandler = async (event: React.MouseEvent<Element, MouseEvent>, streamer: StorageStreamerListType['streamerName'], game: StorageStreamerListType['streamerGame'], windowId: StorageStreamerListType['windowId'], language: Languages) => {
-        event.preventDefault();
-        console.log('streamer', streamer, game)
-
-        await chrome.runtime.sendMessage({ action: 'openSidePanel', payload: { streamer, game, language, windowId } });
-    };
 
     const onClickDisableHanlder = (tabId: StorageStreamerListType['tabId'], isEnable: StorageStreamerListType['isEnable']) => {
         chrome.tabs.sendMessage(tabId, { event: isEnable ? "disableChart" : "enableChart" });
@@ -157,9 +110,6 @@ const TableRows: FC<TableRowsProps> = ({ actionsLabels, streamersList, currentPa
                                     </button>
                                     <div className="hidden absolute z-10 w-20 top-[-3px] right-[37px] opacity-90 bg-gray-500 border-gray-900 rounded divide-y divide-gray-100 shadow-sm group-hover/dropdown:block">
                                         <ul className=" text-sm text-white">
-                                            <li onClick={ (e) => onClickSummarizeHandler(e, streamerName, streamerGame, windowId, language) } className="hover:bg-gray-400 hover:rounded">
-                                                <a href="" className="block py-1 px-2">Summarize</a>
-                                            </li>
                                             <li onClick={ () => onClickFocusHandler(tabId, windowId) } className="hover:bg-gray-400 hover:rounded">
                                                 <a href="" className="block py-1 px-2">{ actionsLabels.focus }</a>
                                             </li>

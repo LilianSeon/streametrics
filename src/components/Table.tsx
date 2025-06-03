@@ -30,7 +30,6 @@ const Table: FC<TableProps> = ({ streamersList, language }: TableProps) => {
     const [ searchTextValue, setSearchTextValue ] = useState('');
     const [ textValue, setTextValue ] = useState<TableTextValueI18n>({ not_found_message: '', not_found_advise: '', game: '', pagination_of: '', search_placeholder: '', previous_page: '', next_page: '', focus: '', disable: '', enable: '', not_detected_message: '', not_detected_button: '' });
 
-
     const filteredStreamers = useMemo(() => streamersList.filter(({ streamerName, streamerGame }) =>
         streamerName.toLowerCase().includes(searchTextValue.toLowerCase()) ||
         streamerGame.toLowerCase().includes(searchTextValue.toLowerCase())
@@ -57,7 +56,7 @@ const Table: FC<TableProps> = ({ streamersList, language }: TableProps) => {
     }, [language]);
 
     return(
-        <div className="h-[260px] mx-2 p-2 bg-gray-800 rounded-lg">
+        <div className="h-auto mx-2 p-2 bg-gray-800 rounded-lg">
             <div className="flex flex-row items-center mb-2">
                 <div className="flex flex-col">
                     <form className="flex items-center mb-0">
@@ -87,7 +86,7 @@ const Table: FC<TableProps> = ({ streamersList, language }: TableProps) => {
                         </tr>
                     </thead>
                     <tbody>
-                        { filteredStreamersLength !== 0 && <TableRows streamersList={filteredStreamers} currentPage={currentPage} searchTextValue={searchTextValue} actionsLabels={{ focus: textValue.focus, disable: textValue.disable, enable: textValue.enable }} language={ language } />}
+                        { filteredStreamersLength !== 0 && <TableRows streamersList={filteredStreamers} currentPage={currentPage} searchTextValue={searchTextValue} actionsLabels={{ focus: textValue.focus, disable: textValue.disable, enable: textValue.enable }} />}
                     </tbody>
                 </table>
                 { displayNotFoundOrNotDetected(filteredStreamersLength, searchTextValueLength) }

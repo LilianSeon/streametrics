@@ -260,19 +260,6 @@ const initStorage = async (): Promise<void> => {
     }
 };
 
-const onClickSummary = async () => {
-    console.log('ID de l\'onglet actuel :', tabId);
-    const { language } = await getStorage(["language"]);
-    const game: string = await getGameName(document);
-    const streamer = await getStreamerName(document);
-
-    /*chrome.runtime.sendMessage({ action: 'startTabCapture', payload: { streamer, game, language } }, (response) => {
-        console.log('startTabCapture', response)
-    });*/
-    
-    chrome.runtime.sendMessage({ action: 'openSidePanel', payload: { streamer, game, language } });
-};
-
 /**
  * Check if `#live-channel-stream-information` is in DOM or wait for it, then start getting datas and init chart
  */
@@ -307,7 +294,7 @@ const initChartInDOM = async () => {
             }
 
             try {
-                accordionComponent = new Accordion(informationContainer, refreshValue ?? 5, i18nMessages, onClickArrowAccordionHandler, onClickExportButtonHandler, onChangeImportHandler, onClickPlayPauseButtonHandler, onClickClearHandler, onClickHideShowMessageButtonHandler, onClickHideShowViewerButtonHandler, onClickHideShowXLabelsButtonHandler, onClickExportImageButtonHandler, onChangeRefreshValue, isAccordionExpanded, onClickSummary);
+                accordionComponent = new Accordion(informationContainer, refreshValue ?? 5, i18nMessages, onClickArrowAccordionHandler, onClickExportButtonHandler, onChangeImportHandler, onClickPlayPauseButtonHandler, onClickClearHandler, onClickHideShowMessageButtonHandler, onClickHideShowViewerButtonHandler, onClickHideShowXLabelsButtonHandler, onClickExportImageButtonHandler, onChangeRefreshValue, isAccordionExpanded);
                 chartContainer = accordionComponent.getChartContainer() as HTMLElement;
                 let accordionElement = accordionComponent.getAccordionElement() as HTMLElement;
                 
@@ -402,13 +389,26 @@ const onTabCreated = async (payload: { url: string, tabID: number }) => {
     
     // If Chart already exists in DOM
     if (chartExtension && chartExtension instanceof ChartExtension && accordionComponent instanceof Accordion && typeof chartContainer !== 'undefined' && messageCounter && intervalManager instanceof IntervalManager) {
-        
         deleteStreamersListStorage(payload.tabID);
         destroy();
     }
 
     if (document.getElementById('accordionExtension') === null && document.getElementById('extensionChartContainer') === null && !isExtensionInitialized && !isExtensionInitializing) {
         await initChartInDOM();
+    }
+
+    const info = await getInfo()
+
+    if (info) {
+        chrome.runtime.sendMessage({
+            action: 'updateMetadata',
+            payload: {
+                streamerName: info.streamerName,
+                streamerGame: info.streamerGame,
+                streamTitle: info.streamTitle,
+                language: info.language
+            }
+        });
     }
 };
 

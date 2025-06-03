@@ -2,10 +2,10 @@
 
 // Handlers
 import { getI18nMessages } from "./handlers/actions/i18nMessagesHandler";
-import { getWindowId, getTabId } from "./handlers/actions/infoHandler";
+import { getWindowId, getTabId, getCurrentTab } from "./handlers/actions/infoHandler";
 import { openSidePanel } from "./handlers/actions/openSidePanel";
 import { addOneStreamer, updateStreamersList, deleteAllStreamers, deleteOneStreamer } from "./handlers/actions/streamersListHandler";
-import { startTabCapture } from "./handlers/actions/tabCapture";
+import { focusTab, startTabCapture, stopTabCapture } from "./handlers/actions/tabCapture";
 
 // Typing
 import { ActionsHandler, ActionsResquest } from "./typings/MessageType";
@@ -14,51 +14,14 @@ let isSidePanelOpen = false;
 
 
 chrome.action.onClicked.addListener(async (tab) => {
-
   if (isSidePanelOpen) {
-    chrome.sidePanel.setOptions({
-      enabled: false
-    });
+    await stopTabCapture({ shouldCloseSidePanel: true });
     isSidePanelOpen = false;
-
-    await chrome.runtime.sendMessage({
-        action: 'stopRecording',
-        target: 'offscreen'
-      });
-      
-    await chrome.offscreen.closeDocument();
-
-    return;
   } else {
-    chrome.sidePanel.setOptions({
-      enabled: true
-    })
-    chrome.sidePanel.open({ windowId: tab.windowId });
+    await startTabCapture({ tab, shouldOpenSidePanel: true });
+    await chrome.storage.local.set({ sidePanelOpenedFrom: tab });
     isSidePanelOpen = true;
-
-    // Create an offscreen document.
-      chrome.offscreen.createDocument({
-        url: 'offscreen.html',
-        //@ts-ignore
-        reasons: ['USER_MEDIA'],
-        justification: 'Recording from chrome.tabCapture API'
-      });
   }
-
-    // Get a MediaStream for the active tab.
-    chrome.tabCapture.getMediaStreamId({ targetTabId: tab.id }, async (streamId) => {
-
-      const resp: { streamerName: string, streamerGame: string, streamTitle: string, language: string } = await chrome.tabs.sendMessage(tab.id!, { event: "getInfo" })
-      console.log("resp", resp)
-      // Send the stream ID to the offscreen document to start recording.
-      chrome.runtime.sendMessage({
-          action: 'startRecording',
-          target: 'offscreen',
-          payload: { ...resp, streamId } 
-      });
-    });
-
-  
 });
 
 const actionsHandler: Record<string, ActionsHandler> = {
@@ -69,8 +32,11 @@ const actionsHandler: Record<string, ActionsHandler> = {
     getWindowId,
     getTabId,
     getI18nMessages,
+    openSidePanel,
+    stopTabCapture,
     startTabCapture,
-    openSidePanel
+    focusTab,
+    getCurrentTab
 };
 
 chrome.storage.onChanged.addListener(({ streamersList }) => {

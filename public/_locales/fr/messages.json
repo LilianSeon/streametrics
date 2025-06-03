@@ -1,6 +1,14 @@
 {
+  "summary_button_disable": {
+    "message": "Désactiver le résumé",
+    "description": "Button désactiver le résumé"
+  },
+  "summary_button_enable": {
+    "message": "Activer le résumé",
+    "description": "Button activer le résumé"
+  },
   "extention_name": {
-    "message": "StreaMetrics – Graphiques Twitch en direct"
+    "message": "StreaMetrics - Graphiques Twitch en direct"
   },
   "extention_description": {
     "message": "Suivez en direct le nombre de spectateurs et l'activité du chat sur Twitch grâce à un graphique sous la vidéo. Open-source et facile à utiliser."

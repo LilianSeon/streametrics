@@ -4,12 +4,16 @@ import { configureStore } from '@reduxjs/toolkit'
 import summarizeReducer from './slices/summarizeSlice';
 import languageReducer from './slices/languageSlice';
 import audioBarsSlice from './slices/audioBarsSlice';
+import sidePanelOpenedFromSlice from './slices/sidePanelOpenedFromSlice';
+import pulseSlice from './slices/pulseSlice';
 
 export const store = configureStore({
   reducer: {
     audioBars: audioBarsSlice,
     summarize: summarizeReducer,
-    language: languageReducer
+    language: languageReducer,
+    sidePanelOpenedFrom: sidePanelOpenedFromSlice,
+    pulse: pulseSlice
   },
 })
 

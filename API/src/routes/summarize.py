@@ -47,6 +47,7 @@ async def summarize(
     temp_path = None
 
     try:
+        print(streamer)
 
         file_bytes = await audio.read()
 
