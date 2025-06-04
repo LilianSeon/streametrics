@@ -64,7 +64,7 @@ async def summarize(
         else:
             summary = summarize_with_mistral(transcription, streamer, game, title, language)
 
-        return JSONResponse(content={"text": transcription, "summary": summary, "time": time})
+        return JSONResponse(content={"text": transcription, "summary": summary, "time": time, "streamerName": streamer })
 
     except Exception as e:
         return JSONResponse(content={"error": str(e)}, status_code=500)
