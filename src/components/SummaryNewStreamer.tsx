@@ -16,9 +16,16 @@ const SummaryNewStreamer = memo(({ summary, activePulseAnimation }: SummaryNewSt
 
     const pulse = useAppSelector((state: RootState) => state.pulse.value);
 
+    const scaleShadow = useMemo(() => {
+        const min = 1;
+        const max = 1.6;
+        const normalized = Math.min(Math.max(pulse / 255, 0), 1); // [0,1]
+        return min + normalized * (max - min); // [1,1.2]
+    }, [pulse]);
+
     const scale = useMemo(() => {
         const min = 1;
-        const max = 1.3;
+        const max = 1.2;
         const normalized = Math.min(Math.max(pulse / 255, 0), 1); // [0,1]
         return min + normalized * (max - min); // [1,1.2]
     }, [pulse]);
@@ -27,7 +34,7 @@ const SummaryNewStreamer = memo(({ summary, activePulseAnimation }: SummaryNewSt
         if (activePulseAnimation) {
             return {
                 transform: `scale(${scale})`,
-                boxShadow: `0 0 ${6 + (scale - 1) * 40}px rgba(255, 255, 255, 0.6)`,
+                boxShadow: `0 0 ${6 + (scaleShadow - 1) * 40}px rgba(255, 255, 255, 0.7)`,
             };
         } else {
             return {};

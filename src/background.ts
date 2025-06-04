@@ -39,6 +39,15 @@ const actionsHandler: Record<string, ActionsHandler> = {
     getCurrentTab
 };
 
+chrome.runtime.onConnect.addListener((port) => {
+  if (port.name === "sidepanel") {
+
+    port.onDisconnect.addListener(async () => {
+      await stopTabCapture({ shouldCloseSidePanel: false });
+    });
+  }
+});
+
 chrome.storage.onChanged.addListener(({ streamersList }) => {
   if (streamersList?.newValue) {
     chrome.action.setBadgeBackgroundColor({ color: '#60a5fa' });

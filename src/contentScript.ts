@@ -44,16 +44,6 @@ let intervalManager: IntervalManager | undefined;
 let hasImportedData: boolean = false;
 let toastManager: ToastManager | undefined;
 
-/*async function fetchTopics(messages: string[]) {
-    const res = await fetch("http://127.0.0.1:5000/detect-topics", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ messages }),
-    });
-  
-    const data = await res.json();
-    return data; // tableau de tableaux de mots
-}*/
 
 /**
  * Get needed data then add it to the Chart
@@ -397,9 +387,10 @@ const onTabCreated = async (payload: { url: string, tabID: number }) => {
         await initChartInDOM();
     }
 
-    const info = await getInfo()
+    const info = await getInfo();
+    const { sidePanelOpenedFrom } = await getStorage(['sidePanelOpenedFrom']);
 
-    if (info) {
+    if (info && sidePanelOpenedFrom?.id && sidePanelOpenedFrom.id === payload.tabID) {
         chrome.runtime.sendMessage({
             action: 'updateMetadata',
             payload: {

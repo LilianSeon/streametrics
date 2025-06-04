@@ -55,13 +55,13 @@ chrome.runtime.onMessage.addListener(async (message) => {
 });
 
 const updateMetadata = ({ streamerName, streamerGame, streamTitle, language, tabId }: { streamerName?: string, streamerGame?: string, streamTitle?: string, language?: string, tabId?: number }) => {
-   streamMetadata = {
-    ...streamMetadata,
-    ...(streamerName !== undefined && { streamerName }),
-    ...(streamerGame !== undefined && { streamerGame }),
-    ...(streamTitle !== undefined && { streamTitle }),
-    ...(tabId !== undefined && { tabId }),
-    ...(language !== undefined && { language })
+  streamMetadata = {
+  ...streamMetadata,
+  ...(streamerName !== undefined && { streamerName }),
+  ...(streamerGame !== undefined && { streamerGame }),
+  ...(streamTitle !== undefined && { streamTitle }),
+  ...(tabId !== undefined && { tabId }),
+  ...(language !== undefined && { language })
   };
 };
 
@@ -70,7 +70,7 @@ const stopRecording = () => {
     audioStream.getTracks().forEach(track => track.stop());
     audioStream = undefined;
     // Reset audio bar Y and height
-    chrome.runtime.sendMessage({ action: 'drawAudioBars', payload: [{ y: '9.00', height: '2.00' }, { y: '9.00', height: '2.00' }, { y: '9.00', height: '2.00' }] });
+    chrome.runtime.sendMessage({ action: 'drawAudioBars', payload: { bars: [{ y: '9.00', height: '2.00' }, { y: '9.00', height: '2.00' }, { y: '9.00', height: '2.00' }] }});
   }
 };
 
@@ -221,7 +221,7 @@ const startRecording = async (message: any) => {
 
           const json = await res.json();
           //console.log("Transcription :", json);
-            if(json.summary != '') chrome.runtime.sendMessage({ action: 'summarizeReady', payload: { summary: json.summary, time: json.time, streamerName: streamMetadata.streamerName } });
+          if (json.summary != '') chrome.runtime.sendMessage({ action: 'summarizeReady', payload: { summary: json.summary, time: json.time, streamerName: json.streamerName } });
 
         } catch (err) {
           console.error("Erreur lors de l'envoi :", err);

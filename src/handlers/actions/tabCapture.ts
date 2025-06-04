@@ -97,14 +97,14 @@ const stopTabCapture: ActionsHandler = async ({ shouldCloseSidePanel }: stopTabC
     return new Promise(async (resolve, reject) => {
         try {
 
-            await chrome.runtime.sendMessage({ action: 'drawAudioBars', payload: [{ y: '9.00', height: '2.00' }, { y: '9.00', height: '2.00' }, { y: '9.00', height: '2.00' }] });
-            
-            if (shouldCloseSidePanel) await closeSidePanel();
+            await chrome.runtime.sendMessage({ action: 'drawAudioBars', payload: { bars: [{ y: '9.00', height: '2.00' }, { y: '9.00', height: '2.00' }, { y: '9.00', height: '2.00' }], pulse: 1 }});
 
             await chrome.runtime.sendMessage({
                 action: 'stopRecording',
                 target: 'offscreen'
             });
+
+            if (shouldCloseSidePanel) await closeSidePanel();
             
             await chrome.offscreen.closeDocument();
             resolve(true);

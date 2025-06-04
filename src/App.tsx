@@ -64,6 +64,8 @@ const App: FC = () => {
 
   useEffect(() => {
 
+    const port = chrome.runtime.connect({ name: "sidepanel" });
+
     chrome.runtime.onMessage.addListener((message, _sender, _sendResponse) => {
 
       if (message.action === "summarizeReady" && currentStreamerNameRef.current) {
@@ -150,6 +152,10 @@ const App: FC = () => {
 
         if (checkStatusNoResponse === streamersList.length) setStorage([]); // If only get error response clear streamerlist
     });
+
+    return () => {
+      port.disconnect();
+    }
 
   }, []);
 

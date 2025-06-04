@@ -1,4 +1,4 @@
-import { FC, useCallback, useEffect, useRef, useState } from "react";
+import { FC, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 // Typings
 import { SummarizeValue } from "../store/slices/summarizeSlice";
@@ -8,6 +8,7 @@ import { AudioBarsValue } from '../store/slices/audioBarsSlice';
 import { StorageStreamerListType } from "../typings/StorageType";
 import { loadMessage } from "../loader/fileLoader";
 import { SummaryList } from "./SummaryList";
+import { AutoScrollStopped } from "./AutoScrollStopped";
 
 type SummarizeProps = {
     summaries: SummarizeValue[],
@@ -25,8 +26,35 @@ const Summarize: FC<SummarizeProps> = ({ summaries, streamerName, audioBars, tab
     const [ summaryButtonTitleEnable, setSummaryButtonTitleEnable ] = useState('');
     const [ summaryButtonTitleDisable, setSummaryButtonTitleDisable ] = useState('');
     const [ isSummarizing, setIsSummarizing ] = useState<boolean>(true);
+    const [ activeAutoScroll, setActiveAutoScroll ] = useState(true);
 
     const endOfListRef = useRef<HTMLDivElement | null>(null);
+
+    const onScroll = useCallback((event: React.UIEvent<HTMLDivElement, UIEvent>) => {
+        const target = event.currentTarget;
+
+        const { scrollTop, scrollHeight, clientHeight } = target;
+
+        const isAtBottom = scrollTop + clientHeight >= scrollHeight - 1;
+
+        setActiveAutoScroll(false);
+
+        if (isAtBottom) {
+            setActiveAutoScroll(true);
+        }
+    }, []);
+
+    const nbSummary = useMemo(() => {
+        if (!activeAutoScroll && summaries) return summaries.length;
+    }, [activeAutoScroll]);
+
+    const nbNewSummary = useMemo(() => {
+        if (nbSummary) return summaries.length - nbSummary;
+    }, [nbSummary, summaries]);
+
+    useEffect(() => {
+        if (activeAutoScroll) endOfListRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, [summaries]);
 
     const stopTabCapture = useCallback(async (event: React.MouseEvent<Element, MouseEvent>) => {
         event.preventDefault();
@@ -48,9 +76,12 @@ const Summarize: FC<SummarizeProps> = ({ summaries, streamerName, audioBars, tab
         setIsSummarizing(!isSummarizing);
     }, [windowId, tabId, isSummarizing]);
 
-    useEffect(() => {
-        endOfListRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, [summaries]);
+    const onClickBackToBottomHanlder = useCallback(() => {
+        if (!activeAutoScroll) {
+            endOfListRef.current?.scrollIntoView({ behavior: "smooth" });
+            setActiveAutoScroll(true);
+        }
+    }, [activeAutoScroll]);
 
     useEffect(() => {
         if (language) {
@@ -81,8 +112,9 @@ const Summarize: FC<SummarizeProps> = ({ summaries, streamerName, audioBars, tab
             
             <div className="group relative flex flex-col w-full rounded-lg overflow-y-auto gap-2.5 grow min-h-0">
                 <div className="absolute top-0 left-0 right-0 h-8 rounded-t-lg pointer-events-none z-10 bg-gradient-to-b from-gray-700 to-transparent" />
-                <div className="group flex flex-col w-full grow overflow-y-auto rounded-lg p-4 border-gray-200 bg-gray-700 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-700 [&::-webkit-scrollbar-thumb]:transition-colors [&::-webkit-scrollbar-thumb]:duration-300 [&::-webkit-scrollbar-thumb]:ease-in-out group-hover:[&::-webkit-scrollbar-thumb]:bg-gray-300">
+                <div onScroll={ onScroll } className="group flex flex-col w-full grow overflow-y-auto rounded-lg p-4 border-gray-200 bg-gray-700 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-700 [&::-webkit-scrollbar-thumb]:transition-colors [&::-webkit-scrollbar-thumb]:duration-300 [&::-webkit-scrollbar-thumb]:ease-in-out group-hover:[&::-webkit-scrollbar-thumb]:bg-gray-300">
                     <SummaryList summaries={ summaries } language={ language } currentStreamer={ streamerName ?? '' } />
+                    { !activeAutoScroll && <AutoScrollStopped nbMessage={ nbNewSummary } onClick={ onClickBackToBottomHanlder }/> }
                     <div ref={endOfListRef} />
                 </div>
             </div>
