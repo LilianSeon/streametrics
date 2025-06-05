@@ -18,7 +18,7 @@ const AutoScrollStopped: FC<AutoScrollStoppedProps> = ({ onClick, nbMessage }: A
                 <path fill-rule="evenodd" d="M10 2a.75.75 0 0 1 .75.75v12.59l1.95-2.1a.75.75 0 1 1 1.1 1.02l-3.25 3.5a.75.75 0 0 1-1.1 0l-3.25-3.5a.75.75 0 1 1 1.1-1.02l1.95 2.1V2.75A.75.75 0 0 1 10 2Z" clip-rule="evenodd" />
             </svg>
             {
-                nbMessageString ? <div className="absolute opacity-90 inline-flex items-center justify-center w-6 h-6 text-xs font-bold text-white bg-blue-600 border-[1px] border-white rounded-full -top-2 -end-2 group-hover/backToBottom:bg-blue-700">{ nbMessageString }</div> : <></>
+                nbMessageString ? <div className={`absolute opacity-90 inline-flex items-center justify-center w-6 h-6 ${nbMessageString === '99+' ? 'text-[0.6rem]' : 'text-xs'} font-bold text-white bg-blue-600 border-[1px] border-white rounded-full -top-2 -end-2 group-hover/backToBottom:bg-blue-700`}>{ nbMessageString }</div> : <></>
             }
         </button>
     );

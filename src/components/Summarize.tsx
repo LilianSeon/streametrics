@@ -79,7 +79,6 @@ const Summarize: FC<SummarizeProps> = ({ summaries, streamerName, audioBars, tab
     const onClickBackToBottomHanlder = useCallback(() => {
         if (!activeAutoScroll) {
             endOfListRef.current?.scrollIntoView({ behavior: "smooth" });
-            setActiveAutoScroll(true);
         }
     }, [activeAutoScroll]);
 
