@@ -1,4 +1,20 @@
 {
+  "enable_summarize": {
+    "message": "Activer le résumé",
+    "description": "Summarize"
+  },
+  "disable_summarize": {
+    "message": "Désactiver le résumer",
+    "description": "Summarize"
+  },
+  "summarize": {
+    "message": "Résumer",
+    "description": "Summarize"
+  },
+  "clear": {
+    "message": "Effacer",
+    "description": "Clear"
+  },
   "summary_button_disable": {
     "message": "Désactiver le résumé",
     "description": "Button désactiver le résumé"

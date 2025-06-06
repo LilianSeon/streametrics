@@ -407,7 +407,7 @@ const removeSpaceInString = (value?: string): string => value ? value.replace(/\
  * @returns { Promise<Element | null> }
  */
 const waitForElm = (selector: string): Promise<Element | null> => {
-    return new Promise(resolve => {
+    return new Promise((resolve, reject) => {
         if (document.querySelector(selector)) {
             return resolve(document.querySelector(selector));
         }
@@ -423,6 +423,13 @@ const waitForElm = (selector: string): Promise<Element | null> => {
             childList: true,
             subtree: true
         });
+
+        setTimeout(() => {
+            if (document.querySelector(selector) === null) {
+                observer.disconnect();
+                reject(document.querySelector(selector));
+            }
+        }, 5000);
     });
 };
 

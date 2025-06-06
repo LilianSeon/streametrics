@@ -6,6 +6,9 @@ import languageReducer from './slices/languageSlice';
 import audioBarsSlice from './slices/audioBarsSlice';
 import sidePanelOpenedFromSlice from './slices/sidePanelOpenedFromSlice';
 import pulseSlice from './slices/pulseSlice';
+import translatedTextSlice from './slices/translatedTextSlice';
+import isSummarizingSlice from './slices/isSummarizingSlice';
+import streamerListSlice from './slices/streamerListSlice';
 
 export const store = configureStore({
   reducer: {
@@ -13,7 +16,10 @@ export const store = configureStore({
     summarize: summarizeReducer,
     language: languageReducer,
     sidePanelOpenedFrom: sidePanelOpenedFromSlice,
-    pulse: pulseSlice
+    pulse: pulseSlice,
+    translatedText: translatedTextSlice,
+    isSummarizing: isSummarizingSlice,
+    streamerList: streamerListSlice
   },
 })
 

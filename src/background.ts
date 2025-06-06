@@ -5,7 +5,7 @@ import { getI18nMessages } from "./handlers/actions/i18nMessagesHandler";
 import { getWindowId, getTabId, getCurrentTab } from "./handlers/actions/infoHandler";
 import { openSidePanel } from "./handlers/actions/openSidePanel";
 import { addOneStreamer, updateStreamersList, deleteAllStreamers, deleteOneStreamer } from "./handlers/actions/streamersListHandler";
-import { focusTab, startTabCapture, stopTabCapture } from "./handlers/actions/tabCapture";
+import { focusTab, shouldStopCapture, startTabCapture, stopTabCapture } from "./handlers/actions/tabCapture";
 
 // Typing
 import { ActionsHandler, ActionsResquest } from "./typings/MessageType";
@@ -29,6 +29,7 @@ const actionsHandler: Record<string, ActionsHandler> = {
     updateStreamersList,
     deleteOneStreamer,
     deleteAllStreamers,
+    shouldStopCapture,
     getWindowId,
     getTabId,
     getI18nMessages,
@@ -44,6 +45,7 @@ chrome.runtime.onConnect.addListener((port) => {
 
     port.onDisconnect.addListener(async () => {
       await stopTabCapture({ shouldCloseSidePanel: false });
+      isSidePanelOpen = false;
     });
   }
 });
@@ -103,7 +105,8 @@ chrome.tabs.onCreated.addListener((tab) => {
 });
 
 chrome.tabs.onRemoved.addListener(async (tabId: number, removeInfo: chrome.tabs.TabRemoveInfo) => {
-    if (actionsHandler['deleteOneStreamer']) {
+    if (actionsHandler['deleteOneStreamer'] && actionsHandler['shouldStopCapture']) {
         actionsHandler['deleteOneStreamer']({ tabId, removeInfo });
+        actionsHandler['shouldStopCapture']({ tabId, removeInfo });
     }
 });

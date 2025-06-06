@@ -264,7 +264,6 @@ const initChartInDOM = async () => {
         
         tabId = await getCurrentTabId();
         const informationContainer = await waitForElm('#live-channel-stream-information');
-        await waitForElm(".CoreText-sc-1txzju1-0.dLeJdh");
         const chatContainer = await waitForElm('.chat-line__message');
         const { language } = await getStorage(["language"]);
         i18nMessages = await getI18nMessages(i18nKeys, language);
@@ -344,6 +343,7 @@ const initChartInDOM = async () => {
         isExtensionInitializing = false;
         isExtensionInitialized = false;
         console.log(error)
+        setTimeout(() => { if(!isExtensionInitialized) initChartInDOM() }, 4000);
     }
     
     isExtensionInitializing = false;

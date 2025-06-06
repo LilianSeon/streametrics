@@ -6,6 +6,8 @@ import { useDispatch } from 'react-redux';
 import { RootState } from './store/store'
 import { useAppSelector } from './store/hooks';
 import { addSummary } from './store/slices/summarizeSlice';
+import { updateIsSummarizing } from './store/slices/isSummarizingSlice';
+import { setStreamerList } from './store/slices/streamerListSlice';
 
 // Components
 import { Navbar } from './components/Navbar';
@@ -19,20 +21,22 @@ import { Summarize } from './components/Summarize';
 import { AudioBarsValue, updateAudioBars } from './store/slices/audioBarsSlice';
 import { updateSidePanelOpenedFrom } from './store/slices/sidePanelOpenedFromSlice';
 import { updatePulse } from './store/slices/pulseSlice';
+import { loadTranslatedText } from './loader/fileLoader';
+import { addTranslatedText, TranslatedText } from './store/slices/translatedTextSlice';
+
 
 
 const App: FC = () => {
 
   const dispatch = useDispatch();
   const summaries = useAppSelector((state: RootState) => state.summarize.value);
-  const audioBars = useAppSelector((state: RootState) => state.audioBars.value);
   const sidePanelOpenedFrom = useAppSelector((state: RootState) => state.sidePanelOpenedFrom.value) as chrome.tabs.Tab;
+  const streamerList = useAppSelector((state: RootState) => state.streamerList.value);
   
   const sidePanelOpenedFromTabId = useMemo(() => sidePanelOpenedFrom?.id, [sidePanelOpenedFrom]);
   const sidePanelOpenedFromWindowId = useMemo(() => sidePanelOpenedFrom?.windowId, [sidePanelOpenedFrom]);
 
   const [ isDisplayListLang, setIsDisplayListLang ] = useState(false);
-  const [ streamerList, setStreamerList ] = useState<StorageStreamerListType[]>([]);
   const [ language, setLanguage ] = useState<Languages | undefined>();
 
   const currentStreamerNameRef = useRef<string | undefined>();
@@ -46,7 +50,10 @@ const App: FC = () => {
   }, [currentStreamerName]);
 
   useEffect(() => {
-    if (currentStreamerName && currentStreamerImage && sidePanelOpenedFromTabId) dispatch(addSummary({ text: '', time: new Date().getTime(), streamerName: currentStreamerName, streamerImage: currentStreamerImage }));
+    if (currentStreamerName && currentStreamerImage && sidePanelOpenedFromTabId) {
+      const summarizeValue = { text: '', time: new Date().getTime(), streamerName: currentStreamerName, streamerImage: currentStreamerImage }
+      dispatch(addSummary(summarizeValue));
+    }
   }, [currentStreamerName, currentStreamerImage])
 
   const onClickBody: React.MouseEventHandler<HTMLDivElement> = () => {
@@ -77,13 +84,16 @@ const App: FC = () => {
       }
     });
 
-    chrome.storage.onChanged.addListener(({ streamersList, language, sidePanelOpenedFrom }) => {
+    chrome.storage.onChanged.addListener(({ streamersList, language, sidePanelOpenedFrom, isSummarizing }) => {
       if (streamersList?.newValue) {
-        setStreamerList(streamersList.newValue as StorageStreamerListType[]);
+        dispatch(setStreamerList(streamersList.newValue as StorageStreamerListType[]));
       }
 
       if (language?.newValue) {
         setLanguage(language.newValue);
+        loadTranslatedText(language.newValue).then((translatedText) => {
+          dispatch(addTranslatedText(translatedText));
+        });
         chrome.runtime.sendMessage({
             action: 'updateMetadata',
             payload: {
@@ -95,6 +105,10 @@ const App: FC = () => {
       if (sidePanelOpenedFrom?.newValue) {
         dispatch(updateSidePanelOpenedFrom(sidePanelOpenedFrom.newValue));
       }
+
+      if (typeof isSummarizing?.newValue != 'undefined') {
+        dispatch(updateIsSummarizing(isSummarizing.newValue));
+      }
     });
 
     const getStorage = async (keys: string | string[]) => {
@@ -102,8 +116,10 @@ const App: FC = () => {
         const { streamersList } = await chrome.storage.local.get(keys);
         const { language } = await chrome.storage.local.get('language');
         const { sidePanelOpenedFrom } = await chrome.storage.local.get('sidePanelOpenedFrom');
+        const translatedText: TranslatedText = await loadTranslatedText(language);
+        dispatch(addTranslatedText(translatedText));
         dispatch(updateSidePanelOpenedFrom(sidePanelOpenedFrom));
-        setStreamerList(streamersList ?? []);
+        dispatch(setStreamerList(streamersList ?? []));
         setLanguage(language);
 
         return streamersList ?? [];
@@ -163,8 +179,8 @@ const App: FC = () => {
     <div onClick={ onClickBody } style={{ height: '100%'}} className='flex flex-col bg-gray-900'>
       <Navbar isDisplayListLang={ isDisplayListLang } setIsDisplayListLang={ setIsDisplayListLang } language={ language } />
       <Table streamersList={ streamerList } language={ language } />
-      <Summarize summaries={ summaries } audioBars={ audioBars } streamerName={ currentStreamerName } tabId={ sidePanelOpenedFromTabId } windowId={ sidePanelOpenedFromWindowId }/>
-      <Footer language={ language } />
+      <Summarize summaries={ summaries } streamerName={ currentStreamerName } tabId={ sidePanelOpenedFromTabId } windowId={ sidePanelOpenedFromWindowId }/>
+      <Footer />
     </div>
   )
 };

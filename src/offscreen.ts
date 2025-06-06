@@ -1,4 +1,6 @@
 let audioStream: MediaStream | undefined;
+let interval: NodeJS.Timeout | undefined;
+let workletNode: AudioWorkletNode | undefined;
 
 let streamMetadata = {
   streamerName: '',
@@ -71,6 +73,12 @@ const stopRecording = () => {
     audioStream = undefined;
     // Reset audio bar Y and height
     chrome.runtime.sendMessage({ action: 'drawAudioBars', payload: { bars: [{ y: '9.00', height: '2.00' }, { y: '9.00', height: '2.00' }, { y: '9.00', height: '2.00' }] }});
+  }
+
+  if (interval) clearInterval(interval);
+  if (workletNode) {
+    workletNode.disconnect();
+    workletNode.port.onmessage = null;
   }
 };
 
@@ -176,10 +184,10 @@ const startRecording = async (message: any) => {
       }});
     };
 
-    setInterval(sendVisualizerBars, 80);
+    interval = setInterval(sendVisualizerBars, 80);
     
 
-    const workletNode = new AudioWorkletNode(audioCtx, 'custom-audio-processor');
+    workletNode = new AudioWorkletNode(audioCtx, 'custom-audio-processor');
 
     let audioBuffer: number[] = [];
     let sampleRate = 44100; // sera défini dynamiquement

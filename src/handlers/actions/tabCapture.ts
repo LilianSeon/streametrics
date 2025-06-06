@@ -80,6 +80,9 @@ const startTabCapture: ActionsHandler = async ({ tab, tabId, windowId, shouldOpe
                     target: 'offscreen',
                     payload: { ...resp, streamId, tabId: tab!.id! } 
                 });
+
+                await chrome.storage.local.set({ isSummarizing: true });
+
                 resolve(true);
             });
         } catch(e) {
@@ -104,6 +107,8 @@ const stopTabCapture: ActionsHandler = async ({ shouldCloseSidePanel }: stopTabC
                 target: 'offscreen'
             });
 
+            await chrome.storage.local.set({ isSummarizing: false });
+
             if (shouldCloseSidePanel) await closeSidePanel();
             
             await chrome.offscreen.closeDocument();
@@ -114,4 +119,13 @@ const stopTabCapture: ActionsHandler = async ({ shouldCloseSidePanel }: stopTabC
     });
 };
 
-export { startTabCapture, stopTabCapture, focusTab }
+const shouldStopCapture: ActionsHandler = async (payload: { tabId: number, removeInfo: chrome.tabs.TabRemoveInfo }, _sender?: chrome.runtime.MessageSender) => {
+    const { streamersList } = await chrome.storage.local.get('streamersList');
+    const { sidePanelOpenedFrom } = await chrome.storage.local.get('sidePanelOpenedFrom');
+    const isListeningTab = streamersList.some((streamer: any) => streamer.tabId === sidePanelOpenedFrom.id && sidePanelOpenedFrom.id === payload.tabId);
+    await chrome.storage.local.set({ isSummarizing: !isListeningTab });
+
+    if (isListeningTab) await stopTabCapture({ shouldCloseSidePanel: false });
+};
+
+export { startTabCapture, stopTabCapture, focusTab, shouldStopCapture }

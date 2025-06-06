@@ -25,8 +25,13 @@ const summarizeSlice = createSlice({
     clearSummaries: (state) => {
       state.value = [];
     },
+    clearSummariesExceptLast: (state) => {
+      //@ts-ignore
+      const getLastStreamer = state.value.findLast((summary) => typeof summary?.streamerImage != 'undefined');
+      state.value = [getLastStreamer];
+    }
   },
 });
 
-export const { addSummary, clearSummaries } = summarizeSlice.actions;
+export const { addSummary, clearSummaries, clearSummariesExceptLast } = summarizeSlice.actions;
 export default summarizeSlice.reducer;

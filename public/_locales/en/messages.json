@@ -1,4 +1,20 @@
 {
+  "enable_summarize": {
+    "message": "Enable summary",
+    "description": "Summarize"
+  },
+  "disable_summarize": {
+    "message": "Disable summary",
+    "description": "Summarize"
+  },
+  "summarize": {
+    "message": "Summarize",
+    "description": "Summarize"
+  },
+  "clear": {
+    "message": "Clear",
+    "description": "Clear"
+  },
   "summary_button_disable": {
     "message": "Disable summary",
     "description": "Button disable summary"

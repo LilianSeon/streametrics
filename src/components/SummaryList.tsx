@@ -18,10 +18,10 @@ const SummaryList = memo(({ summaries, language, currentStreamer }: SummaryListP
     return (
         <>
             {
-                summaries.map((summary, index) => {
+                summaries[0] && summaries.map((summary, index) => {
                         if (summary?.streamerImage) {
                             return (
-                                <SummaryNewStreamer key={summary.time} summary={summary} activePulseAnimation={ summary.streamerName === currentStreamer } />
+                                <SummaryNewStreamer key={ summary.time } summary={ summary } activePulseAnimation={ summary.streamerName === currentStreamer } />
                             )
                         } else {
                             return (

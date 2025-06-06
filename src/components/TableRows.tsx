@@ -1,17 +1,12 @@
-import { FC } from "react";
+import { FC, useCallback, useEffect, useRef, useState } from "react";
 
 // Typings
 import { StorageStreamerListType } from "../typings/StorageType";
 import { Languages } from "./Chart/src/js/Texts";
-
-export interface TableRowsTextValueI18n {
-    focus: string,
-    disable: string,
-    enable: string
-};
+import { useAppSelector } from "../store/hooks";
+import { RootState } from "../store/store";
 
 export type TableRowsProps = {
-    actionsLabels: TableRowsTextValueI18n
     searchTextValue?: string,
     streamersList: StorageStreamerListType[],
     currentPage?: number,
@@ -36,18 +31,24 @@ const scrollToAnchor = () => {
     }
 };
 
-const TableRows: FC<TableRowsProps> = ({ actionsLabels, streamersList, currentPage = 1, searchTextValue = '' }: TableRowsProps) => {
+const TableRows: FC<TableRowsProps> = ({ streamersList, currentPage = 1, searchTextValue = '' }: TableRowsProps) => {
+
+    const translatedText = useAppSelector((state: RootState) => state.translatedText.value);
+
+    const [ open, setOpen ] = useState(false);
+
+    const dropdownRef = useRef<HTMLTableCellElement>(null);
 
     const currentItems = streamersList.slice(
         (currentPage - 1) * itemsPerPage,
         currentPage * itemsPerPage
     );
 
-    const onClickDisableHanlder = (tabId: StorageStreamerListType['tabId'], isEnable: StorageStreamerListType['isEnable']) => {
+    const onClickDisableHanlder = useCallback((tabId: StorageStreamerListType['tabId'], isEnable: StorageStreamerListType['isEnable']) => {
         chrome.tabs.sendMessage(tabId, { event: isEnable ? "disableChart" : "enableChart" });
-    };
+    }, []);
 
-    const onClickFocusHandler = async (tabId: StorageStreamerListType['tabId'], windowId: StorageStreamerListType['windowId']) => {
+    const onClickFocusHandler = useCallback(async (tabId: StorageStreamerListType['tabId'], windowId: StorageStreamerListType['windowId']) => {
         if (tabId) {
             // Active window
             await chrome.windows.update(windowId, { focused: true });
@@ -60,9 +61,9 @@ const TableRows: FC<TableRowsProps> = ({ actionsLabels, streamersList, currentPa
                 func: scrollToAnchor
             });
         }
-    };
+    }, []);
 
-    const getPillColor = (status: StorageStreamerListType['status']): string => {
+    const getPillColor = useCallback((status: StorageStreamerListType['status']): string => {
         switch (status) {
             case 'Active': return 'bg-gradient-to-r from-green-400 via-green-500 to-green-600';
             case 'Actif': return 'bg-gradient-to-r from-green-400 via-green-500 to-green-600';
@@ -72,7 +73,18 @@ const TableRows: FC<TableRowsProps> = ({ actionsLabels, streamersList, currentPa
             case 'Pause': return 'bg-gradient-to-r from-orange-400 via-orange-500 to-orange-600';
             default: return 'bg-gradient-to-r from-green-400 via-green-500 to-green-600';
         }
-    };
+    }, []);
+
+    useEffect(() => {
+        // Close the dropdown if clicked elsewhere
+        const handleClickOutside = (event: MouseEvent) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) setOpen(false);
+        };
+
+        document.addEventListener("mousedown", handleClickOutside);
+
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
 
     return(
         <>
@@ -102,22 +114,24 @@ const TableRows: FC<TableRowsProps> = ({ actionsLabels, streamersList, currentPa
                                  { highlightMatch(streamerGame, searchTextValue) }
                                 </div>
                             </td>
-                            <td className={`${ shouldApplyRoundedClass && 'rounded-br-lg' } w-2/10 bg-gray-900 px-2 py-3 items-center justify-center group/dropdown relative`}>
-                                    <button className="inline-flex items-center p-0.5 text-sm font-medium text-center text-gray-500 hover:text-gray-800 rounded-lg focus:outline-none dark:text-gray-400 dark:hover:text-gray-100 group-hover:text-white" type="button">
-                                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                            <path d="M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM16 12a2 2 0 100-4 2 2 0 000 4z" />
-                                        </svg>
-                                    </button>
-                                    <div className="hidden absolute z-10 w-20 top-[-3px] right-[37px] opacity-90 bg-gray-500 border-gray-900 rounded divide-y divide-gray-100 shadow-sm group-hover/dropdown:block">
+                            <td ref={ dropdownRef } className={`${ shouldApplyRoundedClass && 'rounded-br-lg' } w-2/10 bg-gray-900 px-2 py-3 items-center justify-center group/dropdown relative`}>
+                                <button onClick={() => setOpen((prev) => !prev)} className="inline-flex items-center p-0.5 text-sm font-medium text-center text-gray-500 hover:text-gray-800 rounded-lg focus:outline-none dark:text-gray-400 dark:hover:text-gray-100 group-hover:text-white" type="button">
+                                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM16 12a2 2 0 100-4 2 2 0 000 4z" />
+                                    </svg>
+                                </button>
+                                { open && (
+                                    <div className="absolute z-10 w-20 top-[-3px] right-[37px] opacity-90 bg-gray-500 border-gray-900 rounded divide-y divide-gray-100 shadow-sm">
                                         <ul className=" text-sm text-white">
                                             <li onClick={ () => onClickFocusHandler(tabId, windowId) } className="hover:bg-gray-400 hover:rounded">
-                                                <a href="" className="block py-1 px-2">{ actionsLabels.focus }</a>
+                                                <a href="" className="block py-1 px-2">{ translatedText?.focus?.message }</a>
                                             </li>
-                                            <li onClick={ () => onClickDisableHanlder(tabId, isEnable) } className="hover:bg-gray-400 hover:rounded">
-                                                <a href="#" className="block py-1 px-2">{ isEnable ? actionsLabels.disable : actionsLabels.enable }</a>
+                                            <li onClick={ () => onClickDisableHanlder(tabId, isEnable) } className="hover:bg-gray-400 hover:rounded border-solid border-t border-gray-400">
+                                                <a href="#" className="block py-1 px-2">{ isEnable ? translatedText?.disable?.message : translatedText?.enable?.message }</a>
                                             </li>
                                         </ul>
                                     </div>
+                                )}
                             </td>
                         </tr>
                     )
