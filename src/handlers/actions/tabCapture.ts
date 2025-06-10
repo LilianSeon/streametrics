@@ -72,19 +72,32 @@ const startTabCapture: ActionsHandler = async ({ tab, tabId, windowId, shouldOpe
             // Get a MediaStream for the active tab.
             chrome.tabCapture.getMediaStreamId({ targetTabId: tab.id }, async (streamId) => {
 
-                const resp: { streamerName: string, streamerGame: string, streamTitle: string, language: string } = await chrome.tabs.sendMessage(tab!.id!, { event: "getInfo" })
-                console.log("resp", resp)
-                // Send the stream ID to the offscreen document to start recording.
-                chrome.runtime.sendMessage({
-                    action: 'startRecording',
-                    target: 'offscreen',
-                    payload: { ...resp, streamId, tabId: tab!.id! } 
-                });
+                try {
+                    const tabStillOpen = await isTabStillOpen(tab!.id!);
 
-                await chrome.storage.local.set({ isSummarizing: true });
+                    if (tabStillOpen) {
+                        const resp: { streamerName: string, streamerGame: string, streamTitle: string, language: string } = await chrome.tabs.sendMessage(tab!.id!, { event: "getInfo" })
 
-                resolve(true);
+                        console.log("resp", resp)
+                        // Send the stream ID to the offscreen document to start recording.
+                        chrome.runtime.sendMessage({
+                            action: 'startRecording',
+                            target: 'offscreen',
+                            payload: { ...resp, streamId, tabId: tab!.id! } 
+                        });
+
+                        await chrome.storage.local.set({ isSummarizing: true });
+
+                        resolve(true)
+                    } else {
+                        resolve(false);
+                    }
+                    ;
+                } catch (e) {
+                    reject(e);
+                }
             });
+            
         } catch(e) {
             reject(e);
         }
@@ -128,4 +141,13 @@ const shouldStopCapture: ActionsHandler = async (payload: { tabId: number, remov
     if (isListeningTab) await stopTabCapture({ shouldCloseSidePanel: false });
 };
 
-export { startTabCapture, stopTabCapture, focusTab, shouldStopCapture }
+const isTabStillOpen = async (tabId: number) => {
+  try {
+    await chrome.tabs.get(tabId);
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
+export { startTabCapture, stopTabCapture, focusTab, shouldStopCapture, isTabStillOpen }

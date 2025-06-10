@@ -1,8 +1,11 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
+export type SummarizeTypes = 'error';
+
 export type SummarizeValue = {
     text: string,
     time: number,
+    type?: SummarizeTypes,
     streamerName?: string,
     streamerImage?: string,
 }
@@ -29,9 +32,12 @@ const summarizeSlice = createSlice({
       //@ts-ignore
       const getLastStreamer = state.value.findLast((summary) => typeof summary?.streamerImage != 'undefined');
       state.value = [getLastStreamer];
+    },
+    clearSummariesError: (state) => {
+      state.value = state.value.filter((summary) => summary?.type !== 'error');
     }
   },
 });
 
-export const { addSummary, clearSummaries, clearSummariesExceptLast } = summarizeSlice.actions;
+export const { clearSummariesError, addSummary, clearSummaries, clearSummariesExceptLast } = summarizeSlice.actions;
 export default summarizeSlice.reducer;

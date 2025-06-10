@@ -9,6 +9,7 @@ import pulseSlice from './slices/pulseSlice';
 import translatedTextSlice from './slices/translatedTextSlice';
 import isSummarizingSlice from './slices/isSummarizingSlice';
 import streamerListSlice from './slices/streamerListSlice';
+import captureAllowedSlice from './slices/captureAllowedSlice';
 
 export const store = configureStore({
   reducer: {
@@ -19,7 +20,8 @@ export const store = configureStore({
     pulse: pulseSlice,
     translatedText: translatedTextSlice,
     isSummarizing: isSummarizingSlice,
-    streamerList: streamerListSlice
+    streamerList: streamerListSlice,
+    captureAllowed: captureAllowedSlice
   },
 })
 

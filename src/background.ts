@@ -16,11 +16,19 @@ let isSidePanelOpen = false;
 chrome.action.onClicked.addListener(async (tab) => {
   if (isSidePanelOpen) {
     await stopTabCapture({ shouldCloseSidePanel: true });
-    isSidePanelOpen = false;
+   // isSidePanelOpen = false;
   } else {
-    await startTabCapture({ tab, shouldOpenSidePanel: true });
-    await chrome.storage.local.set({ sidePanelOpenedFrom: tab });
-    isSidePanelOpen = true;
+    chrome.storage.local.set({ sidePanelOpenedFrom: tab });
+    try {
+      await startTabCapture({ tab, shouldOpenSidePanel: true });
+      await chrome.storage.local.set({ captureAllowed: true });
+      //isSidePanelOpen = true;
+    } catch (e) {
+      console.log('Try startTabCapture error :', e)
+      await chrome.storage.local.set({ captureAllowed: false });
+      //isSidePanelOpen = true;
+    }
+    
   }
 });
 
@@ -44,8 +52,8 @@ chrome.runtime.onConnect.addListener((port) => {
   if (port.name === "sidepanel") {
 
     port.onDisconnect.addListener(async () => {
-      await stopTabCapture({ shouldCloseSidePanel: false });
       isSidePanelOpen = false;
+      await stopTabCapture({ shouldCloseSidePanel: false });
     });
   }
 });
@@ -65,6 +73,7 @@ chrome.runtime.onInstalled.addListener(async (details: chrome.runtime.InstalledD
         await chrome.storage.local.set({ isAccordionExpanded: true });
         await chrome.storage.local.set({ refreshValue: 5 });
         await chrome.storage.local.set({ isEnableExtension: true });
+        await chrome.storage.local.set({ captureAllowed: true });
         await chrome.storage.local.set({ streamersList: [] });
     }
 });
@@ -72,6 +81,10 @@ chrome.runtime.onInstalled.addListener(async (details: chrome.runtime.InstalledD
 chrome.runtime.onMessage.addListener((request: ActionsResquest, sender, sendResponse) => {
 
     const { action, payload } = request;
+
+    if (action === 'isSidePanelOpened') {
+      isSidePanelOpen = payload;
+    }
 
     if (actionsHandler[action]) {
         actionsHandler[action](payload, sender).then(sendResponse).catch((err) => {

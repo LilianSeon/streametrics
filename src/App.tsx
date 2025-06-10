@@ -5,7 +5,7 @@ import './background';
 import { useDispatch } from 'react-redux';
 import { RootState } from './store/store'
 import { useAppSelector } from './store/hooks';
-import { addSummary } from './store/slices/summarizeSlice';
+import { addSummary, clearSummariesError } from './store/slices/summarizeSlice';
 import { updateIsSummarizing } from './store/slices/isSummarizingSlice';
 import { setStreamerList } from './store/slices/streamerListSlice';
 
@@ -13,18 +13,26 @@ import { setStreamerList } from './store/slices/streamerListSlice';
 import { Navbar } from './components/Navbar';
 import { Table } from './components/Table';
 import { Footer } from './components/Footer';
+import { Summarize } from './components/Summarize';
 
 // Typing
 import { StorageStreamerListType } from './typings/StorageType';
 import { Languages } from './components/Chart/src/js/Texts';
-import { Summarize } from './components/Summarize';
 import { AudioBarsValue, updateAudioBars } from './store/slices/audioBarsSlice';
 import { updateSidePanelOpenedFrom } from './store/slices/sidePanelOpenedFromSlice';
 import { updatePulse } from './store/slices/pulseSlice';
 import { loadTranslatedText } from './loader/fileLoader';
 import { addTranslatedText, TranslatedText } from './store/slices/translatedTextSlice';
+import { updateCaptureAllowed } from './store/slices/captureAllowedSlice';
 
 
+// Rigth after sidePanel loaded
+chrome.runtime.sendMessage({ action: "isSidePanelOpened", payload: true });
+
+// (optionnel) Avant de se fermer — peu fiable
+window.addEventListener("beforeunload", () => {
+  chrome.runtime.sendMessage({ action: "isSidePanelOpened", payload: false });
+});
 
 const App: FC = () => {
 
@@ -32,6 +40,7 @@ const App: FC = () => {
   const summaries = useAppSelector((state: RootState) => state.summarize.value);
   const sidePanelOpenedFrom = useAppSelector((state: RootState) => state.sidePanelOpenedFrom.value) as chrome.tabs.Tab;
   const streamerList = useAppSelector((state: RootState) => state.streamerList.value);
+  const captureAllowed = useAppSelector((state: RootState) => state.captureAllowed.value);
   
   const sidePanelOpenedFromTabId = useMemo(() => sidePanelOpenedFrom?.id, [sidePanelOpenedFrom]);
   const sidePanelOpenedFromWindowId = useMemo(() => sidePanelOpenedFrom?.windowId, [sidePanelOpenedFrom]);
@@ -46,6 +55,14 @@ const App: FC = () => {
 
 
   useEffect(() => {
+    if (captureAllowed === false) {
+      dispatch(addSummary({ text: "Veuillez ouvrir ce panneaux latéral une fois sur le live d'un streamer.", type: "error", time: new Date().getTime(), streamerName: '', streamerImage: '' }));
+    } else if (captureAllowed) {
+      dispatch(clearSummariesError());
+    }
+  }, [captureAllowed]);
+
+  useEffect(() => {
     currentStreamerNameRef.current = currentStreamerName;
   }, [currentStreamerName]);
 
@@ -54,7 +71,7 @@ const App: FC = () => {
       const summarizeValue = { text: '', time: new Date().getTime(), streamerName: currentStreamerName, streamerImage: currentStreamerImage }
       dispatch(addSummary(summarizeValue));
     }
-  }, [currentStreamerName, currentStreamerImage])
+  }, [currentStreamerName, currentStreamerImage]);
 
   const onClickBody: React.MouseEventHandler<HTMLDivElement> = () => {
     if (isDisplayListLang) setIsDisplayListLang(!isDisplayListLang)
@@ -84,7 +101,7 @@ const App: FC = () => {
       }
     });
 
-    chrome.storage.onChanged.addListener(({ streamersList, language, sidePanelOpenedFrom, isSummarizing }) => {
+    chrome.storage.onChanged.addListener(({ streamersList, language, sidePanelOpenedFrom, isSummarizing, captureAllowed }) => {
       if (streamersList?.newValue) {
         dispatch(setStreamerList(streamersList.newValue as StorageStreamerListType[]));
       }
@@ -102,6 +119,7 @@ const App: FC = () => {
         });
       }
 
+      console.log('onCHange sidePanelOpenedFrom :', sidePanelOpenedFrom)
       if (sidePanelOpenedFrom?.newValue) {
         dispatch(updateSidePanelOpenedFrom(sidePanelOpenedFrom.newValue));
       }
@@ -109,16 +127,22 @@ const App: FC = () => {
       if (typeof isSummarizing?.newValue != 'undefined') {
         dispatch(updateIsSummarizing(isSummarizing.newValue));
       }
+
+      if (captureAllowed?.newValue === true || captureAllowed?.newValue === false) {
+        dispatch(updateCaptureAllowed(captureAllowed.newValue as boolean));
+      }
     });
 
     const getStorage = async (keys: string | string[]) => {
       try {
         const { streamersList } = await chrome.storage.local.get(keys);
         const { language } = await chrome.storage.local.get('language');
-        const { sidePanelOpenedFrom } = await chrome.storage.local.get('sidePanelOpenedFrom');
+        const { isSummarizing } = await chrome.storage.local.get('isSummarizing');
+        const { captureAllowed } = await chrome.storage.local.get('captureAllowed');
         const translatedText: TranslatedText = await loadTranslatedText(language);
+        dispatch(updateCaptureAllowed(captureAllowed as boolean));
+        dispatch(updateIsSummarizing(isSummarizing));
         dispatch(addTranslatedText(translatedText));
-        dispatch(updateSidePanelOpenedFrom(sidePanelOpenedFrom));
         dispatch(setStreamerList(streamersList ?? []));
         setLanguage(language);
 
@@ -162,14 +186,18 @@ const App: FC = () => {
         });
       })
       
-    }).then((streamersList: StorageStreamerListType[]) => {
+    }).then(async (streamersList: StorageStreamerListType[]) => {
         const filteredStreamerList = streamersList.filter(({ tabId }: StorageStreamerListType) => allStreamerTabId.includes(tabId));
         setStorage(filteredStreamerList);
+
+        const { sidePanelOpenedFrom } = await chrome.storage.local.get('sidePanelOpenedFrom');
+        dispatch(updateSidePanelOpenedFrom(sidePanelOpenedFrom));
 
         if (checkStatusNoResponse === streamersList.length) setStorage([]); // If only get error response clear streamerlist
     });
 
     return () => {
+      chrome.runtime.sendMessage({ action: "isSidePanelOpened", payload: false });
       port.disconnect();
     }
 

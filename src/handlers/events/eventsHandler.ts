@@ -3,6 +3,8 @@ import { getStorage } from "../../components/Chart/src/utils/utilsStorage";
 
 const checkStatus = (_payload: any, sendResponse: (response?: any) => void) => {
     return new Promise(async(resolve, reject) => {
+        if (window.location.href === 'https://www.twitch.tv/' && sendResponse) sendResponse();
+        
         const tabId = await getCurrentTabId();
         sendResponse(tabId);
         const streamerName = await getStreamerName(document);

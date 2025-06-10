@@ -6,11 +6,11 @@ import { AutoScrollStopped } from "./AutoScrollStopped";
 import { SummaryHeader } from "./SummaryHeader";
 
 // Typings
-import { SummarizeValue } from "../store/slices/summarizeSlice";
+import { addSummary, SummarizeValue } from "../store/slices/summarizeSlice";
 import { RootState } from "../store/store";
 import { useAppSelector } from "../store/hooks";
 import { StorageStreamerListType } from "../typings/StorageType";
-import { TreeDots } from "./TreeDots";
+import { ThreeDots } from "./ThreeDots";
 import { useDispatch } from "react-redux";
 import { updateIsSummarizing } from "../store/slices/isSummarizingSlice";
 
@@ -28,6 +28,7 @@ const Summarize: FC<SummarizeProps> = ({ summaries, streamerName, tabId, windowI
     const dispatch = useDispatch();
     const language = useAppSelector((state: RootState) => state.language.value);
     const isSummarizing = useAppSelector((state: RootState) => state.isSummarizing.value);
+    const captureAllowed = useAppSelector((state: RootState) => state.captureAllowed.value);
 
     const [ activeAutoScroll, setActiveAutoScroll ] = useState(true);
 
@@ -38,7 +39,7 @@ const Summarize: FC<SummarizeProps> = ({ summaries, streamerName, tabId, windowI
 
         const { scrollTop, scrollHeight, clientHeight } = target;
 
-        const isAtBottom = scrollTop + clientHeight >= scrollHeight - 50;
+        const isAtBottom = scrollTop + clientHeight >= scrollHeight - 90;
 
         setActiveAutoScroll(false);
 
@@ -66,17 +67,37 @@ const Summarize: FC<SummarizeProps> = ({ summaries, streamerName, tabId, windowI
 
     const focusTabAndStartTabCapture = useCallback(async (event: React.MouseEvent<Element, MouseEvent>, windowId: StorageStreamerListType['windowId'], tabId: StorageStreamerListType['tabId']) => {
         event.preventDefault();
-        await chrome.runtime.sendMessage({ action: 'focusTab', payload: { tabId } });
-        await chrome.runtime.sendMessage({ action: 'startTabCapture', payload: { shouldOpenSidePanel: false, windowId, tabId } });
+        try {
+            await chrome.runtime.sendMessage({ action: 'focusTab', payload: { tabId } });
+            const resp2 = await chrome.runtime.sendMessage({ action: 'startTabCapture', payload: { shouldOpenSidePanel: false, windowId, tabId } });
+            if(resp2?.error || !resp2) dispatch(updateIsSummarizing(false));
+            dispatch(updateIsSummarizing(true));
+        } catch (e) {
+            dispatch(updateIsSummarizing(false));
+        }
+        
     }, [windowId, tabId]);
 
     const onClickSummarizeHandler = useCallback(async (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+        //TODO: Quand on lance l'extension depuis google.com (vide), puis qu'on va sur twitch -> select streamer on peut pas lancer un record (seulement en cliquant sur l'icon de l'ext)
+        // Maybe capturé les erreur pour ls afficher à l'user pour qu'il réouvre le sidepanel ?
         if (isSummarizing) {
             await stopTabCapture(event);
+            dispatch(updateIsSummarizing(false));
         } else {
-            if (windowId && tabId) await focusTabAndStartTabCapture(event, windowId, tabId);
+            try {
+                if (windowId && tabId) {
+                    await focusTabAndStartTabCapture(event, windowId, tabId);
+                } else {
+                    dispatch(updateIsSummarizing(false));
+                    dispatch(addSummary({ text: "Veuillez ouvrir ce panneaux latéral une fois sur le live d'un streamer.", type: "error", time: new Date().getTime(), streamerName: '', streamerImage: '' }));
+                }
+            } catch (error: any) {
+                console.log('ERROR :', error)
+                dispatch(addSummary({ text: "Veuillez ouvrir ce panneaux latéral une fois sur le live d'un streamer.", type: "error", time: new Date().getTime(), streamerName: '', streamerImage: '' }));
+                dispatch(updateIsSummarizing(false));
+            }
         }
-        dispatch(updateIsSummarizing(!isSummarizing));
     }, [windowId, tabId, isSummarizing]);
 
     const onClickBackToBottomHanlder = useCallback(() => {
@@ -85,17 +106,17 @@ const Summarize: FC<SummarizeProps> = ({ summaries, streamerName, tabId, windowI
         }
     }, [activeAutoScroll]);
 
-    console.log('isSummarizing', isSummarizing)
+    console.log(isSummarizing)
 
     return(
         <section className="mt-2 mx-2 p-2 flex flex-col grow bg-gray-800 rounded-lg min-h-0">
-            <SummaryHeader onClickSummarizeHandler={onClickSummarizeHandler} isSummarizing={ isSummarizing } />
+            <SummaryHeader onClickSummarizeHandler={ onClickSummarizeHandler } isSummarizing={ isSummarizing } />
             <div className="group relative flex flex-col w-full rounded-lg overflow-y-auto gap-2.5 grow min-h-0">
                 <div className="absolute top-0 left-0 right-0 h-8 rounded-t-lg pointer-events-none z-10 bg-gradient-to-b from-gray-700 to-transparent" />
                 <div onScroll={ onScroll } className="group flex flex-col w-full grow overflow-y-auto rounded-lg p-4 border-gray-200 bg-gray-700 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-700 [&::-webkit-scrollbar-thumb]:transition-colors [&::-webkit-scrollbar-thumb]:duration-300 [&::-webkit-scrollbar-thumb]:ease-in-out group-hover:[&::-webkit-scrollbar-thumb]:bg-gray-300">
                     <SummaryList summaries={ summaries } language={ language } currentStreamer={ streamerName ?? '' } />
                     { !activeAutoScroll && <AutoScrollStopped nbMessage={ nbNewSummary } onClick={ onClickBackToBottomHanlder }/> }
-                    { (Boolean(isSummarizing) && summaries.length > 0) && <TreeDots /> }
+                    { isSummarizing && captureAllowed && summaries.length > 0 && <ThreeDots /> }
                     <div ref={endOfListRef} />
                 </div>
             </div>

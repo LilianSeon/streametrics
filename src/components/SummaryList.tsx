@@ -5,6 +5,7 @@ import { Languages } from "./Chart/src/js/Texts";
 import { SummarizeValue } from "../store/slices/summarizeSlice";
 import { SummaryItem } from "./SummaryItem";
 import { SummaryNewStreamer } from "./SummaryNewStreamer";
+import { SummaryError } from "./SummaryError";
 
 type SummaryListProps = {
   summaries: SummarizeValue[];
@@ -14,6 +15,8 @@ type SummaryListProps = {
 
 const SummaryList = memo(({ summaries, language, currentStreamer }: SummaryListProps) => {
 
+    console.log(summaries, summaries.length)
+
 
     return (
         <>
@@ -22,6 +25,10 @@ const SummaryList = memo(({ summaries, language, currentStreamer }: SummaryListP
                         if (summary?.streamerImage) {
                             return (
                                 <SummaryNewStreamer key={ summary.time } summary={ summary } activePulseAnimation={ summary.streamerName === currentStreamer } />
+                            )
+                        } else if(summary?.type === "error") {
+                            return (
+                                <SummaryError key={ summary.time } errorText={ summary } isLast={ index === summaries.length - 1 } />
                             )
                         } else {
                             return (
