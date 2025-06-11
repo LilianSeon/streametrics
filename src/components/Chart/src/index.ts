@@ -10,6 +10,7 @@ Chart.register(ChartDataLabels);*/
 import verticalHoverLine from './js/plugins/verticalHoverLine';
 import { customTooltipTitle, customTooltipLabel, customTooltipAfterFooter } from './js/plugins/customTooltip';
 import { customSegmentTooltip } from './js/plugins/customSegmentTooltip';
+import { verticalLine } from './js/plugins/verticalLine';
 //import customDatalabels from './plugins/customDatalabels';
 
 // Types
@@ -53,6 +54,7 @@ export default class ChartExtension {
     _isDocumentHidden: boolean;
     language: Languages;
     #lastZoomLevel: number | undefined;
+    _verticalLineTimestamp: number | null = null;
 
     constructor(container: HTMLElement, language: Languages, i18nTexts: Record<string, string>, title?: string, defaultColor?:  ThemeBackgroundColor){
         this.container = container;
@@ -222,10 +224,14 @@ export default class ChartExtension {
                             }
                         }
                     },
-                    responsive: false,
+                    responsive: true,
+                    maintainAspectRatio: false
                 },
-                plugins: [verticalHoverLine, customSegmentTooltip]
+                plugins: [verticalHoverLine, customSegmentTooltip, verticalLine]
             });
+
+            //@ts-expect-error
+            this.chart.config._config.chartExtensionRef = this;
 
             Chart.register(zoomPlugin);
 
@@ -589,5 +595,38 @@ export default class ChartExtension {
         this.chart!.options!.scales!.y!.grid!.display = false;
         this.chart!.options!.scales!.y2!.grid!.display = false;
     };
+
+    showVerticalBarAtTimestamp(timestamp: number): void {
+        if (!this.chart || this.chart.data.datasets[0].data.length === 0) return;
+
+        //@ts-expect-error
+        this.chart.config._config.chartExtensionRef = this;
+
+        // Trouve l'élément dont le timestamp est le plus proche
+        let closest = this.chart.data.datasets[0].data[0];
+        //@ts-ignore
+        let minDiff = Math.abs(closest.time - timestamp);
+
+        for (const point of this.chart.data.datasets[0].data) {
+            //@ts-ignore
+            const diff = Math.abs(point.time - timestamp);
+            if (diff < minDiff) {
+                minDiff = diff;
+                closest = point;
+            }
+        }
+
+        //@ts-ignore
+        this._verticalLineTimestamp = closest.time;
+        this.chart.update();
+    };
+
+    hideVerticalLine(): void {
+        if (!this.chart) return;
+
+        this._verticalLineTimestamp = null;
+        this.chart.update();
+    };
+
 
 };

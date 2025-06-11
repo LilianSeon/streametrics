@@ -19,7 +19,7 @@ import { StorageStatusType, StorageStreamerListType } from './typings/StorageTyp
 import { EventsResquest } from './typings/MessageType';
 
 // Events Handlers
-import { checkStatus, getInfo } from './handlers/events/eventsHandler';
+import { checkStatus, getInfo, hideLine, showLine } from './handlers/events/eventsHandler';
 
 let tabId: number | undefined;
 
@@ -398,7 +398,8 @@ const onTabCreated = async (payload: { url: string, tabID: number }) => {
                 streamerName: info.streamerName,
                 streamerGame: info.streamerGame,
                 streamTitle: info.streamTitle,
-                language: info.language
+                language: info.language,
+                tabId: payload.tabID
             }
         });
     }
@@ -410,7 +411,9 @@ const eventsHandlers: Record<string, any> = {
     disableChart,
     onTabCreated,
     onTabUpdated: onTabCreated,
-    getInfo
+    getInfo,
+    hideLine,
+    showLine
 };
 
 chrome.storage.onChanged.addListener(async (changes) => {
@@ -438,6 +441,17 @@ chrome.runtime.onMessage.addListener((request: EventsResquest, _sender, sendResp
         if (typeof isEnableExtension !== 'undefined' && isEnableExtension === false) return true;
 
         const { event, payload } = request;
+
+        if (event === 'hideLine' || event === 'showLine' && chartExtension) {
+            const streamerName = await getStreamerName(document)
+            if (payload.streamerName && payload.streamerName != streamerName) return true;
+
+            eventsHandlers[event](payload, sendResponse, chartExtension).then(sendResponse).catch((err: any) => {
+              sendResponse({ error: err.message });
+            });
+    
+            return true; // async response
+        }
 
         if (eventsHandlers[event]) {
             eventsHandlers[event](payload, sendResponse).then(sendResponse).catch((err: any) => {

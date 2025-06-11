@@ -79,8 +79,6 @@ const Summarize: FC<SummarizeProps> = ({ summaries, streamerName, tabId, windowI
     }, [windowId, tabId]);
 
     const onClickSummarizeHandler = useCallback(async (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-        //TODO: Quand on lance l'extension depuis google.com (vide), puis qu'on va sur twitch -> select streamer on peut pas lancer un record (seulement en cliquant sur l'icon de l'ext)
-        // Maybe capturé les erreur pour ls afficher à l'user pour qu'il réouvre le sidepanel ?
         if (isSummarizing) {
             await stopTabCapture(event);
             dispatch(updateIsSummarizing(false));
@@ -90,11 +88,10 @@ const Summarize: FC<SummarizeProps> = ({ summaries, streamerName, tabId, windowI
                     await focusTabAndStartTabCapture(event, windowId, tabId);
                 } else {
                     dispatch(updateIsSummarizing(false));
-                    dispatch(addSummary({ text: "Veuillez ouvrir ce panneaux latéral une fois sur le live d'un streamer.", type: "error", time: new Date().getTime(), streamerName: '', streamerImage: '' }));
+                    dispatch(addSummary({ text: "", type: "error", time: new Date().getTime(), streamerName: '', streamerImage: '' }));
                 }
             } catch (error: any) {
-                console.log('ERROR :', error)
-                dispatch(addSummary({ text: "Veuillez ouvrir ce panneaux latéral une fois sur le live d'un streamer.", type: "error", time: new Date().getTime(), streamerName: '', streamerImage: '' }));
+                dispatch(addSummary({ text: "", type: "error", time: new Date().getTime(), streamerName: '', streamerImage: '' }));
                 dispatch(updateIsSummarizing(false));
             }
         }
@@ -105,8 +102,6 @@ const Summarize: FC<SummarizeProps> = ({ summaries, streamerName, tabId, windowI
             endOfListRef.current?.scrollIntoView({ behavior: "smooth" });
         }
     }, [activeAutoScroll]);
-
-    console.log(isSummarizing)
 
     return(
         <section className="mt-2 mx-2 p-2 flex flex-col grow bg-gray-800 rounded-lg min-h-0">

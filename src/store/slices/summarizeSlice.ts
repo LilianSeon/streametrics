@@ -3,11 +3,12 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 export type SummarizeTypes = 'error';
 
 export type SummarizeValue = {
-    text: string,
-    time: number,
-    type?: SummarizeTypes,
-    streamerName?: string,
-    streamerImage?: string,
+  text: string,
+  time: number,
+  tabId?: number,
+  type?: SummarizeTypes,
+  streamerName?: string,
+  streamerImage?: string,
 }
 
 export interface SummarizeState {

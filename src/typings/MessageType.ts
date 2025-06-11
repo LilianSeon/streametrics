@@ -4,7 +4,9 @@ export enum ActionsEnum {
     deleteAllStreamers = 'deleteAllStreamers',
     getWindowId = 'getWindowId',
     getTabId = 'getTabId',
-    isSidePanelOpened ='isSidePanelOpened'
+    isSidePanelOpened ='isSidePanelOpened',
+    showLine = 'showLine',
+    hideLine = 'hideLine'
 };
 
 export enum EventsEnum {

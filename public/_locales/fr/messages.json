@@ -1,4 +1,12 @@
 {
+  "summarize_error_text": {
+    "message": "Veuillez ouvrir ce panneaux latéral une fois sur le live d'un streamer.",
+    "description": "open side panel"
+  },
+  "summarize_error_title": {
+    "message": "Erreur de capture",
+    "description": "Capture error"
+  },
   "enable_summarize": {
     "message": "Activer le résumé",
     "description": "Summarize"
@@ -169,8 +177,12 @@
     "message": "Recherche",
     "description": "Input search placeholder"
   },
-  "toggle": {
-    "message": "Désactiver l'extension",
+  "toggle_disactivated": {
+    "message": "Activer les graphiques",
+    "description": "Toggle title html propertie"
+  },
+  "toggle_activated": {
+    "message": "Désactiver les graphiques",
     "description": "Toggle title html propertie"
   },
   "time_ago": {

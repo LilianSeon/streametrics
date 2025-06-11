@@ -1,16 +1,18 @@
 import { FC } from "react";
 
+// Store
+import { useAppSelector } from "../store/hooks";
+
 // Typings
-//import { Languages } from "./Chart/src/js/Texts";
-import { SummarizeValue } from "../store/slices/summarizeSlice";
+import { RootState } from "../store/store";
 
 type SummaryErrorProps = {
-    errorText: SummarizeValue,
     isLast: boolean;
-    //language: Languages;
 };
 
-const SummaryError: FC<SummaryErrorProps> = ({ errorText, isLast }: SummaryErrorProps) => {
+const SummaryError: FC<SummaryErrorProps> = ({ isLast }: SummaryErrorProps) => {
+
+    const translatedText = useAppSelector((state: RootState) => state.translatedText.value);
       
     return (
         <div>
@@ -21,9 +23,9 @@ const SummaryError: FC<SummaryErrorProps> = ({ errorText, isLast }: SummaryError
                             <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 11.793a1 1 0 1 1-1.414 1.414L10 11.414l-2.293 2.293a1 1 0 0 1-1.414-1.414L8.586 10 6.293 7.707a1 1 0 0 1 1.414-1.414L10 8.586l2.293-2.293a1 1 0 0 1 1.414 1.414L11.414 10l2.293 2.293Z"/>
                         </svg>
                     </div>
-                    <span className="text-base font-semibold text-white">Erreur de capture</span>
+                    <span className="text-base font-semibold text-white">{ translatedText.summarize_error_title.message }</span>
                 </div>
-                <p className="text-sm font-normal text-gray-100">{ errorText.text }</p>
+                <p className="text-sm font-normal text-gray-100">{ translatedText.summarize_error_text.message }</p>
             </div>
             { !isLast && <hr className="h-px bg-gray-500 border-0" /> }
         </div>

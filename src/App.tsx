@@ -56,7 +56,7 @@ const App: FC = () => {
 
   useEffect(() => {
     if (captureAllowed === false) {
-      dispatch(addSummary({ text: "Veuillez ouvrir ce panneaux latéral une fois sur le live d'un streamer.", type: "error", time: new Date().getTime(), streamerName: '', streamerImage: '' }));
+      dispatch(addSummary({ text: "", type: "error", time: new Date().getTime(), streamerName: '', streamerImage: '' }));
     } else if (captureAllowed) {
       dispatch(clearSummariesError());
     }
@@ -77,8 +77,8 @@ const App: FC = () => {
     if (isDisplayListLang) setIsDisplayListLang(!isDisplayListLang)
   };
 
-  const summarizeReady = useCallback(({ summary, time, streamerName }: { summary: string, time: string, streamerName: string }, currentStreamerName: string) => {
-    if (streamerName === currentStreamerName) dispatch(addSummary({ text: summary, time: parseInt(time), streamerName }));
+  const summarizeReady = useCallback(({ summary, time, streamerName, tabId }: { summary: string, time: string, streamerName: string, tabId: number }, currentStreamerName: string) => {
+    if (streamerName === currentStreamerName) dispatch(addSummary({ text: summary, time: parseInt(time), streamerName, tabId: tabId }));
   }, []);
 
   const drawAudioBars = useCallback(({ bars, pulse }: { bars: AudioBarsValue[], pulse: number }) => {
@@ -119,7 +119,6 @@ const App: FC = () => {
         });
       }
 
-      console.log('onCHange sidePanelOpenedFrom :', sidePanelOpenedFrom)
       if (sidePanelOpenedFrom?.newValue) {
         dispatch(updateSidePanelOpenedFrom(sidePanelOpenedFrom.newValue));
       }
@@ -205,7 +204,7 @@ const App: FC = () => {
 
   return (
     <div onClick={ onClickBody } style={{ height: '100%'}} className='flex flex-col bg-gray-900'>
-      <Navbar isDisplayListLang={ isDisplayListLang } setIsDisplayListLang={ setIsDisplayListLang } language={ language } />
+      <Navbar isDisplayListLang={ isDisplayListLang } setIsDisplayListLang={ setIsDisplayListLang } />
       <Table streamersList={ streamerList } language={ language } />
       <Summarize summaries={ summaries } streamerName={ currentStreamerName } tabId={ sidePanelOpenedFromTabId } windowId={ sidePanelOpenedFromWindowId }/>
       <Footer />

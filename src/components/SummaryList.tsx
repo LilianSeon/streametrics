@@ -15,9 +15,6 @@ type SummaryListProps = {
 
 const SummaryList = memo(({ summaries, language, currentStreamer }: SummaryListProps) => {
 
-    console.log(summaries, summaries.length)
-
-
     return (
         <>
             {
@@ -28,7 +25,7 @@ const SummaryList = memo(({ summaries, language, currentStreamer }: SummaryListP
                             )
                         } else if(summary?.type === "error") {
                             return (
-                                <SummaryError key={ summary.time } errorText={ summary } isLast={ index === summaries.length - 1 } />
+                                <SummaryError key={ summary.time } isLast={ index === summaries.length - 1 } />
                             )
                         } else {
                             return (

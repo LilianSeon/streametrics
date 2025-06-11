@@ -1,4 +1,4 @@
-import { memo, useMemo } from 'react';
+import { memo, MouseEventHandler, useMemo } from 'react';
 
 // Typings
 import { SummarizeValue } from '../store/slices/summarizeSlice';
@@ -19,8 +19,18 @@ const SummaryItem = memo(({ summary, isLast, language }: SummaryItemProps) => {
     second: '2-digit'
   }), [summary.time, language]);
 
+  const onMouseEnterHandler: MouseEventHandler<HTMLDivElement> = (event: any) => {
+    event.preventDefault();
+    if (summary?.tabId) chrome.tabs.sendMessage(summary.tabId, { event: "showLine", payload: { tabId: summary.tabId, time: summary.time, streamerName: summary.streamerName } });
+  };
+
+  const onMouseLeaveHandler: MouseEventHandler<HTMLDivElement> = (event: any) => {
+    event.preventDefault();
+    if (summary?.tabId) chrome.tabs.sendMessage(summary.tabId, { event: "hideLine", payload: { tabId: summary.tabId, time: summary.time } });
+  };
+
   return (
-    <div className="py-1">
+    <div className="py-1" onMouseEnter={ (event) => onMouseEnterHandler(event) } onMouseLeave={ (event) => onMouseLeaveHandler(event) }>
         <div className="flex items-center space-x-2">
             <span className="text-sm font-normal text-gray-400 dark:text-gray-400">{ formattedTime }</span>
         </div>

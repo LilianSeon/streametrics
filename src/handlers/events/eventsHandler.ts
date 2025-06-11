@@ -1,3 +1,4 @@
+import ChartExtension from "../../components/Chart/src";
 import { checkChartIsPaused, checkStreamerStatus, getCurrentTabId, getGameName, getStreamerName, getStreamTitle } from "../../components/Chart/src/utils/utils";
 import { getStorage } from "../../components/Chart/src/utils/utilsStorage";
 
@@ -49,5 +50,25 @@ const getInfo = (_payload?: any, sendResponse?: (response?: any) => void): Promi
     });
 };
 
+const showLine = (payload: any, sendResponse: (response?: any) => void, chartExtension: ChartExtension) => {
+    return new Promise(async(resolve, _reject) => {
+        console.log("showLine", payload)
 
-export { getInfo, checkStatus }
+        chartExtension?.showVerticalBarAtTimestamp(payload?.time);
+
+        sendResponse(true)
+        resolve(true)
+    });
+};
+
+const hideLine = (payload: any, sendResponse: (response?: any) => void, chartExtension: ChartExtension) => {
+    return new Promise(async(resolve, _reject) => {
+        console.log("hideLine", payload)
+        chartExtension?.hideVerticalLine();
+        sendResponse(true)
+        resolve(true)
+    });
+};
+
+
+export { getInfo, checkStatus, showLine, hideLine }

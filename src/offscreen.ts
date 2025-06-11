@@ -6,7 +6,8 @@ let streamMetadata = {
   streamerName: '',
   streamerGame: '',
   streamTitle: '',
-  language: ''
+  language: '',
+  tabId: 0
 };
 
 const encodeWAV = (samples: any, sampleRate = 44100) => {
@@ -83,8 +84,8 @@ const stopRecording = () => {
 };
 
 const startRecording = async (message: any) => {
-    const { streamerName, streamerGame, streamTitle, language, streamId }: { streamerName: string, streamerGame: string, streamTitle: string, language: string, streamId: number } = message.payload;
-    streamMetadata = { streamerName, streamerGame, streamTitle, language };
+    const { streamerName, streamerGame, streamTitle, language, streamId, tabId }: { streamerName: string, streamerGame: string, streamTitle: string, language: string, streamId: number, tabId: number } = message.payload;
+    streamMetadata = { streamerName, streamerGame, streamTitle, language, tabId };
 
     audioStream = await navigator.mediaDevices.getUserMedia({
       audio: {
@@ -229,7 +230,7 @@ const startRecording = async (message: any) => {
 
           const json = await res.json();
           //console.log("Transcription :", json);
-          if (json.summary != '') chrome.runtime.sendMessage({ action: 'summarizeReady', payload: { summary: json.summary, time: json.time, streamerName: json.streamerName } });
+          if (json.summary != '') chrome.runtime.sendMessage({ action: 'summarizeReady', payload: { summary: json.summary, time: json.time, streamerName: json.streamerName, tabId: streamMetadata.tabId } });
 
         } catch (err) {
           console.error("Erreur lors de l'envoi :", err);

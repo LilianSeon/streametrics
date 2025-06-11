@@ -1,4 +1,12 @@
 {
+  "summarize_error_text": {
+    "message": "Please open this side panel once on a streamer's live.",
+    "description": "open side panel"
+  },
+  "summarize_error_title": {
+    "message": "Capture error",
+    "description": "Capture error"
+  },
   "enable_summarize": {
     "message": "Enable summary",
     "description": "Summarize"
@@ -169,8 +177,12 @@
     "message": "Search",
     "description": "Input search placeholder"
   },
-  "toggle": {
-    "message": "Disable extension",
+  "toggle_disactivated": {
+    "message": "Enable charts",
+    "description": "Toggle title html propertie"
+  },
+  "toggle_activated": {
+    "message": "Disable charts",
     "description": "Toggle title html propertie"
   },
   "time_ago": {
