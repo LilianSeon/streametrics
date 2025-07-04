@@ -1,9 +1,9 @@
 import asyncio
-from fastapi import APIRouter, HTTPException, Header, UploadFile, File, Form, Request
+from fastapi import APIRouter, Depends, HTTPException, Header, UploadFile, File, Form
 from fastapi.responses import JSONResponse
 from concurrent.futures import ThreadPoolExecutor
-from limite import limiter
-
+#from slowapi import Limiter
+#from slowapi.util import get_remote_address
 
 import tempfile
 import os
@@ -11,6 +11,8 @@ import whisper
 import requests
 
 router = APIRouter()
+#limiter = Limiter(key_func=get_remote_address)
+#router.state.limiter = limiter
 
 API_KEY = "streametrics-secret"
 
@@ -55,19 +57,20 @@ def transcribe_audio(temp_path: str):
     )["text"]
 
 def validate_api_key(x_api_key: str = Header(...)):
+    print(x_api_key, API_KEY)
     if x_api_key != API_KEY:
         raise HTTPException(status_code=403, detail="Invalid API key")
 
 @router.post("/")
-@limiter.limit("9/minute")  # max 4 requets per minute
+#@limiter.limit("4/minute")  # max 4 requets per minute
 async def summarize(
-        request: Request,
         audio: UploadFile = File(...),
         streamer: str = Form(...),
         language: str = Form(...),
         game: str = Form(...),
         time: str = Form(...),
         title: str = Form(...),
+        #x_api_key: str = Depends(validate_api_key)
     ):
 
     temp_path = None
@@ -90,7 +93,7 @@ async def summarize(
             if any(c in champ for c in ["<", ">", "{", "}", ";"]):
                 raise HTTPException(status_code=400, detail="Invalid characters in fields")
 
-        # Temporary save file
+        # Sauvegarde temporaire du fichier
         with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp:
             tmp.write(file_bytes)
             temp_path = tmp.name
@@ -98,6 +101,7 @@ async def summarize(
         # Transcription in a dedicated thread
         transcription = await asyncio.get_event_loop().run_in_executor(executor, transcribe_audio, temp_path)
 
+        print(transcription)
 
         if len(transcription.strip()) < 20:
             summary = transcription
