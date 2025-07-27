@@ -16,19 +16,17 @@ let isSidePanelOpen = false;
 chrome.action.onClicked.addListener(async (tab) => {
   if (isSidePanelOpen) {
     await stopTabCapture({ shouldCloseSidePanel: true });
-   // isSidePanelOpen = false;
+    isSidePanelOpen = false;
   } else {
     chrome.storage.local.set({ sidePanelOpenedFrom: tab });
     try {
       await startTabCapture({ tab, shouldOpenSidePanel: true });
       await chrome.storage.local.set({ captureAllowed: true });
-      //isSidePanelOpen = true;
     } catch (e) {
       console.log('Try startTabCapture error :', e)
       await chrome.storage.local.set({ captureAllowed: false });
-      //isSidePanelOpen = true;
     }
-    
+    isSidePanelOpen = true;
   }
 });
 

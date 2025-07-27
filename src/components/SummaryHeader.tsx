@@ -27,8 +27,7 @@ const SummaryHeader: FC<SummaryHeaderProps> = ({ onClickSummarizeHandler, isSumm
         setOpen(false);
     }, []);
 
-    const downloadSummariesAsTxt = useCallback(() => {
-
+    const downloadSummariesAsJson = useCallback(() => {
         const formattedTime = (date: number) => new Date(date).toLocaleTimeString(language, {
             hour12: language === 'en',
             hour: '2-digit',
@@ -36,24 +35,27 @@ const SummaryHeader: FC<SummaryHeaderProps> = ({ onClickSummarizeHandler, isSumm
             second: '2-digit'
         });
 
-        const content = summaries.map((item, index) =>
-            `Summary #${index + 1} - ${item.streamerName ?? "N/A"} - ${ formattedTime(item.time) }
-Text       : ${item.text}
+        const formattedSummaries = summaries.map((item, index) => ({
+            summaryNumber: index + 1,
+            streamerName: item.streamerName ?? "N/A",
+            time: formattedTime(item.time),
+            text: item.text
+        }));
 
-            `
-        ).join("\n");
+        const jsonContent = JSON.stringify(formattedSummaries, null, 2);
 
-        const blob = new Blob([content], { type: "text/plain" });
+        const blob = new Blob([jsonContent], { type: "application/json" });
         const url = URL.createObjectURL(blob);
         const link = document.createElement("a");
 
         link.href = url;
-        link.download = "summaries.txt";
+        link.download = "summaries.json";
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
     }, [summaries, language]);
+
 
     useEffect(() => {
         // Close the dropdown if clicked elsewhere
@@ -85,7 +87,7 @@ Text       : ${item.text}
                 <div className="absolute right-0 mt-1 w-28 z-50 bg-gray-600 rounded shadow-lg">
                     <ul className="text-sm text-white">
                         <li>
-                            <button onClick={ () => downloadSummariesAsTxt() } className="flex w-full items-center hover:bg-gray-400 px-2 py-2 rounded cursor-pointer" type="button">
+                            <button onClick={ () => downloadSummariesAsJson() } className="flex w-full items-center hover:bg-gray-400 px-2 py-2 rounded cursor-pointer" type="button">
                                 <svg className="w-4 h-4 mr-3 mb-1 pointer-events-none text-gray-100" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
                                     <path d="M14.707 7.793a1 1 0 0 0-1.414 0L11 10.086V1.5a1 1 0 0 0-2 0v8.586L6.707 7.793a1 1 0 1 0-1.414 1.414l4 4a1 1 0 0 0 1.416 0l4-4a1 1 0 0 0-.002-1.414Z"></path>
                                     <path d="M18 12h-2.55l-2.975 2.975a3.5 3.5 0 0 1-4.95 0L4.55 12H2a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2Zm-3 5a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path>

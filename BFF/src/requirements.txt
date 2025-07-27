@@ -1,0 +1,3 @@
+aiohttp==3.12.14
+fastapi==0.116.1
+python-dotenv==1.1.1

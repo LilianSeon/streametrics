@@ -78,7 +78,6 @@ const startTabCapture: ActionsHandler = async ({ tab, tabId, windowId, shouldOpe
                     if (tabStillOpen) {
                         const resp: { streamerName: string, streamerGame: string, streamTitle: string, language: string } = await chrome.tabs.sendMessage(tab!.id!, { event: "getInfo" })
 
-                        console.log("resp", resp)
                         // Send the stream ID to the offscreen document to start recording.
                         chrome.runtime.sendMessage({
                             action: 'startRecording',
@@ -88,11 +87,10 @@ const startTabCapture: ActionsHandler = async ({ tab, tabId, windowId, shouldOpe
 
                         await chrome.storage.local.set({ isSummarizing: true });
 
-                        resolve(true)
+                        resolve(true);
                     } else {
                         resolve(false);
                     }
-                    ;
                 } catch (e) {
                     reject(e);
                 }

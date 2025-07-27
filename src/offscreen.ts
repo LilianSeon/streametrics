@@ -223,15 +223,16 @@ const startRecording = async (message: any) => {
         formData.append('time', new Date().getTime().toString());
 
         try {
-          const res = await fetch("http://127.0.0.1:5000/summarize/", { //188.245.179.58
-            method: "POST",
-            body: formData
-          });
+          if (wavBlob.size > 0) {
+            const res = await fetch("http://127.0.0.1:5050/bff/summary", { //188.245.179.58
+              method: "POST",
+              body: formData
+            });
 
-          const json = await res.json();
-          //console.log("Transcription :", json);
-          if (json.summary != '') chrome.runtime.sendMessage({ action: 'summarizeReady', payload: { summary: json.summary, time: json.time, streamerName: json.streamerName, tabId: streamMetadata.tabId } });
-
+            const json = await res.json();
+            //console.log("Transcription :", json);
+            if (json.summary && json.summary != '') chrome.runtime.sendMessage({ action: 'summarizeReady', payload: { summary: json.summary, time: json.time, streamerName: json.streamerName, tabId: streamMetadata.tabId } });
+          }
         } catch (err) {
           console.error("Erreur lors de l'envoi :", err);
         }

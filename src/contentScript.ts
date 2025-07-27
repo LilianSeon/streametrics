@@ -307,7 +307,7 @@ const initChartInDOM = async () => {
                 accordionComponent.setI18nTexts(i18nMessages);
                 accordionComponent.setProgressBarWidth(20);
             } catch(_) {
-                setTimeout(() => { if(!isExtensionInitialized) initChartInDOM() }, 4000);
+                setTimeout(() => { if(!isExtensionInitialized && !isExtensionInitializing) initChartInDOM() }, 4000);
             }
             
         }
@@ -343,8 +343,7 @@ const initChartInDOM = async () => {
     } catch (error) {
         isExtensionInitializing = false;
         isExtensionInitialized = false;
-        console.log(error)
-        setTimeout(() => { if(!isExtensionInitialized) initChartInDOM() }, 4000);
+        setTimeout(() => { if(!isExtensionInitialized && !isExtensionInitializing) initChartInDOM() }, 4000);
     }
     
     isExtensionInitializing = false;
