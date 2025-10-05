@@ -2,7 +2,6 @@ import asyncio
 from fastapi import APIRouter, Depends, HTTPException, Header, UploadFile, File, Form, Request
 from fastapi.responses import JSONResponse
 from concurrent.futures import ThreadPoolExecutor
-from limite import limiter
 
 
 import tempfile
@@ -16,13 +15,7 @@ load_dotenv(find_dotenv())
 
 API_KEY = os.getenv("INTERNAL_API_KEY")
 
-def validate_api_key(x_api_key: str = Header(...)):
-    if x_api_key != API_KEY:
-        raise HTTPException(status_code=403, detail="Invalid API key")
-
-router = APIRouter(
-    dependencies=[Depends(validate_api_key)]
-)
+router = APIRouter()
 
 # Charger Whisper et le modèle de résumé
 whisper_model = whisper.load_model("small")
@@ -45,6 +38,7 @@ def summarize_with_mistral(text: str, streamer: str, game: str, title: str, lang
         f"Le résumé doit être en { language }.\n\n"
         f"Ne fait pas mention du titre."
     )
+
     try:
         res = requests.post("http://localhost:11434/api/generate", json={
             "model": "mistral",
@@ -65,9 +59,7 @@ def transcribe_audio(temp_path: str):
     )["text"]
 
 @router.post("/")
-@limiter.limit("9/minute")  # max 9 requets per minute
 async def summarize(
-        request: Request,
         audio: UploadFile = File(...),
         streamer: str = Form(...),
         language: str = Form(...),

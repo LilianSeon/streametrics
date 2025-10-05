@@ -224,7 +224,7 @@ const startRecording = async (message: any) => {
 
         try {
           if (wavBlob.size > 0) {
-            const res = await fetch("http://127.0.0.1:5050/bff/summary", { //188.245.179.58
+            const res = await fetch("http://127.0.0.1:5000/summarize/", { //188.245.179.58
               method: "POST",
               body: formData
             });
