@@ -10,6 +10,13 @@ type SummaryHeaderProps = {
     isSummarizing: boolean
 }
 
+type DownloadSummaries = {
+    id: number;
+    name: string;
+    time: string;
+    text: string;
+}[]
+
 const SummaryHeader: FC<SummaryHeaderProps> = ({ onClickSummarizeHandler, isSummarizing }: SummaryHeaderProps) => {
 
     const dispatch = useDispatch();
@@ -28,21 +35,23 @@ const SummaryHeader: FC<SummaryHeaderProps> = ({ onClickSummarizeHandler, isSumm
     }, []);
 
     const downloadSummariesAsJson = useCallback(() => {
-        const formattedTime = (date: number) => new Date(date).toLocaleTimeString(language, {
+        const formattedTime = (date: number) => new Date(date).toLocaleDateString(language, {
             hour12: language === 'en',
             hour: '2-digit',
             minute: '2-digit',
             second: '2-digit'
         });
 
-        const formattedSummaries = summaries.map((item, index) => ({
-            summaryNumber: index + 1,
-            streamerName: item.streamerName ?? "N/A",
+        const formattedSummaries: DownloadSummaries = summaries.map((item, index) => ({
+            id: index,
+            name: item.streamerName ?? "N/A",
             time: formattedTime(item.time),
             text: item.text
         }));
 
-        const jsonContent = JSON.stringify(formattedSummaries, null, 2);
+        console.log(formattedSummaries)
+
+        /*const jsonContent = JSON.stringify(formattedSummaries, null, 2);
 
         const blob = new Blob([jsonContent], { type: "application/json" });
         const url = URL.createObjectURL(blob);
@@ -53,7 +62,7 @@ const SummaryHeader: FC<SummaryHeaderProps> = ({ onClickSummarizeHandler, isSumm
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-        URL.revokeObjectURL(url);
+        URL.revokeObjectURL(url);*/
     }, [summaries, language]);
 
 
