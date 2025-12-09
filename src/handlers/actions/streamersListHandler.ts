@@ -107,7 +107,6 @@ const deleteOneStreamer = async (payload: { tabId: number, removeInfo: chrome.ta
     const { streamersList } = await chrome.storage.local.get('streamersList');
     const streamerToDelete: StorageStreamerListType[] = streamersList.filter((streamer: StorageStreamerListType) => streamer.tabId !== payload.tabId || streamer.windowId !== payload.removeInfo.windowId);
     await chrome.storage.local.set({ 'streamersList': streamerToDelete });
-    //chrome.action.setBadgeText({ text: `${ streamerToDelete.length === 0 ? '' : streamerToDelete.length }` });
 };
 
 export { deleteOneStreamer, deleteAllStreamers ,addOneStreamer, updateStreamersList }

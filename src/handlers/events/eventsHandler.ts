@@ -1,8 +1,11 @@
-import { checkChartIsPaused, checkStreamerStatus, getCurrentTabId, getGameName, getStreamerName } from "../../components/Chart/src/utils/utils";
+import ChartExtension from "../../components/Chart/src";
+import { checkChartIsPaused, checkStreamerStatus, getCurrentTabId, getGameName, getStreamerName, getStreamTitle } from "../../components/Chart/src/utils/utils";
 import { getStorage } from "../../components/Chart/src/utils/utilsStorage";
 
 const checkStatus = (_payload: any, sendResponse: (response?: any) => void) => {
     return new Promise(async(resolve, reject) => {
+        if (window.location.href === 'https://www.twitch.tv/' && sendResponse) sendResponse();
+        
         const tabId = await getCurrentTabId();
         sendResponse(tabId);
         const streamerName = await getStreamerName(document);
@@ -30,5 +33,42 @@ const getStatus = async (isStreamLive: boolean, isPaused: boolean): Promise<stri
     return status_inactive ?? status_active;
 };
 
+const getInfo = (_payload?: any, sendResponse?: (response?: any) => void): Promise<{ streamerName: string, streamerGame: string, streamTitle: string, language: string } | false> => {
+    return new Promise(async(resolve, reject) => {
+        const streamerName = await getStreamerName(document);
+        const streamerGame = await getGameName(document);
+        const streamTitle = getStreamTitle(document);
+        const { language } = await getStorage(["language"]);
 
-export { checkStatus }
+        if (streamerName && streamerGame && streamTitle && language) {
+            if (sendResponse) sendResponse({ streamerName, streamerGame, streamTitle, language });
+            resolve({ streamerName, streamerGame, streamTitle, language });
+        } else {
+            if (sendResponse) sendResponse(false);
+            reject(false)
+        }
+    });
+};
+
+const showLine = (payload: any, sendResponse: (response?: any) => void, chartExtension: ChartExtension) => {
+    return new Promise(async(resolve, _reject) => {
+        console.log("showLine", payload)
+
+        chartExtension?.showVerticalBarAtTimestamp(payload?.time);
+
+        sendResponse(true)
+        resolve(true)
+    });
+};
+
+const hideLine = (payload: any, sendResponse: (response?: any) => void, chartExtension: ChartExtension) => {
+    return new Promise(async(resolve, _reject) => {
+        console.log("hideLine", payload)
+        chartExtension?.hideVerticalLine();
+        sendResponse(true)
+        resolve(true)
+    });
+};
+
+
+export { getInfo, checkStatus, showLine, hideLine }

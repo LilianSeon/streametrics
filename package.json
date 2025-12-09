@@ -20,6 +20,7 @@
     "test:browser": "vitest --workspace=vitest.workspace.ts"
   },
   "dependencies": {
+    "@reduxjs/toolkit": "^2.8.2",
     "@types/jest": "^29.5.12",
     "build": "^0.1.4",
     "chart.js": "^4.4.3",
@@ -27,12 +28,14 @@
     "puppeteer": "^23.11.1",
     "puppeteer-core": "^23.9.0",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "react-redux": "^9.2.0"
   },
   "devDependencies": {
     "@jest/globals": "^29.7.0",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
+    "@types/audioworklet": "^0.0.75",
     "@types/chrome": "^0.0.268",
     "@types/hammerjs": "^2.0.46",
     "@types/lodash.isequal": "^4.5.8",

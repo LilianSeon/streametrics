@@ -19,7 +19,7 @@ import { StorageStatusType, StorageStreamerListType } from './typings/StorageTyp
 import { EventsResquest } from './typings/MessageType';
 
 // Events Handlers
-import { checkStatus } from './handlers/events/eventsHandler';
+import { checkStatus, getInfo, hideLine, showLine } from './handlers/events/eventsHandler';
 
 let tabId: number | undefined;
 
@@ -44,6 +44,7 @@ let intervalManager: IntervalManager | undefined;
 let hasImportedData: boolean = false;
 let toastManager: ToastManager | undefined;
 
+
 /**
  * Get needed data then add it to the Chart
  */
@@ -52,10 +53,12 @@ const startLoopGetData = async () => {
         const nbViewer: number = getNbViewer(document);
         const game: string = await getGameName(document);
         let messageAmount: number = 0;
+        //let messages: string[] = [];
     
         if (chartExtension && duration && nbViewer) {
     
             if (typeof messageCounter !== 'undefined') {
+                //messages = messageCounter.getNewMessages();
                 messageAmount = messageCounter.getAmountOfNewMessages(messageCounter.previousMessagesCount);
             }
     
@@ -75,6 +78,7 @@ const startLoopGetData = async () => {
             chartExtension.addData(newData, messageAmount);
             //chartExtension.addPeaks(peaks);
             loopCounter++;
+            //if (messages?.length > 20) console.log(await fetchTopics(messages));
     
         }
     
@@ -260,7 +264,7 @@ const initChartInDOM = async () => {
         
         tabId = await getCurrentTabId();
         const informationContainer = await waitForElm('#live-channel-stream-information');
-        await waitForElm(".CoreText-sc-1txzju1-0.dLeJdh");
+        //await waitForElm(".CoreText-sc-1txzju1-0.dLeJdh");
         const chatContainer = await waitForElm('.chat-line__message');
         const { language } = await getStorage(["language"]);
         i18nMessages = await getI18nMessages(i18nKeys, language);
@@ -286,15 +290,15 @@ const initChartInDOM = async () => {
                 
                 const observer = new MutationObserver((mutationsList) => {
                     for (const mutation of mutationsList) {
-                    if (mutation.type === 'childList') {
-                        mutation.removedNodes.forEach((node) => {
-                        if (node === accordionElement) {
-                            console.log('L’élément a été supprimé du DOM.');
-                            initChartInDOM();
-                            observer.disconnect();
+                        if (mutation.type === 'childList') {
+                            mutation.removedNodes.forEach(() => {
+                            if (document.getElementById(accordionElement.id) === null && isExtensionInitialized) { // If accordion getting deleted
+                                destroy();
+                                initChartInDOM();
+                                observer.disconnect();
+                            }
+                            });
                         }
-                        });
-                    }
                     }
                 });
 
@@ -303,7 +307,7 @@ const initChartInDOM = async () => {
                 accordionComponent.setI18nTexts(i18nMessages);
                 accordionComponent.setProgressBarWidth(20);
             } catch(_) {
-                setTimeout(() => { if(!isExtensionInitialized) initChartInDOM() }, 4000);
+                setTimeout(() => { if(!isExtensionInitialized && !isExtensionInitializing) initChartInDOM() }, 4000);
             }
             
         }
@@ -339,7 +343,7 @@ const initChartInDOM = async () => {
     } catch (error) {
         isExtensionInitializing = false;
         isExtensionInitialized = false;
-        console.log(error)
+        setTimeout(() => { if(!isExtensionInitialized && !isExtensionInitializing) initChartInDOM() }, 4000);
     }
     
     isExtensionInitializing = false;
@@ -375,13 +379,28 @@ const onTabCreated = async (payload: { url: string, tabID: number }) => {
     
     // If Chart already exists in DOM
     if (chartExtension && chartExtension instanceof ChartExtension && accordionComponent instanceof Accordion && typeof chartContainer !== 'undefined' && messageCounter && intervalManager instanceof IntervalManager) {
-        
         deleteStreamersListStorage(payload.tabID);
         destroy();
     }
 
     if (document.getElementById('accordionExtension') === null && document.getElementById('extensionChartContainer') === null && !isExtensionInitialized && !isExtensionInitializing) {
         await initChartInDOM();
+    }
+
+    const info = await getInfo();
+    const { sidePanelOpenedFrom } = await getStorage(['sidePanelOpenedFrom']);
+
+    if (info && sidePanelOpenedFrom?.id && sidePanelOpenedFrom.id === payload.tabID) {
+        chrome.runtime.sendMessage({
+            action: 'updateMetadata',
+            payload: {
+                streamerName: info.streamerName,
+                streamerGame: info.streamerGame,
+                streamTitle: info.streamTitle,
+                language: info.language,
+                tabId: payload.tabID
+            }
+        });
     }
 };
 
@@ -390,7 +409,10 @@ const eventsHandlers: Record<string, any> = {
     enableChart,
     disableChart,
     onTabCreated,
-    onTabUpdated: onTabCreated
+    onTabUpdated: onTabCreated,
+    getInfo,
+    hideLine,
+    showLine
 };
 
 chrome.storage.onChanged.addListener(async (changes) => {
@@ -418,6 +440,17 @@ chrome.runtime.onMessage.addListener((request: EventsResquest, _sender, sendResp
         if (typeof isEnableExtension !== 'undefined' && isEnableExtension === false) return true;
 
         const { event, payload } = request;
+
+        if (event === 'hideLine' || event === 'showLine' && chartExtension) {
+            const streamerName = await getStreamerName(document)
+            if (payload.streamerName && payload.streamerName != streamerName) return true;
+
+            eventsHandlers[event](payload, sendResponse, chartExtension).then(sendResponse).catch((err: any) => {
+              sendResponse({ error: err.message });
+            });
+    
+            return true; // async response
+        }
 
         if (eventsHandlers[event]) {
             eventsHandlers[event](payload, sendResponse).then(sendResponse).catch((err: any) => {

@@ -19,8 +19,12 @@ export default defineConfig({
     rollupOptions: {
       input: {
         index: './index.html',
+        'offscreen.html': './offscreen.html',
+        'sidepanel.html': './sidepanel.html',
+        'js/offscreen': './src/offscreen.ts',
         'js/background': './src/background.ts',
         'js/content_scripts': './src/contentScript.ts',
+        'js/audioProcessor': './src/components/Chart/src/js/audioProcessor.ts',
         'css/accordion.css': './src/components/Chart/src/assets/css/accordion.css',
         'fonts/pacifico.woff2': './src/components/Chart/src/assets/fonts/pacifico.woff2',
         'css/index.css': './src/components/Chart/src/assets/css/index.css',

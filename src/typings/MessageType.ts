@@ -3,7 +3,10 @@ export enum ActionsEnum {
     updateStreamersList = 'updateStreamersList',
     deleteAllStreamers = 'deleteAllStreamers',
     getWindowId = 'getWindowId',
-    getTabId = 'getTabId'
+    getTabId = 'getTabId',
+    isSidePanelOpened ='isSidePanelOpened',
+    showLine = 'showLine',
+    hideLine = 'hideLine'
 };
 
 export enum EventsEnum {

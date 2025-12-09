@@ -2,27 +2,65 @@
 
 // Handlers
 import { getI18nMessages } from "./handlers/actions/i18nMessagesHandler";
-import { getWindowId, getTabId } from "./handlers/actions/infoHandler";
+import { getWindowId, getTabId, getCurrentTab } from "./handlers/actions/infoHandler";
+import { openSidePanel } from "./handlers/actions/openSidePanel";
 import { addOneStreamer, updateStreamersList, deleteAllStreamers, deleteOneStreamer } from "./handlers/actions/streamersListHandler";
+import { focusTab, shouldStopCapture, startTabCapture, stopTabCapture } from "./handlers/actions/tabCapture";
 
 // Typing
 import { ActionsHandler, ActionsResquest } from "./typings/MessageType";
+
+let isSidePanelOpen = false;
+
+
+chrome.action.onClicked.addListener(async (tab) => {
+  if (isSidePanelOpen) {
+    await stopTabCapture({ shouldCloseSidePanel: true });
+    isSidePanelOpen = false;
+  } else {
+    chrome.storage.local.set({ sidePanelOpenedFrom: tab });
+    try {
+      await startTabCapture({ tab, shouldOpenSidePanel: true });
+      await chrome.storage.local.set({ captureAllowed: true });
+    } catch (e) {
+      console.log('Try startTabCapture error :', e)
+      await chrome.storage.local.set({ captureAllowed: false });
+    }
+    isSidePanelOpen = true;
+  }
+});
 
 const actionsHandler: Record<string, ActionsHandler> = {
     addOneStreamer,
     updateStreamersList,
     deleteOneStreamer,
     deleteAllStreamers,
+    shouldStopCapture,
     getWindowId,
     getTabId,
-    getI18nMessages
+    getI18nMessages,
+    openSidePanel,
+    stopTabCapture,
+    startTabCapture,
+    focusTab,
+    getCurrentTab
 };
 
+chrome.runtime.onConnect.addListener((port) => {
+  if (port.name === "sidepanel") {
+
+    port.onDisconnect.addListener(async () => {
+      isSidePanelOpen = false;
+      await stopTabCapture({ shouldCloseSidePanel: false });
+    });
+  }
+});
+
 chrome.storage.onChanged.addListener(({ streamersList }) => {
-      if (streamersList?.newValue) {
-        chrome.action.setBadgeBackgroundColor({ color: '#60a5fa' });
-        chrome.action.setBadgeText({ text: `${ streamersList.newValue.length === 0 ? '' : streamersList.newValue.length }` });
-      }
+  if (streamersList?.newValue) {
+    chrome.action.setBadgeBackgroundColor({ color: '#60a5fa' });
+    chrome.action.setBadgeText({ text: `${ streamersList.newValue.length === 0 ? '' : streamersList.newValue.length }` });
+  }
 });
 
 
@@ -33,6 +71,7 @@ chrome.runtime.onInstalled.addListener(async (details: chrome.runtime.InstalledD
         await chrome.storage.local.set({ isAccordionExpanded: true });
         await chrome.storage.local.set({ refreshValue: 5 });
         await chrome.storage.local.set({ isEnableExtension: true });
+        await chrome.storage.local.set({ captureAllowed: true });
         await chrome.storage.local.set({ streamersList: [] });
     }
 });
@@ -40,6 +79,10 @@ chrome.runtime.onInstalled.addListener(async (details: chrome.runtime.InstalledD
 chrome.runtime.onMessage.addListener((request: ActionsResquest, sender, sendResponse) => {
 
     const { action, payload } = request;
+
+    if (action === 'isSidePanelOpened') {
+      isSidePanelOpen = payload;
+    }
 
     if (actionsHandler[action]) {
         actionsHandler[action](payload, sender).then(sendResponse).catch((err) => {
@@ -73,7 +116,8 @@ chrome.tabs.onCreated.addListener((tab) => {
 });
 
 chrome.tabs.onRemoved.addListener(async (tabId: number, removeInfo: chrome.tabs.TabRemoveInfo) => {
-    if (actionsHandler['deleteOneStreamer']) {
+    if (actionsHandler['deleteOneStreamer'] && actionsHandler['shouldStopCapture']) {
         actionsHandler['deleteOneStreamer']({ tabId, removeInfo });
+        actionsHandler['shouldStopCapture']({ tabId, removeInfo });
     }
 });

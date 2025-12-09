@@ -1,6 +1,6 @@
 {
     "manifest_version": 3,
-    "version": "1.0.1",
+    "version": "1.0.3",
     "name": "__MSG_extention_name__",
     "short_name": "StreaMetrics",
     "description": "__MSG_extention_description__",
@@ -13,14 +13,24 @@
         "128": "images/logo-transparent.png"
     },
     "action": {
-        "default_popup": "index.html"
+        
     },
-    "permissions": ["tabs", "storage"],
+    "permissions": ["sidePanel", "tabCapture", "activeTab", "offscreen", "tabs", "storage", "scripting"],
     "host_permissions": [
         "https://www.twitch.tv/*"
     ],
     "background": {
         "service_worker": "js/background.js"
+    },
+    "offscreen_documents": [
+        {
+        "url": "offscreen.html",
+        "reasons": ["USER_MEDIA"],
+        "justification": "Audio capture of tab content"
+        }
+    ],
+    "side_panel": {
+        "default_path": "sidepanel.html"
     },
     "content_scripts": [
         {

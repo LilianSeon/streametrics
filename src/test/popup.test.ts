@@ -34,7 +34,7 @@ test('popup renders correctly', async () => {
     const pageTwitch = await browser?.newPage();
     await pageTwitch?.goto(`https://www.twitch.tv/`);
 
-    await pageTwitch?.click('[data-a-target*="tw-core-button-label-text"]'); // Accepte cookies
+    //await pageTwitch?.click('[data-a-target*="tw-core-button-label-text"]'); // Accepte cookies
 
     const wait = (time: number) => {
         return new Promise(function(resolve) { 

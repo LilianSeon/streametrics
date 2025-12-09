@@ -1,16 +1,14 @@
 import { FC, useMemo } from "react";
-
-export interface NotFoundTextValueI18n {
-    not_found_message: string,
-    not_found_advise: string
-}
+import { RootState } from "../store/store";
+import { useAppSelector } from "../store/hooks";
 
 type NotFoundProps = {
-    notFoundTexts: NotFoundTextValueI18n,
     searchValue: string
 }
 
-const NotFound: FC<NotFoundProps> = ({ notFoundTexts, searchValue }: NotFoundProps) => {
+const NotFound: FC<NotFoundProps> = ({ searchValue }: NotFoundProps) => {
+
+    const translatedText = useAppSelector((state: RootState) => state.translatedText.value);
 
     const imgSrcNotFound = useMemo(() => chrome.runtime.getURL('images/not_found-transparent.png'), []);
 
@@ -19,9 +17,9 @@ const NotFound: FC<NotFoundProps> = ({ notFoundTexts, searchValue }: NotFoundPro
             <p className="flex justify-center items-center">
                <img className="my-auto h-[4.5rem] inline-block" src={ imgSrcNotFound } alt="No results found" /> 
             </p>
-            <p className="flex justify-center items-center text-xl font-bold">{ notFoundTexts.not_found_message }</p>
+            <p className="flex justify-center items-center text-xl font-bold">{ translatedText?.not_found_message?.message }</p>
             <p className="flex justify-center items-center">« { searchValue } »</p>
-            <p className="flex justify-center items-center">{ notFoundTexts.not_found_advise }</p>
+            <p className="flex justify-center items-center">{ translatedText?.not_found_advise?.message }</p>
         </div>
     );
 };

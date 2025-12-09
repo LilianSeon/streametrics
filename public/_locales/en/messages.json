@@ -1,6 +1,38 @@
 {
+  "summarize_error_text": {
+    "message": "Please open this side panel once on a streamer's live.",
+    "description": "open side panel"
+  },
+  "summarize_error_title": {
+    "message": "Capture error",
+    "description": "Capture error"
+  },
+  "enable_summarize": {
+    "message": "Enable summary",
+    "description": "Summarize"
+  },
+  "disable_summarize": {
+    "message": "Disable summary",
+    "description": "Summarize"
+  },
+  "summarize": {
+    "message": "Summarize",
+    "description": "Summarize"
+  },
+  "clear": {
+    "message": "Clear",
+    "description": "Clear"
+  },
+  "summary_button_disable": {
+    "message": "Disable summary",
+    "description": "Button disable summary"
+  },
+  "summary_button_enable": {
+    "message": "Enable summary",
+    "description": "Button enable summary"
+  },
   "extention_name": {
-    "message": "StreaMetrics – Twitch Viewer & Chat Graphs"
+    "message": "StreaMetrics - Twitch Viewer & Chat Graphs"
   },
   "extention_description": {
     "message": "Track real-time viewer count and chat activity on Twitch with a live graph under the stream. Open-source and easy to use."
@@ -145,8 +177,12 @@
     "message": "Search",
     "description": "Input search placeholder"
   },
-  "toggle": {
-    "message": "Disable extension",
+  "toggle_disactivated": {
+    "message": "Enable charts",
+    "description": "Toggle title html propertie"
+  },
+  "toggle_activated": {
+    "message": "Disable charts",
     "description": "Toggle title html propertie"
   },
   "time_ago": {
