@@ -51,7 +51,13 @@ const Table: FC<TableProps> = ({ streamersList }: TableProps) => {
                                     <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"></path>
                                 </svg>
                             </div>
-                            <input value={ searchTextValue } placeholder={ translatedText?.search_placeholder?.message } onChange={ e => setSearchTextValue(e.target.value) } type="text" className="border text-sm rounded-lg block w-44 pl-10 p-2 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-primary-500 focus:border-primary-500" />
+                            <input 
+                                value={ searchTextValue } 
+                                placeholder={ translatedText?.search_placeholder?.message } 
+                                onChange={ e => setSearchTextValue(e.target.value) }
+                                type="text"
+                                className="border text-sm rounded-lg block w-[150px] md:w-[250px] pl-10 p-2 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-primary-500 focus:border-primary-500"
+                            />
                         </div>
                     </form>
                 </div>
@@ -62,9 +68,9 @@ const Table: FC<TableProps> = ({ streamersList }: TableProps) => {
                 <table className="rounded-lg w-full text-sm text-left text-gray-400 table-auto overflow-visible">
                     <thead className="text-xs uppercase bg-gray-700 text-gray-300">
                         <tr>
-                            <th className="rounded-tl-lg px-4 py-3">Streamer</th>
-                            <th className="py-3">Status</th>
-                            <th className="py-3 pl-1">{ translatedText?.game?.message }</th>
+                            <th className="rounded-tl-lg px-4 py-3 text-center">Streamer</th>
+                            <th className="py-3 text-center">Status</th>
+                            <th className="py-3 pl-1 text-center">{ translatedText?.game?.message }</th>
                             <th className="rounded-tr-lg py-3">
                                 <span className="sr-only">Actions</span>
                             </th>

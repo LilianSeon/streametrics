@@ -20,7 +20,7 @@ const highlightMatch = (text: string, search: string) => {
     const regex = new RegExp(`(${search})`, 'gi'); // g: Finds all matches in the text + i: Makes the search case-insensitive.
     const parts = text.split(regex);
     return parts.map((part, index) =>
-        regex.test(part) ? <span key={index} className="bg-yellow-300 text-gray-900">{part}</span> : part
+        regex.test(part) ? <span key={index} className="font-extrabold">{part}</span> : part
     );
 };
 
@@ -99,23 +99,23 @@ const TableRows: FC<TableRowsProps> = ({ streamersList, currentPage = 1, searchT
 
                     return(
                         <tr key={ index }className={`${ index !== streamersList.length-1 && 'border-b' } border-gray-700 group rounded-br-lg`}>
-                            <td className={`${ shouldApplyRoundedClass && 'rounded-bl-lg' } w-3/10 bg-gray-900 flex flex-row pl-2 pr-1 py-4 font-medium text-white/90 group-hover:text-white whitespace-nowrap`}>
+                            <td className={`${ shouldApplyRoundedClass && 'rounded-bl-lg' } w-3/10 bg-gray-900 flex flex-row pl-2 pr-1 py-4 font-medium text-white/90 group-hover:text-white whitespace-nowrap items-center justify-center`}>
                                 <img className="mr-2 rounded-full" src={ streamerImage } alt="Streamer avatar" width={ 20 } height={ 20 }/>
                                 <div className="overflow-hidden text-ellipsis whitespace-nowrap w-[120px] cursor-default" title={ streamerName }>
                                  { highlightMatch(displayedName, searchTextValue) }
                                 </div>
                             </td>
-                            <td className="w-1/10 bg-gray-900 pl-1 pr-1 py-3">
+                            <td className="w-1/10 bg-gray-900 pl-1 pr-1 py-3 text-center">
                                 <div title={ status } className={`${ getPillColor(status) } mr-1 ml-2 sm:ml-0 w-2 h-2 rounded-full inline-block`}></div>
                                 <div className="hidden sm:inline-block group-hover:text-white cursor-default">{ status }</div>
                             </td>
-                            <td className="w-3/10 bg-gray-900 py-3">
+                            <td className="w-3/10 bg-gray-900 py-3 text-center">
                                 <div className="max-w-[6rem] sm:max-w-[19rem] md:max-w-[24rem] overflow-hidden text-ellipsis whitespace-nowrap group-hover:text-white cursor-default" title={ streamerGame }>
                                  { highlightMatch(streamerGame, searchTextValue) }
                                 </div>
                             </td>
                             <td ref={ dropdownRef } className={`${ shouldApplyRoundedClass && 'rounded-br-lg' } w-2/10 bg-gray-900 px-2 py-3 items-center justify-center group/dropdown relative`}>
-                                <button onClick={() => setOpen((prev) => !prev)} className="inline-flex items-center p-0.5 text-sm font-medium text-center text-gray-500 hover:text-gray-800 rounded-lg focus:outline-none dark:text-gray-400 dark:hover:text-gray-100 group-hover:text-white" type="button">
+                                <button onClick={() => setOpen((prev) => !prev)} className="inline-flex items-center p-0.5 text-sm font-medium text-center text-gray-500 hover:text-white rounded-lg focus:outline-none dark:text-gray-400 dark:hover:text-gray-100" type="button">
                                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                                         <path d="M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM16 12a2 2 0 100-4 2 2 0 000 4z" />
                                     </svg>
