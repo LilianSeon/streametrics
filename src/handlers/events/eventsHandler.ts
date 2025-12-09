@@ -50,20 +50,16 @@ const getInfo = (_payload?: any, sendResponse?: (response?: any) => void): Promi
     });
 };
 
-const showLine = (payload: any, sendResponse: (response?: any) => void, chartExtension: ChartExtension) => {
+const showLine = (payload: { streamerName: string, tabId: number, time: number }, sendResponse: (response?: any) => void, chartExtension: ChartExtension) => {
     return new Promise(async(resolve, _reject) => {
-        console.log("showLine", payload)
-
         chartExtension?.showVerticalBarAtTimestamp(payload?.time);
-
         sendResponse(true)
         resolve(true)
     });
 };
 
-const hideLine = (payload: any, sendResponse: (response?: any) => void, chartExtension: ChartExtension) => {
+const hideLine = (_: { tabId: number, time: number }, sendResponse: (response?: any) => void, chartExtension: ChartExtension) => {
     return new Promise(async(resolve, _reject) => {
-        console.log("hideLine", payload)
         chartExtension?.hideVerticalLine();
         sendResponse(true)
         resolve(true)
