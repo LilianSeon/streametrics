@@ -596,6 +596,35 @@ export default class ChartExtension {
         this.chart!.options!.scales!.y2!.grid!.display = false;
     };
 
+    showTooltip(datasetIndex: number = 0, dataIndex: number, shouldUpdate = true): void {
+        if (!this.chart) return;
+        const tooltip = this.chart.tooltip;
+        const chartArea = this.chart.chartArea;
+
+        if (!tooltip) return;
+
+        this.chart.setActiveElements([
+            { datasetIndex, index: dataIndex }
+        ]);
+        tooltip.setActiveElements([
+            { datasetIndex, index: dataIndex }
+        ], {
+            x: (chartArea.left + chartArea.right) / 2,
+            y: (chartArea.top + chartArea.bottom) / 2,
+        });
+
+        if (shouldUpdate) this.chart.update();
+    }
+
+    hideTooltip(shouldUpdate = true) {
+        if (!this.chart) return;
+        const tooltip = this.chart.tooltip;
+
+        this.chart.setActiveElements([]);
+        tooltip?.setActiveElements([], {x: 0, y: 0});
+        if (shouldUpdate) this.chart.update();
+    }
+
     showVerticalBarAtTimestamp(timestamp: number): void {
         if (!this.chart || this.chart.data.datasets[0].data.length === 0) return;
 
@@ -606,6 +635,8 @@ export default class ChartExtension {
         let closest = this.chart.data.datasets[0].data[0];
         //@ts-ignore
         let minDiff = Math.abs(closest.time - timestamp);
+        let index = 0;
+        let closestIndex = 0;
 
         for (const point of this.chart.data.datasets[0].data) {
             //@ts-ignore
@@ -613,9 +644,12 @@ export default class ChartExtension {
             if (diff < minDiff) {
                 minDiff = diff;
                 closest = point;
+                closestIndex = index;
             }
+            index++;
         }
 
+        this.showTooltip(0, closestIndex, false);
         //@ts-ignore
         this._verticalLineTimestamp = closest.time;
         this.chart.update();
@@ -624,6 +658,7 @@ export default class ChartExtension {
     hideVerticalLine(): void {
         if (!this.chart) return;
 
+        this.hideTooltip(false);
         this._verticalLineTimestamp = null;
         this.chart.update();
     };
