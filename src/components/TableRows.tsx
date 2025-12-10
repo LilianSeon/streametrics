@@ -121,13 +121,30 @@ const TableRows: FC<TableRowsProps> = ({ streamersList, currentPage = 1, searchT
                                     </svg>
                                 </button>
                                 { open && (
-                                    <div className="absolute z-10 w-20 top-[-3px] right-[37px] opacity-90 bg-gray-500 border-gray-900 rounded divide-y divide-gray-100 shadow-sm">
-                                        <ul className=" text-sm text-white">
-                                            <li onClick={ () => onClickFocusHandler(tabId, windowId) } className="hover:bg-gray-400 hover:rounded">
-                                                <a href="" className="block py-1 px-2">{ translatedText?.focus?.message }</a>
+                                    <div className="absolute right-0 mt-1 w-28 z-50 bg-gray-600 rounded shadow-lg">
+                                        <ul className="text-sm text-white">
+                                            <li>
+                                                <button onClick={ () => onClickFocusHandler(tabId, windowId) } className="flex w-full items-center hover:bg-gray-400 px-2 py-2 rounded cursor-pointer" type="button">
+                                                    <svg className="w-4 h-4 mr-3 mb-1 pointer-events-none text-gray-100" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                                        <path d="M10 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z" />
+                                                        <path fillRule="evenodd" d="M.664 10.59a1.651 1.651 0 0 1 0-1.186A10.004 10.004 0 0 1 10 3c4.257 0 7.893 2.66 9.336 6.41.147.381.146.804 0 1.186A10.004 10.004 0 0 1 10 17c-4.257 0-7.893-2.66-9.336-6.41ZM14 10a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z" clipRule="evenodd" />
+                                                    </svg>
+
+                                                    <span>{ translatedText?.focus?.message }</span>
+                                                </button>
                                             </li>
-                                            <li onClick={ () => onClickDisableHanlder(tabId, isEnable) } className="hover:bg-gray-400 hover:rounded border-solid border-t border-gray-400">
-                                                <a href="#" className="block py-1 px-2">{ isEnable ? translatedText?.disable?.message : translatedText?.enable?.message }</a>
+                                            <li>
+                                                <button onClick={ () => onClickDisableHanlder(tabId, isEnable)} className="flex w-full items-center hover:bg-gray-400 px-2 py-2 rounded cursor-pointer border-solid border-t border-gray-400" type="button">
+                                                    { isEnable ? 
+                                                    <svg className="w-4 h-4 mr-3 mb-1 pointer-events-none text-gray-100" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                                        <path fillRule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16ZM8.28 7.22a.75.75 0 0 0-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 1 0 1.06 1.06L10 11.06l1.72 1.72a.75.75 0 1 0 1.06-1.06L11.06 10l1.72-1.72a.75.75 0 0 0-1.06-1.06L10 8.94 8.28 7.22Z" clipRule="evenodd" />
+                                                    </svg> :
+                                                    <svg className="w-4 h-4 mr-3 mb-1 pointer-events-none text-gray-100" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                                        <path fillRule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm3.857-9.809a.75.75 0 0 0-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 1 0-1.06 1.061l2.5 2.5a.75.75 0 0 0 1.137-.089l4-5.5Z" clipRule="evenodd" />
+                                                    </svg>
+                                                    }
+                                                    <span>{ isEnable ? translatedText?.disable?.message : translatedText?.enable?.message }</span>
+                                                </button>
                                             </li>
                                         </ul>
                                     </div>

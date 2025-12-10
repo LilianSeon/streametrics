@@ -44,25 +44,25 @@ const SummaryHeader: FC<SummaryHeaderProps> = ({ onClickSummarizeHandler, isSumm
 
         const formattedSummaries: DownloadSummaries = summaries.map((item, index) => ({
             id: index,
-            name: item.streamerName ?? "N/A",
+            name: item?.streamerName ?? "N/A",
             time: formattedTime(item.time),
             text: item.text
         }));
 
-        console.log(formattedSummaries)
-
-        /*const jsonContent = JSON.stringify(formattedSummaries, null, 2);
+        const jsonContent = JSON.stringify(formattedSummaries, null, 2);
+        const allNames = [...new Set(formattedSummaries.map(summary => summary.name))];
+        const formattedNames = allNames.length > 1 ? '_' + allNames.join('_') : '_' + allNames;
 
         const blob = new Blob([jsonContent], { type: "application/json" });
         const url = URL.createObjectURL(blob);
         const link = document.createElement("a");
 
         link.href = url;
-        link.download = "summaries.json";
+        link.download = `summaries${ formattedNames }.json`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-        URL.revokeObjectURL(url);*/
+        URL.revokeObjectURL(url);
     }, [summaries, language]);
 
 
