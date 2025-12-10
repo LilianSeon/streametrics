@@ -5,7 +5,7 @@ import { getI18nMessages } from "./handlers/actions/i18nMessagesHandler";
 import { getWindowId, getTabId, getCurrentTab } from "./handlers/actions/infoHandler";
 import { openSidePanel } from "./handlers/actions/openSidePanel";
 import { addOneStreamer, updateStreamersList, deleteAllStreamers, deleteOneStreamer } from "./handlers/actions/streamersListHandler";
-import { focusTab, shouldStopCapture, startTabCapture, stopTabCapture } from "./handlers/actions/tabCapture";
+import { closeSidePanel, focusTab, shouldStopCapture, startTabCapture, stopTabCapture } from "./handlers/actions/tabCapture";
 
 // Typing
 import { ActionsHandler, ActionsResquest } from "./typings/MessageType";
@@ -43,7 +43,8 @@ const actionsHandler: Record<string, ActionsHandler> = {
     stopTabCapture,
     startTabCapture,
     focusTab,
-    getCurrentTab
+    getCurrentTab,
+    closeSidePanel
 };
 
 chrome.runtime.onConnect.addListener((port) => {

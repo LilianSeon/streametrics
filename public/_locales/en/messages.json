@@ -1,4 +1,8 @@
 {
+  "button_close": {
+    "message": "Close",
+    "description": "Close"
+  },
   "summarize_error_text": {
     "message": "Please open this side panel once on a streamer's live.",
     "description": "open side panel"

@@ -1,4 +1,8 @@
 {
+  "button_close": {
+    "message": "Fermer",
+    "description": "Close"
+  },
   "summarize_error_text": {
     "message": "Veuillez ouvrir ce panneaux latéral une fois sur le live d'un streamer.",
     "description": "open side panel"

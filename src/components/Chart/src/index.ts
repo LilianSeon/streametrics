@@ -54,7 +54,6 @@ export default class ChartExtension {
     _isDocumentHidden: boolean;
     language: Languages;
     #lastZoomLevel: number | undefined;
-    _verticalLineTimestamp: number | null = null;
 
     constructor(container: HTMLElement, language: Languages, i18nTexts: Record<string, string>, title?: string, defaultColor?:  ThemeBackgroundColor){
         this.container = container;
@@ -596,6 +595,13 @@ export default class ChartExtension {
         this.chart!.options!.scales!.y2!.grid!.display = false;
     };
 
+    /**
+     * Set an active over element.
+     * @param { number } datasetIndex 
+     * @param { number } dataIndex 
+     * @param { boolean } shouldUpdate 
+     * @returns 
+     */
     showTooltip(datasetIndex: number = 0, dataIndex: number, shouldUpdate = true): void {
         if (!this.chart) return;
         const tooltip = this.chart.tooltip;
@@ -616,6 +622,11 @@ export default class ChartExtension {
         if (shouldUpdate) this.chart.update();
     }
 
+    /**
+     * Hide active over element.
+     * @param { boolean } shouldUpdate 
+     * @returns 
+     */
     hideTooltip(shouldUpdate = true) {
         if (!this.chart) return;
         const tooltip = this.chart.tooltip;
@@ -631,10 +642,9 @@ export default class ChartExtension {
         //@ts-expect-error
         this.chart.config._config.chartExtensionRef = this;
 
-        // Trouve l'élément dont le timestamp est le plus proche
+        // Find the element whose timestamp is closest
         let closest = this.chart.data.datasets[0].data[0];
-        //@ts-ignore
-        let minDiff = Math.abs(closest.time - timestamp);
+        let minDiff = Math.abs((closest as ChartDataViewer).time - timestamp);
         let index = 0;
         let closestIndex = 0;
 
@@ -649,18 +659,13 @@ export default class ChartExtension {
             index++;
         }
 
-        this.showTooltip(0, closestIndex, false);
-        //@ts-ignore
-        this._verticalLineTimestamp = closest.time;
-        this.chart.update();
+        this.showTooltip(0, closestIndex);
     };
 
     hideVerticalLine(): void {
         if (!this.chart) return;
 
-        this.hideTooltip(false);
-        this._verticalLineTimestamp = null;
-        this.chart.update();
+        this.hideTooltip();
     };
 
 
