@@ -6,7 +6,8 @@ export enum ActionsEnum {
     getTabId = 'getTabId',
     isSidePanelOpened ='isSidePanelOpened',
     showLine = 'showLine',
-    hideLine = 'hideLine'
+    hideLine = 'hideLine',
+    closeSidePanel = 'closeSidePanel'
 };
 
 export enum EventsEnum {

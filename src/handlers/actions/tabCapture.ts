@@ -28,7 +28,7 @@ const openSidePanel = async (tab: chrome.tabs.Tab) => {
     chrome.sidePanel.open({ windowId: tab.windowId });
 };
 
-const closeSidePanel = async () => {
+const closeSidePanel: ActionsHandler = async (_: any, _sender?: chrome.runtime.MessageSender) => {
     chrome.sidePanel.setOptions({
         enabled: false
     });
@@ -120,7 +120,7 @@ const stopTabCapture: ActionsHandler = async ({ shouldCloseSidePanel }: stopTabC
 
             await chrome.storage.local.set({ isSummarizing: false });
 
-            if (shouldCloseSidePanel) await closeSidePanel();
+            if (shouldCloseSidePanel) await closeSidePanel(undefined);
             
             await chrome.offscreen.closeDocument();
             resolve(true);
@@ -148,4 +148,4 @@ const isTabStillOpen = async (tabId: number) => {
   }
 }
 
-export { startTabCapture, stopTabCapture, focusTab, shouldStopCapture, isTabStillOpen }
+export { startTabCapture, stopTabCapture, focusTab, shouldStopCapture, isTabStillOpen, closeSidePanel, openSidePanel }

@@ -13,7 +13,6 @@ const isSummarizingSlice = createSlice({
   initialState,
   reducers: {
     updateIsSummarizing: (state, action: PayloadAction<boolean>) => {
-      //@ts-ignore
         state.value = action.payload;
     },
   },
