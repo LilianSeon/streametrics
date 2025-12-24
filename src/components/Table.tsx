@@ -31,6 +31,7 @@ const Table: FC<TableProps> = ({ streamersList }: TableProps) => {
 
     const filteredStreamersLength = useMemo(() => filteredStreamers.length, [filteredStreamers]);
     const searchTextValueLength = useMemo(() => searchTextValue.length, [searchTextValue]);
+    const showPagination = useMemo(() => streamerList.length > 3, [streamerList]);
 
     const displayNotFoundOrNotDetected = (filteredStreamersLength: number, searchTextValueLength: number) => {
         if (filteredStreamersLength === 0 && searchTextValueLength === 0) {
@@ -43,6 +44,7 @@ const Table: FC<TableProps> = ({ streamersList }: TableProps) => {
     return(
         <div className="h-auto mx-2 p-2 bg-gray-800 rounded-lg">
             <div className="flex flex-row items-center mb-2">
+                { showPagination ? <><Pagination totalItems={ filteredStreamersLength } currentPage={ currentPage } setCurrentPage={ setCurrentPage } /><div className="grow"></div></> : <><h2 className="text-lg font-medium text-white">{translatedText?.chart_title?.message}</h2><div className="grow"></div></> }
                 <div className="flex flex-col">
                     <form className="flex items-center mb-0">
                         <div className="relative w-full">
@@ -61,8 +63,6 @@ const Table: FC<TableProps> = ({ streamersList }: TableProps) => {
                         </div>
                     </form>
                 </div>
-                <div className="grow"></div>
-                { streamerList.length > 3 ? <Pagination totalItems={ filteredStreamersLength } currentPage={ currentPage } setCurrentPage={ setCurrentPage } /> : <></> }
             </div>
             <div className="rounded-lg overflow-visible">
                 <table className="rounded-lg w-full text-sm text-left text-gray-400 table-auto overflow-visible">

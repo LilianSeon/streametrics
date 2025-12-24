@@ -10,6 +10,7 @@ import translatedTextSlice from './slices/translatedTextSlice';
 import isSummarizingSlice from './slices/isSummarizingSlice';
 import streamerListSlice from './slices/streamerListSlice';
 import captureAllowedSlice from './slices/captureAllowedSlice';
+import currentStepSlice from './slices/currentStepSlice';
 
 export const store = configureStore({
   reducer: {
@@ -21,7 +22,8 @@ export const store = configureStore({
     translatedText: translatedTextSlice,
     isSummarizing: isSummarizingSlice,
     streamerList: streamerListSlice,
-    captureAllowed: captureAllowedSlice
+    captureAllowed: captureAllowedSlice,
+    currentStep: currentStepSlice,
   },
 })
 

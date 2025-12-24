@@ -1,4 +1,36 @@
 {
+  "current_step_summarizing": {
+    "message": "Résume",
+    "description": "Résume"
+  },
+  "current_step_transcribing": {
+    "message": "Transcription",
+    "description": "Transcription"
+  },
+  "current_step_listening": {
+    "message": "Écoute",
+    "description": "Listening"
+  },
+  "current_step_error": {
+    "message": "Erreur",
+    "description": "Error"
+  },
+  "current_step_done": {
+    "message": "Terminé",
+    "description": "Done"
+  },
+  "current_step_pending": {
+    "message": "En attente",
+    "description": "Pending"
+  },
+  "current_step_processing": {
+    "message": "Traitement",
+    "description": "Processing"
+  },
+  "chart_title": {
+    "message": "Graphiques",
+    "description": "Charts"
+  },
   "button_close": {
     "message": "Fermer",
     "description": "Close"

@@ -1,4 +1,36 @@
 {
+  "current_step_summarizing": {
+    "message": "Summarizing",
+    "description": "Summarizing"
+  },
+  "current_step_transcribing": {
+    "message": "Transcribing",
+    "description": "Transcribing"
+  },
+  "current_step_listening": {
+    "message": "Listening",
+    "description": "Listening"
+  },
+  "current_step_error": {
+    "message": "Error",
+    "description": "Error"
+  },
+  "current_step_done": {
+    "message": "Done",
+    "description": "Done"
+  },
+  "current_step_pending": {
+    "message": "Pending",
+    "description": "Pending"
+  },
+  "current_step_processing": {
+    "message": "Processing",
+    "description": "Processing"
+  },
+  "chart_title": {
+    "message": "Charts",
+    "description": "Charts"
+  },
   "button_close": {
     "message": "Close",
     "description": "Close"

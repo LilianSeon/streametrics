@@ -8,6 +8,7 @@ import { useAppSelector } from './store/hooks';
 import { addSummary, clearSummariesError } from './store/slices/summarizeSlice';
 import { updateIsSummarizing } from './store/slices/isSummarizingSlice';
 import { setStreamerList } from './store/slices/streamerListSlice';
+import { updateCurrentStep } from './store/slices/currentStepSlice';
 
 // Components
 import { Navbar } from './components/Navbar';
@@ -24,12 +25,12 @@ import { updatePulse } from './store/slices/pulseSlice';
 import { loadTranslatedText } from './loader/fileLoader';
 import { addTranslatedText, TranslatedText } from './store/slices/translatedTextSlice';
 import { updateCaptureAllowed } from './store/slices/captureAllowedSlice';
-
+import { CurrentStep } from './typings/StatusType';
 
 // Rigth after sidePanel loaded
 chrome.runtime.sendMessage({ action: "isSidePanelOpened", payload: true });
 
-// (optionnel) Avant de se fermer — peu fiable
+// before closing
 window.addEventListener("beforeunload", () => {
   chrome.runtime.sendMessage({ action: "isSidePanelOpened", payload: false });
 });
@@ -86,6 +87,17 @@ const App: FC = () => {
     if (pulse) dispatch(updatePulse(pulse));
   }, []);
 
+  const setCurrentStep = useCallback((step: CurrentStep) => {
+    if (step) {
+      dispatch(updateCurrentStep(step));
+      if (step === 'done') {
+        setTimeout(() => {
+          dispatch(updateCurrentStep('listening'));
+        }, 2000);
+      }
+    };
+  }, [])
+
   useEffect(() => {
 
     const port = chrome.runtime.connect({ name: "sidepanel" });
@@ -98,6 +110,15 @@ const App: FC = () => {
 
       if (message.action === "drawAudioBars") {
         drawAudioBars(message.payload);
+      }
+
+      if (
+        (message.action === 'processingProgress' ||
+        message.action === "summarizeReady" ||
+        message.action === "summarizeError") &&
+        message.payload?.currentStep as CurrentStep
+      ) {
+        setCurrentStep(message.payload.currentStep);
       }
     });
 

@@ -4,13 +4,14 @@ import { FC, MouseEvent, useCallback, useEffect, useMemo, useRef, useState } fro
 import { SummaryList } from "./SummaryList";
 import { AutoScrollStopped } from "./AutoScrollStopped";
 import { SummaryHeader } from "./SummaryHeader";
+import { StatusBadge } from "./StatusBadge";
 
 // Typings
 import { addSummary, SummarizeValue } from "../store/slices/summarizeSlice";
 import { RootState } from "../store/store";
 import { useAppSelector } from "../store/hooks";
 import { StorageStreamerListType } from "../typings/StorageType";
-import { ThreeDots } from "./ThreeDots";
+//import { ThreeDots } from "./ThreeDots";
 import { useDispatch } from "react-redux";
 import { updateIsSummarizing } from "../store/slices/isSummarizingSlice";
 
@@ -28,7 +29,8 @@ const Summarize: FC<SummarizeProps> = ({ summaries, streamerName, tabId, windowI
     const dispatch = useDispatch();
     const language = useAppSelector((state: RootState) => state.language.value);
     const isSummarizing = useAppSelector((state: RootState) => state.isSummarizing.value);
-    const captureAllowed = useAppSelector((state: RootState) => state.captureAllowed.value);
+    //const captureAllowed = useAppSelector((state: RootState) => state.captureAllowed.value);
+    const currentStep = useAppSelector((state: RootState) => state.currentStep.value);
 
     const [ activeAutoScroll, setActiveAutoScroll ] = useState(true);
 
@@ -111,7 +113,7 @@ const Summarize: FC<SummarizeProps> = ({ summaries, streamerName, tabId, windowI
                 <div onScroll={ onScroll } className="group flex flex-col w-full grow overflow-y-auto rounded-lg p-4 border-gray-200 bg-gray-700 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-700 [&::-webkit-scrollbar-thumb]:transition-colors [&::-webkit-scrollbar-thumb]:duration-300 [&::-webkit-scrollbar-thumb]:ease-in-out group-hover:[&::-webkit-scrollbar-thumb]:bg-gray-300">
                     <SummaryList summaries={ summaries } language={ language } currentStreamer={ streamerName ?? '' } />
                     { !activeAutoScroll && <AutoScrollStopped nbMessage={ nbNewSummary } onClick={ onClickBackToBottomHanlder }/> }
-                    { isSummarizing && captureAllowed && summaries.length > 0 && <ThreeDots /> }
+                    <StatusBadge currentStep={ currentStep } />
                     <div ref={endOfListRef} />
                 </div>
             </div>
