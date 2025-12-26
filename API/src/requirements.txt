@@ -4,3 +4,7 @@ pydantic==2.11.7
 python-dotenv==1.1.1
 Requests==2.32.4
 slowapi==0.1.9
+celery==5.3.4
+redis==5.0.1
+uvicorn==0.25.0
+python-multipart==0.0.6

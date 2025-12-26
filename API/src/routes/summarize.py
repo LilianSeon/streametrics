@@ -8,7 +8,8 @@ import tempfile
 import os
 import whisper
 import requests
-
+from tasks.tasks import process_audio_task
+from celery_app import celery
 from dotenv import find_dotenv, load_dotenv
 
 load_dotenv(find_dotenv())
@@ -68,44 +69,77 @@ async def summarize(
         title: str = Form(...),
     ):
 
-    temp_path = None
+    file_bytes = await audio.read()
+    size_mb = len(file_bytes) / (1024 * 1024)
 
-    try:
-        print(streamer)
+    if size_mb > MAX_FILE_SIZE_MB:
+        raise HTTPException(status_code=413, detail="File too large")
 
-        file_bytes = await audio.read()
+    if not audio.filename.lower().endswith('.wav'):
+        raise HTTPException(status_code=415, detail="Unsupported file type")
 
-        # File's size
-        size_mb = len(file_bytes) / (1024 * 1024)
-        if size_mb > MAX_FILE_SIZE_MB:
-            raise HTTPException(status_code=413, detail="File too large")
-        
-        # MIME type
-        if not audio.filename.lower().endswith('.wav'):
-            raise HTTPException(status_code=415, detail="Unsupported file type")
-        
-        for champ in [streamer, title, game]:
-            if any(c in champ for c in ["<", ">", "{", "}", ";"]):
-                raise HTTPException(status_code=400, detail="Invalid characters in fields")
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp:
+        tmp.write(file_bytes)
+        temp_path = tmp.name
 
-        # Temporary save file
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp:
-            tmp.write(file_bytes)
-            temp_path = tmp.name
+    # Lancer la tâche Celery
+    task = process_audio_task.delay(temp_path, streamer, language, game, title, time)
 
-        # Transcription in a dedicated thread
-        transcription = await asyncio.get_event_loop().run_in_executor(executor, transcribe_audio, temp_path)
+    return {"task_id": task.id}
 
+@router.get("/status/{task_id}")
+async def get_status(task_id: str):
 
-        if len(transcription.strip()) < 10:
-            summary = transcription
-        else:
-            summary = summarize_with_mistral(transcription, streamer, game, title, language)
+    task = celery.AsyncResult(task_id)
 
-        return JSONResponse(content={"text": transcription, "summary": summary, "time": time, "streamerName": streamer })
+    if task.state == "PENDING":
+        return {
+            "status": "pending",
+            "current_step": "pending",
+            "progress": 0,
+            "message": "Task is waiting to be processed..."
+        }
 
-    except Exception as e:
-        return JSONResponse(content={"error": str(e)}, status_code=500)
-    finally:
-        if temp_path and os.path.exists(temp_path):
-            os.remove(temp_path)
+    if task.state == "STARTED":
+        return {
+            "status": "processing",
+            "current_step": "processing",
+            "progress": 10,
+            "message": "Task has started processing..."
+        }
+
+    if task.state == "PROGRESS":
+        # Return detailed progress information
+        return {
+            "status": "processing",
+            "progress": task.info.get("progress", 0),
+            "current_step": task.info.get("current_step", "unknown"),
+            "message": task.info.get("status", "Processing..."),
+            "transcription": task.info.get("transcription", None)
+        }
+
+    if task.state == "SUCCESS":
+        return {
+            "status": "done",
+            "current_step": task.info.get("current_step", "done"),
+            "progress": 100,
+            "result": task.result
+        }
+
+    if task.state == "FAILURE":
+        # task.info contains the exception when task fails
+        error_message = str(task.info) if task.info else "Unknown error"
+        return {
+            "status": "error",
+            "current_step": "error",
+            "progress": 0,
+            "error": error_message,
+            "message": "An error occurred during processing"
+        }
+
+    # Unknown state
+    return {
+        "status": "unknown",
+        "state": task.state,
+        "message": "Unknown task state"
+    }

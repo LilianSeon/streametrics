@@ -10,6 +10,12 @@ let streamMetadata = {
   tabId: 0
 };
 
+// Track active tasks to prevent multiple simultaneous processing
+let activeTasks: Set<string> = new Set();
+let isProcessing = false;
+let isLastCurrentStepDone = false;
+
+
 const encodeWAV = (samples: any, sampleRate = 44100) => {
     const buffer = new ArrayBuffer(44 + samples.length * 2);
     const view = new DataView(buffer);
@@ -45,6 +51,116 @@ const encodeWAV = (samples: any, sampleRate = 44100) => {
     return new Blob([view], { type: 'audio/wav' });
 }
 
+/**
+ * Function to poll task status and send result when ready.
+ * @param { string } taskId
+ * @param { number } tabId
+ */
+const pollTaskStatus = async (taskId: string, tabId: number) => {
+  // Add task to active set
+  activeTasks.add(taskId);
+
+  const maxAttempts = 120; // Max 2 minutes (120 * 1000ms = 2 min)
+  let attempts = 0;
+
+  const poll = async () => {
+    try {
+      const res = await fetch(`http://127.0.0.1:5000/summarize/status/${taskId}`);
+      const statusData = await res.json();
+
+      console.log(`Task ${taskId} status:`, statusData);
+
+      // Send progress updates to frontend
+      if (statusData.status === 'processing' || statusData.status === 'pending') {
+        isLastCurrentStepDone = false;
+        chrome.runtime.sendMessage({
+          action: 'processingProgress',
+          payload: {
+            taskId,
+            progress: statusData.progress || 0,
+            message: statusData.message || 'Processing...',
+            currentStep: statusData.current_step,
+            tabId
+          }
+        });
+      }
+
+      // Task completed successfully
+      if (statusData.status === 'done' && statusData.result) {
+        activeTasks.delete(taskId);
+        isProcessing = false;
+        isLastCurrentStepDone = true;
+        chrome.runtime.sendMessage({
+          action: 'summarizeReady',
+          payload: {
+            summary: statusData.result.summary,
+            text: statusData.result.text,
+            time: statusData.result.time,
+            streamerName: statusData.result.streamerName,
+            currentStep: statusData.current_step,
+            tabId
+          }
+        });
+        return; // Stop polling
+      }
+
+      // Task failed
+      if (statusData.status === 'error') {
+        activeTasks.delete(taskId);
+        isProcessing = false;
+        isLastCurrentStepDone = false;
+        console.error(`Task ${taskId} failed:`, statusData.error);
+        chrome.runtime.sendMessage({
+          action: 'summarizeError',
+          payload: {
+            error: statusData.error || 'Unknown error',
+            message: statusData.message,
+            currentStep: statusData.current_step,
+            tabId
+          }
+        });
+        return; // Stop polling
+      }
+
+      // Continue polling if not done and haven't exceeded max attempts
+      attempts++;
+      if (attempts < maxAttempts) {
+        setTimeout(poll, 1000); // Poll every second
+      } else {
+        activeTasks.delete(taskId);
+        isProcessing = false;
+        isLastCurrentStepDone = false;
+        console.error(`Task ${taskId} timeout after ${maxAttempts} attempts`);
+        chrome.runtime.sendMessage({
+          action: 'summarizeError',
+          payload: {
+            error: 'Task timeout',
+            message: 'The task took too long to complete',
+            currentStep: statusData.current_step,
+            tabId: tabId
+          }
+        });
+      }
+    } catch (err) {
+      activeTasks.delete(taskId);
+      isProcessing = false;
+      isLastCurrentStepDone = false;
+      console.error(`Error polling task ${taskId}:`, err);
+      chrome.runtime.sendMessage({
+        action: 'summarizeError',
+        payload: {
+          error: 'Polling error',
+          message: String(err),
+          currentStep: 'error',
+          tabId: tabId
+        }
+      });
+    }
+  };
+
+  // Start polling
+  poll();
+};
 
 chrome.runtime.onMessage.addListener(async (message) => {
   if (message.action === 'startRecording') {
@@ -81,6 +197,12 @@ const stopRecording = () => {
     workletNode.disconnect();
     workletNode.port.onmessage = null;
   }
+
+  // Reset processing flags
+  isProcessing = false;
+  isLastCurrentStepDone = false;
+  activeTasks.clear();
+  console.log("Recording stopped - processing flags reset");
 };
 
 const startRecording = async (message: any) => {
@@ -206,14 +328,14 @@ const startRecording = async (message: any) => {
       audioBuffer.push(...chunk); // accumulate samples
 
       if (audioBuffer.length >= maxSamples) {
-        // 1. Extraire 30s de données
+        // Get 30sec data.
         const chunkToSend = audioBuffer.slice(0, maxSamples);
         audioBuffer = audioBuffer.slice(maxSamples); // garde le reste si trop
 
-        // 2. Convertir en WAV
+        // Converted in WAV
         const wavBlob = encodeWAV(Float32Array.from(chunkToSend), sampleRate);
 
-        // 3. Envoi backend
+        // Send to backend
         const formData = new FormData();
         formData.append("audio", wavBlob, "chunk.wav");
         formData.append('streamer', streamMetadata.streamerName);
@@ -224,17 +346,47 @@ const startRecording = async (message: any) => {
 
         try {
           if (wavBlob.size > 0) {
-            const res = await fetch("http://127.0.0.1:5000/summarize/", { //188.245.179.58
+            // Skip if already processing a task
+            if (isProcessing) {
+              console.log("Skipping audio chunk - already processing a task");
+              return;
+            }
+
+            if (isLastCurrentStepDone) {
+              chrome.runtime.sendMessage({
+                action: 'processingProgress',
+                payload: {
+                  currentStep: 'listening',
+                  tabId
+                }
+              });
+            }
+
+            // Mark as processing
+            isProcessing = true;
+
+            // Submit audio processing task
+            const res = await fetch("http://127.0.0.1:5000/summarize/", {
               method: "POST",
               body: formData
             });
 
             const json = await res.json();
-            //console.log("Transcription :", json);
-            if (json.summary && json.summary != '') chrome.runtime.sendMessage({ action: 'summarizeReady', payload: { summary: json.summary, time: json.time, streamerName: json.streamerName, tabId: streamMetadata.tabId } });
+            console.log("Task submitted:", json);
+
+            if (json?.task_id) {
+              // Poll for task status
+              pollTaskStatus(json.task_id, streamMetadata.tabId);
+            } else {
+              // If no task_id, reset processing flag
+              isProcessing = false;
+              isLastCurrentStepDone = false;
+            }
           }
         } catch (err) {
           console.error("Erreur lors de l'envoi :", err);
+          isProcessing = false; // Reset on error
+          isLastCurrentStepDone = false;
         }
       }
     };

@@ -10,9 +10,11 @@ import { addSummary, SummarizeValue } from "../store/slices/summarizeSlice";
 import { RootState } from "../store/store";
 import { useAppSelector } from "../store/hooks";
 import { StorageStreamerListType } from "../typings/StorageType";
-import { ThreeDots } from "./ThreeDots";
+//import { ThreeDots } from "./ThreeDots";
 import { useDispatch } from "react-redux";
 import { updateIsSummarizing } from "../store/slices/isSummarizingSlice";
+import { updateCurrentStep } from "../store/slices/currentStepSlice";
+import { Banner } from "./Banner";
 
 
 type SummarizeProps = {
@@ -28,24 +30,21 @@ const Summarize: FC<SummarizeProps> = ({ summaries, streamerName, tabId, windowI
     const dispatch = useDispatch();
     const language = useAppSelector((state: RootState) => state.language.value);
     const isSummarizing = useAppSelector((state: RootState) => state.isSummarizing.value);
-    const captureAllowed = useAppSelector((state: RootState) => state.captureAllowed.value);
 
     const [ activeAutoScroll, setActiveAutoScroll ] = useState(true);
+    const [ hasOverflow, setHasOverflow ] = useState(false);
+    const [ isAtTop, setIsAtTop ] = useState(true);
 
     const endOfListRef = useRef<HTMLDivElement | null>(null);
+    const scrollContainerRef = useRef<HTMLDivElement | null>(null);
 
     const onScroll = useCallback((event: React.UIEvent<HTMLDivElement, UIEvent>) => {
         const target = event.currentTarget;
-
         const { scrollTop, scrollHeight, clientHeight } = target;
+        const isAtBottom = scrollTop + clientHeight >= scrollHeight - 100;
 
-        const isAtBottom = scrollTop + clientHeight >= scrollHeight - 90;
-
-        setActiveAutoScroll(false);
-
-        if (isAtBottom) {
-            setActiveAutoScroll(true);
-        }
+        setActiveAutoScroll(isAtBottom);
+        setIsAtTop(scrollTop <= 10);
     }, []);
 
     const nbSummary = useMemo(() => {
@@ -58,6 +57,20 @@ const Summarize: FC<SummarizeProps> = ({ summaries, streamerName, tabId, windowI
 
     useEffect(() => {
         if (activeAutoScroll) endOfListRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, [summaries, activeAutoScroll]);
+
+    useEffect(() => {
+        const checkOverflow = () => {
+            if (scrollContainerRef.current) {
+                const { scrollHeight, clientHeight } = scrollContainerRef.current;
+                setHasOverflow(scrollHeight > clientHeight);
+            }
+        };
+
+        checkOverflow();
+        window.addEventListener('resize', checkOverflow);
+
+        return () => window.removeEventListener('resize', checkOverflow);
     }, [summaries]);
 
     const stopTabCapture = useCallback(async (event: React.MouseEvent<Element, MouseEvent>) => {
@@ -82,6 +95,7 @@ const Summarize: FC<SummarizeProps> = ({ summaries, streamerName, tabId, windowI
         if (isSummarizing) {
             await stopTabCapture(event);
             dispatch(updateIsSummarizing(false));
+            dispatch(updateCurrentStep('listening'));
         } else {
             try {
                 if (windowId && tabId) {
@@ -99,6 +113,7 @@ const Summarize: FC<SummarizeProps> = ({ summaries, streamerName, tabId, windowI
 
     const onClickBackToBottomHanlder = useCallback(() => {
         if (!activeAutoScroll) {
+            setActiveAutoScroll(true);
             endOfListRef.current?.scrollIntoView({ behavior: "smooth" });
         }
     }, [activeAutoScroll]);
@@ -107,12 +122,16 @@ const Summarize: FC<SummarizeProps> = ({ summaries, streamerName, tabId, windowI
         <section className="mt-2 mx-2 p-2 flex flex-col grow bg-gray-800 rounded-lg min-h-0">
             <SummaryHeader onClickSummarizeHandler={ onClickSummarizeHandler } isSummarizing={ isSummarizing } />
             <div className="group relative flex flex-col w-full rounded-lg overflow-y-auto gap-2.5 grow min-h-0">
-                <div className="absolute top-0 left-0 right-0 h-8 rounded-t-lg pointer-events-none z-10 bg-gradient-to-b from-gray-700 to-transparent" />
-                <div onScroll={ onScroll } className="group flex flex-col w-full grow overflow-y-auto rounded-lg p-4 border-gray-200 bg-gray-700 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-700 [&::-webkit-scrollbar-thumb]:transition-colors [&::-webkit-scrollbar-thumb]:duration-300 [&::-webkit-scrollbar-thumb]:ease-in-out group-hover:[&::-webkit-scrollbar-thumb]:bg-gray-300">
-                    <SummaryList summaries={ summaries } language={ language } currentStreamer={ streamerName ?? '' } />
-                    { !activeAutoScroll && <AutoScrollStopped nbMessage={ nbNewSummary } onClick={ onClickBackToBottomHanlder }/> }
-                    { isSummarizing && captureAllowed && summaries.length > 0 && <ThreeDots /> }
-                    <div ref={endOfListRef} />
+                { hasOverflow && !isAtTop && <div className="absolute top-0 left-0 right-0 h-8 rounded-t-lg pointer-events-none z-10 bg-gradient-to-b from-gray-700 to-transparent" /> }
+                <div ref={ scrollContainerRef } onScroll={ onScroll } className="group flex flex-col w-full grow overflow-y-auto rounded-lg border-gray-200 bg-gray-700 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-700 [&::-webkit-scrollbar-thumb]:transition-colors [&::-webkit-scrollbar-thumb]:duration-300 [&::-webkit-scrollbar-thumb]:ease-in-out group-hover:[&::-webkit-scrollbar-thumb]:bg-gray-300">
+                    <div className="flex flex-col p-4">
+                        <SummaryList summaries={ summaries } language={ language } currentStreamer={ streamerName ?? '' } />
+                        { !activeAutoScroll && <AutoScrollStopped nbMessage={ nbNewSummary } onClick={ onClickBackToBottomHanlder }/> }
+                        <div ref={ endOfListRef } />
+                    </div>
+                    <div className="flex justify-center pb-2">
+                        <Banner title="Beta" message="New feature! Summarizes stream." />
+                    </div>
                 </div>
             </div>
         </section>
