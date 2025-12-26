@@ -13,8 +13,8 @@ const AutoScrollStopped: FC<AutoScrollStoppedProps> = ({ onClick, nbMessage }: A
     }, [nbMessage]);
 
     return(
-        <button type="button" onClick={ onClick } className="animate-fade-in group/backToBottom absolute opacity-0 border-[1px] border-white end-6 bottom-6 inline-flex items-center p-1 text-sm text-center text-white bg-gray-500 rounded-full">
-            <svg className="opacity-100 w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="#fff">
+        <button type="button" onClick={ onClick } className="animate-fade-in group/backToBottom absolute border-[1px] border-white end-6 bottom-6 inline-flex items-center p-1 text-sm text-center text-white bg-gray-500 rounded-full hover:bg-gray-600 transition-colors">
+            <svg className="w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="#fff">
                 <path fill-rule="evenodd" d="M10 2a.75.75 0 0 1 .75.75v12.59l1.95-2.1a.75.75 0 1 1 1.1 1.02l-3.25 3.5a.75.75 0 0 1-1.1 0l-3.25-3.5a.75.75 0 1 1 1.1-1.02l1.95 2.1V2.75A.75.75 0 0 1 10 2Z" clip-rule="evenodd" />
             </svg>
             {

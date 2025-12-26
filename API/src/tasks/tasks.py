@@ -154,13 +154,5 @@ def process_audio_task(self, temp_path, streamer, language, game, title, time):
         except:
             pass
 
-        # Update state with error details
-        self.update_state(
-            state='FAILURE',
-            meta={
-                'current_step': 'error',
-                'status': f'Error: {str(e)}',
-                'error': str(e)
-            }
-        )
+        # Let Celery handle the failure by raising the exception
         raise

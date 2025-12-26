@@ -127,13 +127,14 @@ async def get_status(task_id: str):
         }
 
     if task.state == "FAILURE":
-        error_info = task.info if isinstance(task.info, dict) else {"error": str(task.info)}
+        # task.info contains the exception when task fails
+        error_message = str(task.info) if task.info else "Unknown error"
         return {
             "status": "error",
-            "current_step": task.info.get("current_step", "error"),
+            "current_step": "error",
             "progress": 0,
-            "error": error_info.get("error", str(task.info)),
-            "message": error_info.get("status", "An error occurred during processing")
+            "error": error_message,
+            "message": "An error occurred during processing"
         }
 
     # Unknown state

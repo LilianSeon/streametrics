@@ -1,9 +1,10 @@
-import { FC, useCallback, useEffect, useRef, useState } from "react";
+import { FC, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useAppSelector } from "../store/hooks";
 import { RootState } from "../store/store";
 import { AudioBarsValue } from "../store/slices/audioBarsSlice";
 import { useDispatch } from "react-redux";
 import { clearSummariesExceptLast } from "../store/slices/summarizeSlice";
+import { StatusBadge } from "./StatusBadge";
 
 type SummaryHeaderProps = {
     onClickSummarizeHandler: (event: any) => Promise<void>,
@@ -23,6 +24,10 @@ const SummaryHeader: FC<SummaryHeaderProps> = ({ onClickSummarizeHandler, isSumm
     const summaries = useAppSelector((state: RootState) => state.summarize.value);
     const language = useAppSelector((state: RootState) => state.language.value);
     const translatedText = useAppSelector((state: RootState) => state.translatedText.value);
+    const captureAllowed = useAppSelector((state: RootState) => state.captureAllowed.value);
+    const currentStep = useAppSelector((state: RootState) => state.currentStep.value);
+    
+    const shouldDisplayBadge = useMemo(() => captureAllowed && isSummarizing, [captureAllowed, isSummarizing]);
 
     const audioBars = useAppSelector((state: RootState) => state.audioBars.value);
     const dropdownRef = useRef<HTMLDivElement>(null);
@@ -81,7 +86,13 @@ const SummaryHeader: FC<SummaryHeaderProps> = ({ onClickSummarizeHandler, isSumm
         <div className="mb-2 flex flex-row items-center">
             <h2 className="text-lg font-medium text-white">{ translatedText?.summarize?.message }</h2>
             <div className="grow" />
-            <button onClick={(event) => onClickSummarizeHandler(event)} title={ isSummarizing ?  translatedText?.disable_summarize?.message  : translatedText?.enable_summarize?.message } className="inline-flex items-center justify-center shadow-lg w-8 h-8 font-medium bg-gradient-to-r from-cyan-500 to-blue-600 hover:bg-gradient-to-bl rounded-full group focus:outline-none hover:shadow-xl" type="button">
+            { shouldDisplayBadge && <div className="mr-4 z-10 w-fit self-center">
+                                        <StatusBadge currentStep={ currentStep } />
+                                    </div> }
+            <button onClick={(event) => onClickSummarizeHandler(event)} title={ isSummarizing ?  translatedText?.disable_summarize?.message  : translatedText?.enable_summarize?.message }
+                className="inline-flex items-center justify-center shadow-lg w-8 h-8 font-medium bg-gradient-to-r from-cyan-500 to-blue-600 hover:bg-gradient-to-bl rounded-full group focus:outline-none hover:shadow-xl"
+                type="button"
+            >
                 <svg width="20px" height="20px" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                     { audioBars.map(({ y, height }: AudioBarsValue, index: number) => <rect className="transition-[height,y] duration-[80ms]" x={ 8 * index } key={ index } fill="#ffffff" y={ y } width="4" height={ height }></rect>)  }
                 </svg>
