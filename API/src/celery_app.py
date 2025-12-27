@@ -7,7 +7,7 @@ celery = Celery(
     include=['tasks.tasks']  # Import tasks module so Celery can find them
 )
 
-# Configure Celery for better handling of long-running tasks
+# Configure Celery for better handling of long-running tasks with concurrency
 celery.conf.update(
     task_track_started=True,  # Track when tasks start
     task_send_sent_event=True,  # Send task-sent events
@@ -16,5 +16,6 @@ celery.conf.update(
     task_soft_time_limit=540,  # Soft time limit: 9 minutes (540 seconds)
     broker_connection_retry_on_startup=True,  # Retry broker connection on startup
     task_acks_late=True,  # Acknowledge tasks after completion (better for reliability)
-    worker_prefetch_multiplier=1,  # Fetch one task at a time (better for long tasks)
+    worker_prefetch_multiplier=4,  # Prefetch 4 tasks per worker (matches concurrency=4)
+    worker_max_tasks_per_child=50,  # Restart worker after 50 tasks to prevent memory leaks
 )

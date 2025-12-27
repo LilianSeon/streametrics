@@ -4,13 +4,22 @@ import requests
 from celery_app import celery
 from requests.exceptions import Timeout, RequestException
 import time
+import threading
 
-whisper_model = whisper.load_model("small")
+# Thread-local storage for Whisper model to avoid conflicts in concurrent execution
+_thread_locals = threading.local()
+
+def get_whisper_model():
+    """Get or create Whisper model for current thread"""
+    if not hasattr(_thread_locals, 'whisper_model'):
+        _thread_locals.whisper_model = whisper.load_model("small")
+    return _thread_locals.whisper_model
 
 # Configuration for timeouts and retries
-MISTRAL_TIMEOUT = 60  # 60 seconds timeout for Mistral API
+MISTRAL_TIMEOUT = 120  # 120 seconds timeout for Mistral API (increased for concurrent requests)
 MISTRAL_MAX_RETRIES = 3
 MISTRAL_RETRY_DELAY = 2  # seconds between retries
+MISTRAL_MAX_TOKENS = 150  # Limit response length to reduce processing time
 
 def check_mistral_health():
     """Check if Mistral service is available"""
@@ -41,7 +50,11 @@ def summarize_with_mistral(text: str, streamer: str, game: str, title: str, lang
                 json={
                     "model": "mistral",
                     "prompt": prompt,
-                    "stream": False
+                    "stream": False,
+                    "options": {
+                        "num_predict": MISTRAL_MAX_TOKENS,  # Limit output tokens
+                        "temperature": 0.7,  # Slightly lower for faster, more focused responses
+                    }
                 },
                 timeout=MISTRAL_TIMEOUT
             )
@@ -68,7 +81,8 @@ def summarize_with_mistral(text: str, streamer: str, game: str, title: str, lang
 
 
 def transcribe_audio(path):
-    return whisper_model.transcribe(
+    model = get_whisper_model()
+    return model.transcribe(
         path,
         fp16=False,
         no_speech_threshold=0.6,
